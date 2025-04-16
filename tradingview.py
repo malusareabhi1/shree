@@ -9,8 +9,8 @@ import yfinance as yf
 def doctor_algo_bot_strategy(df, iv_value=16.0):
     df['20_SMA'] = df['Close'].rolling(window=20).mean()
     std_dev = df['Close'].rolling(window=20).std()
-    df['Upper_Band'] = df['20_SMA'] + (2 * std_dev)
-    df['Lower_Band'] = df['20_SMA'] - (2 * std_dev)
+    df['Upper_Band'] = df['20_SMA'] + (2.0 * std_dev)
+    df['Lower_Band'] = df['20_SMA'] - (2.0 * std_dev)
     df['Avg_Volume'] = df['Volume'].rolling(window=20).mean()
     df['Signal'] = 0
 
@@ -28,9 +28,10 @@ def doctor_algo_bot_strategy(df, iv_value=16.0):
 
             ref_level = max(ref_prev['High'], prev['Close'])
             if current['Close'] > ref_level:
-                df.at[df.index[i], 'Signal'] = 1  # Entry Signal
+                df.at[df.index[i], 'Signal'] = 1
 
     return df
+
 
 # --- Streamlit App Layout ---
 st.set_page_config(layout="wide")
