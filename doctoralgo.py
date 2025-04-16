@@ -15,10 +15,16 @@ def doctor_algo_bot_strategy(df, iv_value=16.0):
 
     for i in range(21, len(df)):
         current = df.iloc[i]
-        prev = df.iloc[i-1]
-        ref_prev = df.iloc[i-2] if i >= 2 else prev
+        prev = df.iloc[i - 1]
+        ref_prev = df.iloc[i - 2] if i >= 2 else prev
 
-        if (current.name.time() >= datetime.strptime("09:30", "%H:%M").time()
+        # Get time safely
+        try:
+            current_time = df.index[i].time()
+        except:
+            continue  # Skip if index is not datetime
+
+        if (current_time >= datetime.strptime("09:30", "%H:%M").time()
             and prev['Close'] > prev['20_SMA']
             and prev['Low'] > prev['20_SMA']
             and current['Close'] > prev['Close']
@@ -30,6 +36,7 @@ def doctor_algo_bot_strategy(df, iv_value=16.0):
                 df.at[df.index[i], 'Signal'] = 1  # Entry Signal
 
     return df
+
 
 # --- Streamlit App Layout ---
 st.set_page_config(layout="wide")
