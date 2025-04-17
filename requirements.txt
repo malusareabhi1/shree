@@ -5,3 +5,4 @@ plotly
 yfinance 
 matplotlib 
 fyers-apiv3
+requests
