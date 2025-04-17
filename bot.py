@@ -178,7 +178,7 @@ elif selected == "Trade Log":
             "Count": [win_count, loss_count]
         })
         fig = px.pie(win_loss_df, names='Result', values='Count', title='Win vs Loss')
-        st.plotly_chart(fig, use_container_width=True)
+        #st.plotly_chart(fig, use_container_width=True)
 
         # 📁 Download option
         csv = trade_log.to_csv(index=False).encode('utf-8')
