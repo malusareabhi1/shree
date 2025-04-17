@@ -4,6 +4,9 @@ import datetime
 import random
 import plotly.graph_objects as go
 from nsepython import nse_eq
+import requests
+import smtplib
+from email.mime.text import MIMEText
 
 # --- App Configuration ---
 st.set_page_config(page_title="Algo Trading Dashboard", layout="wide")
@@ -31,6 +34,32 @@ def get_dummy_trade_data():
 
 def get_dummy_funds():
     return pd.DataFrame({"Available Funds": [1500000], "Used Capital": [217000], "Net PnL": [2700]})
+
+# --- Telegram Alerts ---
+TELEGRAM_BOT_TOKEN = "your_bot_token_here"
+TELEGRAM_CHAT_ID = "your_chat_id_here"
+
+def send_telegram_alert(message):
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    data = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
+    requests.post(url, data=data)
+
+# --- Email Alerts ---
+EMAIL_SENDER = "sender@example.com"
+EMAIL_PASSWORD = "yourpassword"
+EMAIL_RECEIVER = "receiver@example.com"
+SMTP_SERVER = "smtp.gmail.com"
+
+
+def send_email_alert(subject, message):
+    msg = MIMEText(message)
+    msg['Subject'] = subject
+    msg['From'] = EMAIL_SENDER
+    msg['To'] = EMAIL_RECEIVER
+
+    with smtplib.SMTP_SSL(SMTP_SERVER, 465) as server:
+        server.login(EMAIL_SENDER, EMAIL_PASSWORD)
+        server.send_message(msg)
 
 # --- Live Data from NSE ---
 @st.cache_data(ttl=300)
@@ -67,6 +96,11 @@ if selected_tab == "Live Market":
 
     if "error" not in live_data:
         st.success(f"**{stock}** 📍 ₹{live_data['last_price']} (High: ₹{live_data['day_high']} / Low: ₹{live_data['day_low']})")
+        if st.button("🔔 Send Alert"):
+            alert_msg = f"Live Update - {stock}: ₹{live_data['last_price']} (High: ₹{live_data['day_high']} / Low: ₹{live_data['day_low']})"
+            send_telegram_alert(alert_msg)
+            send_email_alert(f"Live Alert - {stock}", alert_msg)
+            st.info("Alert sent via Telegram & Email!")
     else:
         st.error(f"Failed to fetch data: {live_data['error']}")
 
