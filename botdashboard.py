@@ -113,6 +113,9 @@ elif selected == "Test Strategy":
             # Equity curve
             df['Equity Curve'] = capital + df['PnL'].cumsum()
             st.line_chart(df.set_index("Date")["Equity Curve"])
+             # Show trade log table
+            st.subheader("📝 Trade Log")
+            st.dataframe(trade_log)
 
 elif selected == "Trade Log":
     st.title("📝 Trade Log")
