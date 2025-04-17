@@ -167,7 +167,7 @@ elif selected == "Trade Log":
         # 📉 PnL Over Time Chart
         st.subheader("PnL Over Time")
         pnl_chart = px.line(trade_log, x="Timestamp", y="PnL", title="PnL Over Time")
-        st.plotly_chart(pnl_chart, use_container_width=True)
+       # st.plotly_chart(pnl_chart, use_container_width=True)
 
         # 🥧 Win/Loss Pie Chart
         st.subheader("Win/Loss Ratio")
