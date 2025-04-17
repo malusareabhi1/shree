@@ -1,6 +1,6 @@
 from fyers_apiv3 import fyersModel
 #from fyers_apiv3.fyers_api import accessToken
-from fyers_apiv3 import accessToken, fyersModel  ✅
+from fyers_apiv3 import accessToken, fyersModel
 
 
 # --- Step 1: App details ---
