@@ -70,7 +70,7 @@ elif selected == "Get Stock Data":
     ]
 
     stock = st.selectbox("Select NIFTY 50 stock or Index (^NSEI)", options=nifty_50_stocks, index=nifty_50_stocks.index("TCS.NS"))
-    from_date = st.date_input("From Date", datetime(2023, 1, 1))
+    from_date = st.date_input("From Date", datetime(2025, 1, 1))
     to_date = st.date_input("To Date", datetime.today())
     interval = st.selectbox("Select Interval", ["1m", "5m", "15m", "30m", "1h", "1d", "1wk", "1mo"], index=5)
 
