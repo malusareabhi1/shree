@@ -187,9 +187,92 @@ elif selected == "Trade Log":
 
 elif selected == "Account Info":
     st.title("💼 Account Information")
-    st.subheader("Funds")
-    st.json({"Available": 120000, "Used": 50000})
-    st.subheader("Open Positions")
-    st.json({"TCS": {"Qty": 30, "Avg Price": 3125.0}, "INFY": {"Qty": 50, "Avg Price": 1450.5}})
-    st.subheader("Orders")
-    st.json({"Last Order": "SELL - TCS - 30 Shares @ 3150"})
+
+    uploaded_log = st.file_uploader("📁 Upload Trade Log CSV", type=["csv"], key="account_info_log")
+
+    if uploaded_log is not None:
+        try:
+            trade_data = pd.read_csv(uploaded_log)
+
+            # Ensure required columns
+            required_cols = {"Date", "Stock", "Action", "Price", "Qty", "PnL"}
+            if required_cols.issubset(trade_data.columns):
+                # Convert Date
+                trade_data["Date"] = pd.to_datetime(trade_data["Date"])
+                
+                # Calculate Net PnL
+                net_pnl = trade_data["PnL"].sum()
+                starting_capital = 100000
+                available_capital = starting_capital + net_pnl
+
+                # Open Positions
+                positions = {}
+
+                for _, row in trade_data.iterrows():
+                    stock = row["Stock"]
+                    qty = row["Qty"]
+                    price = row["Price"]
+                    action = row["Action"]
+
+                    if stock not in positions:
+                        positions[stock] = {"Qty": 0, "Cost": 0}
+
+                    if action == "BUY":
+                        prev_qty = positions[stock]["Qty"]
+                        prev_cost = positions[stock]["Cost"]
+                        new_qty = prev_qty + qty
+                        new_cost = prev_cost + qty * price
+                        positions[stock]["Qty"] = new_qty
+                        positions[stock]["Cost"] = new_cost
+                    elif action == "SELL":
+                        positions[stock]["Qty"] -= qty
+                        positions[stock]["Cost"] -= qty * price
+
+                # Remove closed positions
+                open_positions = {k: v for k, v in positions.items() if v["Qty"] > 0}
+
+                # Format open positions
+                formatted_positions = {}
+                for stock, pos in open_positions.items():
+                    avg_price = round(pos["Cost"] / pos["Qty"], 2) if pos["Qty"] > 0 else 0
+                    formatted_positions[stock] = {
+                        "Qty": pos["Qty"],
+                        "Avg Price": avg_price
+                    }
+
+                used_capital = sum(v["Qty"] * v["Avg Price"] for v in formatted_positions.values())
+
+                # Last Order Summary
+                last_trade = trade_data.sort_values("Date").iloc[-1]
+                last_order = f"{last_trade['Action']} - {last_trade['Stock']} - {last_trade['Qty']} Shares @ {last_trade['Price']}"
+
+                # Display
+                st.subheader("Funds Summary")
+                st.json({
+                    "Available": round(available_capital, 2),
+                    "Used": round(used_capital, 2),
+                    "Net PnL": round(net_pnl, 2)
+                })
+
+                st.subheader("Open Positions")
+                st.json(formatted_positions)
+
+                st.subheader("Last Order")
+                st.write(last_order)
+            else:
+                st.warning("CSV must include columns: Date, Stock, Action, Price, Qty, PnL")
+        except Exception as e:
+            st.error(f"Error processing file: {e}")
+
+    else:
+        # Fallback when no file uploaded
+        st.subheader("Funds Summary")
+        st.json({"Available": 120000, "Used": 50000})
+        st.subheader("Open Positions")
+        st.json({
+            "TCS": {"Qty": 30, "Avg Price": 3125.0},
+            "INFY": {"Qty": 50, "Avg Price": 1450.5}
+        })
+        st.subheader("Last Order")
+        st.write("SELL - TCS - 30 Shares @ 3150")
+
