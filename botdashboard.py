@@ -74,14 +74,7 @@ elif selected == "Get Stock Data":
                 st.line_chart(df.set_index("Date")["Close"])
         except Exception as e:
             st.error(f"Error fetching data: {e}")
-                # Download button
-                csv = trade_log.to_csv(index=False).encode('utf-8')
-                st.download_button(
-                    label="📥 Download Trade Log CSV",
-                    data=csv,
-                    file_name="doctor_strategy_trade_log.csv",
-                    mime="text/csv"
-                )
+               
 
 elif selected == "Test Strategy":
     st.title("⚙️ Test Doctor Trade Strategy")
