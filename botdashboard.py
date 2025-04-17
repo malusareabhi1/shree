@@ -74,6 +74,7 @@ elif selected == "Get Stock Data":
                 st.line_chart(df.set_index("Date")["Close"])
         except Exception as e:
             st.error(f"Error fetching data: {e}")
+            
 elif selected == "Test Strategy":
     st.title("⚙️ Test Doctor Trade Strategy")
 
