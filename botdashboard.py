@@ -57,7 +57,16 @@ if selected == "Dashboard":
 
 elif selected == "Get Stock Data":
     st.title("📈 Get Stock Data")
-    stock = st.text_input("Enter NSE stock symbol (e.g., TCS.NS, INFY.NS)", value="TCS.NS")
+    stock = st.text_input("Enter NSE stock symbol (e.g.,"ADANIENT.NS", "ASIANPAINT.NS", "AXISBANK.NS", "BAJAJ-AUTO.NS", "BAJFINANCE.NS",
+    "BAJAJFINSV.NS", "BPCL.NS", "BHARTIARTL.NS", "BRITANNIA.NS", "CIPLA.NS",
+    "COALINDIA.NS", "DRREDDY.NS", "EICHERMOT.NS", "GRASIM.NS", "HCLTECH.NS",
+    "HDFCBANK.NS", "HDFC.NS", "HDFCLIFE.NS", "HEROMOTOCO.NS", "HINDALCO.NS",
+    "HINDUNILVR.NS", "ICICIBANK.NS", "INDUSINDBK.NS", "INFY.NS", "ITC.NS",
+    "JSWSTEEL.NS", "KOTAKBANK.NS", "LT.NS", "M&M.NS", "MARUTI.NS",
+    "NESTLEIND.NS", "NTPC.NS", "ONGC.NS", "POWERGRID.NS", "RELIANCE.NS",
+    "SBIN.NS", "SHREECEM.NS", "SUNPHARMA.NS", "TATACONSUM.NS", "TATAMOTORS.NS",
+    "TATASTEEL.NS", "TCS.NS", "TECHM.NS", "TITAN.NS", "ULTRACEMCO.NS",
+    "UPL.NS", "WIPRO.NS")", value="TCS.NS")
     from_date = st.date_input("From Date", datetime(2023, 1, 1))
     to_date = st.date_input("To Date", datetime.today())
     interval = st.selectbox("Select Interval", ["1m", "5m", "15m", "30m", "1h", "1d", "1wk", "1mo"], index=5)
