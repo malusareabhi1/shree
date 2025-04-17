@@ -3,6 +3,7 @@ from streamlit_option_menu import option_menu
 from datetime import datetime
 import pandas as pd
 import yfinance as yf
+import plotly.express as px
 # Page configuration
 st.set_page_config(layout="wide", page_title="Doctor Trade Dashboard")
 
