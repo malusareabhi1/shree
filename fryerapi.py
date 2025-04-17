@@ -1,5 +1,7 @@
 from fyers_apiv3 import fyersModel
-from fyers_apiv3.fyers_api import accessToken
+#from fyers_apiv3.fyers_api import accessToken
+from fyers_apiv3 import accessToken, fyersModel  ✅
+
 
 # --- Step 1: App details ---
 client_id = "YOUR_CLIENT_ID"             # Format: ABC123-100
