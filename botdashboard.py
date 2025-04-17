@@ -128,15 +128,46 @@ elif selected == "Test Strategy":
 
 elif selected == "Trade Log":
     st.title("📝 Trade Log")
-    trade_data = pd.DataFrame({
-        "Date": ["2024-04-15", "2024-04-16"],
-        "Stock": ["INFY", "TCS"],
-        "Action": ["BUY", "SELL"],
-        "Price": [1450.5, 3125.0],
-        "Qty": [50, 30],
-        "PnL": [2500, -750]
-    })
-    st.dataframe(trade_data)
+
+    uploaded_log = st.file_uploader("📁 Upload Trade Log CSV", type=["csv"])
+
+    if uploaded_log is not None:
+        try:
+            trade_data = pd.read_csv(uploaded_log)
+
+            # Display metrics if relevant columns are present
+            if all(col in trade_data.columns for col in ["PnL", "Action", "Stock"]):
+                total_pnl = trade_data["PnL"].sum()
+                win_trades = (trade_data["PnL"] > 0).sum()
+                loss_trades = (trade_data["PnL"] < 0).sum()
+                unique_stocks = trade_data["Stock"].nunique()
+
+                col1, col2, col3, col4 = st.columns(4)
+                col1.metric("📈 Net PnL", f"₹{total_pnl}")
+                col2.metric("✅ Winning Trades", win_trades)
+                col3.metric("❌ Losing Trades", loss_trades)
+                col4.metric("📊 Stocks Traded", unique_stocks)
+
+            # Show trade data table
+            st.subheader("📋 Trade Log Table")
+            st.dataframe(trade_data)
+
+        except Exception as e:
+            st.error(f"Failed to read uploaded file: {e}")
+    else:
+        # If no file uploaded, show sample static data
+        trade_data = pd.DataFrame({
+            "Date": ["2024-04-15", "2024-04-16"],
+            "Stock": ["INFY", "TCS"],
+            "Action": ["BUY", "SELL"],
+            "Price": [1450.5, 3125.0],
+            "Qty": [50, 30],
+            "PnL": [2500, -750]
+        })
+
+        st.info("No file uploaded. Showing example trade log.")
+        st.dataframe(trade_data)
+
 
 elif selected == "Account Info":
     st.title("💼 Account Information")
