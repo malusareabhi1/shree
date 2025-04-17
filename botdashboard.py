@@ -78,44 +78,53 @@ elif selected == "Get Stock Data":
 
 elif selected == "Test Strategy":
     st.title("⚙️ Test Doctor Trade Strategy")
-    uploaded_file = st.file_uploader("Upload Stock Data (CSV)", type=["csv"])
+    stock = st.selectbox("Select Stock", ["RELIANCE", "TCS", "INFY", "HDFCBANK"])
+    capital = st.number_input("Capital Allocation (₹)", value=50000)
+    uploaded_file = st.file_uploader("📁 Upload CSV File (OHLCV Data)", type=["csv"])
 
-    if uploaded_file:
+    if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
-        st.success("File uploaded successfully!")
-        st.write("📋 Data Preview", df.head())
-
-        # Ensure 'Date' column is datetime
-        if 'Date' in df.columns:
-            df['Date'] = pd.to_datetime(df['Date'])
-
-        capital = st.number_input("Capital Allocation (₹)", value=50000)
 
         if st.button("Run Backtest"):
-            st.info("Running Doctor Strategy...")
+            try:
+                # Check if 'Close' and 'Date' columns are present
+                if 'Close' not in df.columns or 'Date' not in df.columns:
+                    st.error("CSV must contain 'Date' and 'Close' columns.")
+                else:
+                    df['Signal'] = df['Close'].diff().apply(lambda x: 'BUY' if x > 5 else 'SELL' if x < -5 else None)
+                    df.dropna(subset=['Signal'], inplace=True)
 
-            # Example logic (replace with your real Doctor Trade strategy)
-            df['Signal'] = None
-            df['Signal'] = df['Close'].diff().apply(lambda x: 'BUY' if x > 5 else 'SELL' if x < -5 else None)
-            df['PnL'] = df['Close'].diff().fillna(0)
-            df['PnL'] = df.apply(lambda row: row['PnL'] if row['Signal'] in ['BUY', 'SELL'] else 0, axis=1)
+                    pnl = df['Signal'].apply(lambda x: 500 if x == 'BUY' else -250).sum()
+                    winning_trades = (df['Signal'] == 'BUY').sum()
+                    losing_trades = (df['Signal'] == 'SELL').sum()
 
-            total_pnl = df['PnL'].sum()
-            win_trades = len(df[df['PnL'] > 0])
-            lose_trades = len(df[df['PnL'] < 0])
-            hit_ratio = round((win_trades / (win_trades + lose_trades)) * 100, 2) if (win_trades + lose_trades) > 0 else 0
+                    st.success(f"Strategy tested on {stock} with capital ₹{capital}")
+                    st.metric("Net PnL", f"₹{pnl}")
+                    st.metric("Winning Trades", winning_trades)
+                    st.metric("Losing Trades", losing_trades)
 
-            st.metric("Net PnL", f"₹{total_pnl:,.2f}")
-            st.metric("Winning Trades", win_trades)
-            st.metric("Losing Trades", lose_trades)
-            st.metric("Hit Ratio", f"{hit_ratio}%")
+                    st.subheader("📋 Trade Log")
+                    trade_log = df[['Date', 'Signal', 'Close']].rename(columns={
+                        'Signal': 'Action',
+                        'Close': 'Price'
+                    })
+                    trade_log['Stock'] = stock
+                    trade_log['Qty'] = 10  # Example quantity
+                    trade_log['PnL'] = trade_log['Action'].apply(lambda x: 500 if x == 'BUY' else -250)
+                    trade_log = trade_log[['Date', 'Stock', 'Action', 'Price', 'Qty', 'PnL']]
+                    st.dataframe(trade_log)
 
-            # Equity curve
-            df['Equity Curve'] = capital + df['PnL'].cumsum()
-            st.line_chart(df.set_index("Date")["Equity Curve"])
-             # Show trade log table
-            st.subheader("📝 Trade Log")
-            st.dataframe(trade_log)
+                    # Download button
+                    csv = trade_log.to_csv(index=False).encode('utf-8')
+                    st.download_button(
+                        label="📥 Download Trade Log CSV",
+                        data=csv,
+                        file_name="doctor_strategy_trade_log.csv",
+                        mime="text/csv"
+                    )
+            except Exception as e:
+                st.error(f"Error during strategy test: {e}")
+
 
 elif selected == "Trade Log":
     st.title("📝 Trade Log")
