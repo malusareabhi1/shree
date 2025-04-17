@@ -77,14 +77,52 @@ elif selected == "Get Stock Data":
 
 elif selected == "Test Strategy":
     st.title("⚙️ Test Doctor Trade Strategy")
-    stock = st.selectbox("Select Stock", ["RELIANCE", "TCS", "INFY", "HDFCBANK"])
-    capital = st.number_input("Capital Allocation (₹)", value=50000)
-    if st.button("Run Backtest"):
-        st.success(f"Strategy tested on {stock} with capital ₹{capital}")
-        # Simulate result
-        st.metric("Net PnL", "+₹5,250")
-        st.metric("Winning Trades", "12")
-        st.metric("Losing Trades", "5")
+    uploaded_file = st.file_uploader("Upload Stock Data (CSV)", type=["csv"])
+
+    if uploaded_file:
+        df = pd.read_csv(uploaded_file)
+        st.success("File uploaded successfully!")
+        st.write("📋 Data Preview", df.head())
+
+        # Make sure 'Date' is in datetime format
+        if 'Date' in df.columns:
+            df['Date'] = pd.to_datetime(df['Date'])
+
+        capital = st.number_input("Capital Allocation (₹)", value=50000)
+
+        if st.button("Run Backtest"):
+            st.info("Running Doctor Strategy...")
+
+            # Placeholder Doctor Strategy Logic — Replace with your actual logic
+            df['Signal'] = df['Close'].diff().apply(lambda x: 'BUY' if x > 5 else 'SELL' if x < -5 else None)
+            df['PnL'] = df['Close'].diff().fillna(0)
+            df['PnL'] = df.apply(lambda row: row['PnL'] if row['Signal'] in ['BUY', 'SELL'] else 0, axis=1)
+
+            # Filter out only trades
+            trade_log = df[df['Signal'].notnull()].copy()
+            trade_log = trade_log[['Date', 'Signal', 'Close', 'PnL']]
+            trade_log.rename(columns={"Signal": "Action", "Close": "Price"}, inplace=True)
+            trade_log['Qty'] = 1  # Placeholder qty
+
+            # Metrics
+            total_pnl = trade_log['PnL'].sum()
+            win_trades = len(trade_log[trade_log['PnL'] > 0])
+            lose_trades = len(trade_log[trade_log['PnL'] < 0])
+            hit_ratio = round((win_trades / (win_trades + lose_trades)) * 100, 2) if (win_trades + lose_trades) > 0 else 0
+
+            st.metric("Net PnL", f"₹{total_pnl:,.2f}")
+            st.metric("Winning Trades", win_trades)
+            st.metric("Losing Trades", lose_trades)
+            st.metric("Hit Ratio", f"{hit_ratio}%")
+
+            # Equity curve
+            df['Equity Curve'] = capital + df['PnL'].cumsum()
+            st.subheader("📈 Equity Curve")
+            st.line_chart(df.set_index("Date")["Equity Curve"])
+
+            # Show trade log table
+            st.subheader("📝 Trade Log")
+            st.dataframe(trade_log)
 
 elif selected == "Trade Log":
     st.title("📝 Trade Log")
