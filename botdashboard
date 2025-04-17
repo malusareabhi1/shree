@@ -1,0 +1,102 @@
+import streamlit as st
+from streamlit_option_menu import option_menu
+from datetime import datetime
+import pandas as pd
+
+# Page configuration
+st.set_page_config(layout="wide", page_title="Doctor Trade Dashboard")
+
+# Sidebar navigation
+with st.sidebar:
+    selected = option_menu(
+        menu_title="Doctor Trade",
+        options=["Dashboard", "Get Stock Data", "Test Strategy", "Trade Log", "Account Info"],
+        icons=["bar-chart", "search", "cpu", "clipboard-data", "wallet2"],
+        menu_icon="cast",
+        default_index=0,
+    )
+
+# Main area rendering
+st.markdown("""
+    <style>
+        .main .block-container {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        .card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin: 10px 0;
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+if selected == "Dashboard":
+    st.title("📊 Welcome to Doctor Trade Dashboard")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.markdown("<div class='card-title'>Capital Overview</div>", unsafe_allow_html=True)
+        st.metric(label="Available Capital", value="₹1,20,000")
+        st.metric(label="Used Capital", value="₹50,000")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col2:
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.markdown("<div class='card-title'>Strategy Overview</div>", unsafe_allow_html=True)
+        st.metric(label="Hit Ratio", value="61.76%")
+        st.metric(label="Risk per Trade", value="1.5%")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+elif selected == "Get Stock Data":
+    st.title("📈 Get Stock Data")
+    stock = st.text_input("Enter stock symbol (e.g., TCS, INFY)")
+    from_date = st.date_input("From Date", datetime(2023, 1, 1))
+    to_date = st.date_input("To Date", datetime.today())
+    if st.button("Fetch Data"):
+        st.info(f"Fetching data for {stock.upper()} from {from_date} to {to_date}")
+        # Simulate data
+        df = pd.DataFrame({
+            "Date": pd.date_range(from_date, to_date),
+            "Close": [100 + i*0.5 for i in range((to_date - from_date).days + 1)]
+        })
+        st.line_chart(df.set_index("Date"))
+
+elif selected == "Test Strategy":
+    st.title("⚙️ Test Doctor Trade Strategy")
+    stock = st.selectbox("Select Stock", ["RELIANCE", "TCS", "INFY", "HDFCBANK"])
+    capital = st.number_input("Capital Allocation (₹)", value=50000)
+    if st.button("Run Backtest"):
+        st.success(f"Strategy tested on {stock} with capital ₹{capital}")
+        # Simulate result
+        st.metric("Net PnL", "+₹5,250")
+        st.metric("Winning Trades", "12")
+        st.metric("Losing Trades", "5")
+
+elif selected == "Trade Log":
+    st.title("📝 Trade Log")
+    trade_data = pd.DataFrame({
+        "Date": ["2024-04-15", "2024-04-16"],
+        "Stock": ["INFY", "TCS"],
+        "Action": ["BUY", "SELL"],
+        "Price": [1450.5, 3125.0],
+        "Qty": [50, 30],
+        "PnL": [2500, -750]
+    })
+    st.dataframe(trade_data)
+
+elif selected == "Account Info":
+    st.title("💼 Account Information")
+    st.subheader("Funds")
+    st.json({"Available": 120000, "Used": 50000})
+    st.subheader("Open Positions")
+    st.json({"TCS": {"Qty": 30, "Avg Price": 3125.0}, "INFY": {"Qty": 50, "Avg Price": 1450.5}})
+    st.subheader("Orders")
+    st.json({"Last Order": "SELL - TCS - 30 Shares @ 3150"})
