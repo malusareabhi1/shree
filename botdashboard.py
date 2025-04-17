@@ -184,6 +184,7 @@ elif selected == "Trade Log":
 elif selected == "Account Info":
     st.title("💼 Account Information")
 
+    # Get session values
     starting_capital = 100000
     net_pnl = st.session_state.get('net_pnl', 0)
     used_capital = st.session_state.get('used_capital', 0)
@@ -192,17 +193,26 @@ elif selected == "Account Info":
     open_positions = st.session_state.get('open_positions', {})
     last_order = st.session_state.get('last_order', "No order placed yet")
 
-    # Display
+    # 📊 Display Funds Summary
     st.subheader("Funds Summary")
-    st.json({
-        "Available Capital": round(available_capital, 2),
-        "Used Capital": round(used_capital, 2),
-        "Net PnL": round(net_pnl, 2)
+    funds_df = pd.DataFrame({
+        "Metric": ["Available Capital", "Used Capital", "Net PnL"],
+        "Value (₹)": [round(available_capital, 2), round(used_capital, 2), round(net_pnl, 2)]
     })
+    st.table(funds_df)
 
+    # 📊 Display Open Positions
     st.subheader("Open Positions")
-    st.json(open_positions)
+    if open_positions:
+        positions_df = pd.DataFrame([
+            {"Stock": stock, "Qty": data["Qty"], "Avg Price": data["Avg Price"]}
+            for stock, data in open_positions.items()
+        ])
+        st.table(positions_df)
+    else:
+        st.write("No open positions.")
 
+    # 🧾 Last Order
     st.subheader("Last Order")
     st.write(last_order)
 
