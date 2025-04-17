@@ -208,4 +208,42 @@ elif selected == "Account Info":
     st.subheader("Funds Summary")
     funds_df = pd.DataFrame({
         "Metric": ["Available Capital", "Used Capital", "Net PnL"],
-        "Value (₹)": [round(available_capital, 2), round(
+        "Value (₹)": [round(available_capital, 2), round(used_capital, 2), round(net_pnl, 2)],
+    })
+    st.table(funds_df)
+
+    st.subheader("Open Positions")
+    if open_positions:
+        for stock, details in open_positions.items():
+            st.write(f"{stock}: {details['Qty']} shares @ ₹{details['Avg Price']}")
+    else:
+        st.info("No open positions")
+
+    st.subheader("Last Order")
+    st.write(last_order)
+
+elif selected == "Strategy Detail":
+    st.title("ℹ️ Strategy Details")
+
+    st.markdown("""
+    **Objective:** Implement a simple strategy based on basic moving averages and volatility.
+    
+    **Strategy Highlights:**
+    - Buy when the price crosses above the moving average and volatility is low.
+    - Sell when the price falls below the moving average and volatility is high.
+    """)
+    
+elif selected == "Project Detail":
+    st.title("📋 Project Details")
+
+    st.markdown("""
+    **Project Name:** Trade Strategy Automation System
+    **Goal:** Automate strategy testing, risk management, and trade execution.
+    
+    **Components:**
+    - Data Collection
+    - Backtesting Framework
+    - Trade Simulation
+    - Capital & Risk Management
+    """)
+
