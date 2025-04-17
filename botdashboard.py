@@ -131,6 +131,15 @@ elif selected == "Test Strategy":
             # Show trade log table
             st.subheader("📝 Trade Log")
             st.dataframe(trade_log)
+             # Download button
+                csv = trade_log.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="📥 Download Trade Log CSV",
+                    data=csv,
+                    file_name="doctor_strategy_trade_log.csv",
+                    mime="text/csv"
+                )
+
 
 elif selected == "Trade Log":
     st.title("📝 Trade Log")
