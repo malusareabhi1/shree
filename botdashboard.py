@@ -120,8 +120,8 @@ elif selected == "Test Strategy":
             csv = trade_log.to_csv(index=False).encode("utf-8")
             st.download_button("📥 Download Trade Log", data=csv, file_name="trade_log.csv", mime="text/csv")
             # Example trade_log generated after strategy
-# Ensure trade_log is a DataFrame
-st.session_state['trade_log_df'] = trade_log  # ✅ Store in session
+            # Ensure trade_log is a DataFrame
+            st.session_state['trade_log_df'] = trade_log  # ✅ Store in session
 
 
 elif selected == "Trade Log":
