@@ -120,65 +120,47 @@ elif selected == "Test Strategy":
 
             csv = trade_log.to_csv(index=False).encode("utf-8")
             st.download_button("📥 Download Trade Log", data=csv, file_name="trade_log.csv", mime="text/csv")
+            # Example trade_log generated after strategy
+# Ensure trade_log is a DataFrame
+st.session_state['trade_log_df'] = trade_log  # ✅ Store in session
 
 
 elif selected == "Trade Log":
-    st.title("📝 Trade Log")
+    st.title("📘 Trade Log")
 
-    uploaded_log = st.file_uploader("📁 Upload Trade Log CSV", type=["csv"])
+    # Check if trade_log_df exists
+    if 'trade_log_df' in st.session_state and not st.session_state['trade_log_df'].empty:
+        trade_log = st.session_state['trade_log_df']
+        
+        st.subheader("Trade Log Table")
+        st.dataframe(trade_log)
 
-    if uploaded_log is not None:
-        try:
-            trade_data = pd.read_csv(uploaded_log)
+        # 📉 PnL Over Time Chart
+        st.subheader("PnL Over Time")
+        pnl_chart = px.line(trade_log, x="Timestamp", y="PnL", title="PnL Over Time")
+        st.plotly_chart(pnl_chart, use_container_width=True)
 
-            if all(col in trade_data.columns for col in ["PnL", "Action", "Stock", "Date"]):
-                # Ensure Date is in datetime format
-                trade_data["Date"] = pd.to_datetime(trade_data["Date"])
-
-                # Metrics
-                total_pnl = trade_data["PnL"].sum()
-                win_trades = (trade_data["PnL"] > 0).sum()
-                loss_trades = (trade_data["PnL"] < 0).sum()
-                unique_stocks = trade_data["Stock"].nunique()
-
-                col1, col2, col3, col4 = st.columns(4)
-                col1.metric("📈 Net PnL", f"₹{total_pnl}")
-                col2.metric("✅ Winning Trades", win_trades)
-                col3.metric("❌ Losing Trades", loss_trades)
-                col4.metric("📊 Stocks Traded", unique_stocks)
-
-                # Line chart: PnL over time
-                st.subheader("📅 PnL Over Time")
-                pnl_over_time = trade_data.groupby("Date")["PnL"].sum().reset_index()
-                st.line_chart(pnl_over_time.set_index("Date"))
-
-                # Pie chart: Win vs Loss
-                st.subheader("🥧 Win/Loss Ratio")
-                pie_data = pd.Series([win_trades, loss_trades], index=["Wins", "Losses"])
-                st.pyplot(pie_data.plot.pie(autopct="%1.1f%%", figsize=(5, 5), title="Win/Loss Ratio").figure)
-
-                # Trade Log Table
-                st.subheader("📋 Trade Log Table")
-                st.dataframe(trade_data)
-
-            else:
-                st.warning("CSV must include columns: Date, Stock, Action, Price, Qty, PnL")
-
-        except Exception as e:
-            st.error(f"Failed to read uploaded file: {e}")
-    else:
-        # Example data when no file is uploaded
-        trade_data = pd.DataFrame({
-            "Date": ["2024-04-15", "2024-04-16"],
-            "Stock": ["INFY", "TCS"],
-            "Action": ["BUY", "SELL"],
-            "Price": [1450.5, 3125.0],
-            "Qty": [50, 30],
-            "PnL": [2500, -750]
+        # 🥧 Win/Loss Pie Chart
+        st.subheader("Win/Loss Ratio")
+        win_count = (trade_log['PnL'] > 0).sum()
+        loss_count = (trade_log['PnL'] <= 0).sum()
+        win_loss_df = pd.DataFrame({
+            "Result": ["Win", "Loss"],
+            "Count": [win_count, loss_count]
         })
+        fig = px.pie(win_loss_df, names='Result', values='Count', title='Win vs Loss')
+        st.plotly_chart(fig, use_container_width=True)
 
-        st.info("No file uploaded. Showing example trade log.")
-        st.dataframe(trade_data)
+        # 📁 Download option
+        csv = trade_log.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="Download Trade Log as CSV",
+            data=csv,
+            file_name='trade_log.csv',
+            mime='text/csv'
+        )
+    else:
+        st.info("No trade log found. Run 'Test Strategy' first.")
 
 
 elif selected == "Account Info":
