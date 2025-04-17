@@ -135,8 +135,11 @@ elif selected == "Trade Log":
         try:
             trade_data = pd.read_csv(uploaded_log)
 
-            # Display metrics if relevant columns are present
-            if all(col in trade_data.columns for col in ["PnL", "Action", "Stock"]):
+            if all(col in trade_data.columns for col in ["PnL", "Action", "Stock", "Date"]):
+                # Ensure Date is in datetime format
+                trade_data["Date"] = pd.to_datetime(trade_data["Date"])
+
+                # Metrics
                 total_pnl = trade_data["PnL"].sum()
                 win_trades = (trade_data["PnL"] > 0).sum()
                 loss_trades = (trade_data["PnL"] < 0).sum()
@@ -148,14 +151,27 @@ elif selected == "Trade Log":
                 col3.metric("❌ Losing Trades", loss_trades)
                 col4.metric("📊 Stocks Traded", unique_stocks)
 
-            # Show trade data table
-            st.subheader("📋 Trade Log Table")
-            st.dataframe(trade_data)
+                # Line chart: PnL over time
+                st.subheader("📅 PnL Over Time")
+                pnl_over_time = trade_data.groupby("Date")["PnL"].sum().reset_index()
+                st.line_chart(pnl_over_time.set_index("Date"))
+
+                # Pie chart: Win vs Loss
+                st.subheader("🥧 Win/Loss Ratio")
+                pie_data = pd.Series([win_trades, loss_trades], index=["Wins", "Losses"])
+                st.pyplot(pie_data.plot.pie(autopct="%1.1f%%", figsize=(5, 5), title="Win/Loss Ratio").figure)
+
+                # Trade Log Table
+                st.subheader("📋 Trade Log Table")
+                st.dataframe(trade_data)
+
+            else:
+                st.warning("CSV must include columns: Date, Stock, Action, Price, Qty, PnL")
 
         except Exception as e:
             st.error(f"Failed to read uploaded file: {e}")
     else:
-        # If no file uploaded, show sample static data
+        # Example data when no file is uploaded
         trade_data = pd.DataFrame({
             "Date": ["2024-04-15", "2024-04-16"],
             "Stock": ["INFY", "TCS"],
