@@ -56,8 +56,7 @@ if selected == "Dashboard":
         st.markdown('</div>', unsafe_allow_html=True)
 
 elif selected == "Get Stock Data":
-    st.title("📈 Get Stock Data")
-    
+    st.title("📈 Get Stock Data from NSE")
     stock = st.text_input("Enter NSE stock symbol (e.g., TCS.NS, INFY.NS)", value="TCS.NS")
     from_date = st.date_input("From Date", datetime(2023, 1, 1))
     to_date = st.date_input("To Date", datetime.today())
@@ -75,8 +74,6 @@ elif selected == "Get Stock Data":
                 st.line_chart(df.set_index("Date")["Close"])
         except Exception as e:
             st.error(f"Error fetching data: {e}")
-               
-
 elif selected == "Test Strategy":
     st.title("⚙️ Test Doctor Trade Strategy")
 
