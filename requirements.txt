@@ -9,3 +9,4 @@ requests
 streamlit_option_menu 
 nsepython 
 utils
+fyers_apiv3
