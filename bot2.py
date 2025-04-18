@@ -591,7 +591,7 @@ elif selected == "Intraday Stock Finder":
         else:
             st.warning("No suitable intraday stocks found based on current filters.")
 
-elif option_menu == "Alpha Vantage API":
+elif selected == "Alpha Vantage API":
     st.subheader("📈 Stock Data from Alpha Vantage")
 
     # Input for API key and symbol
