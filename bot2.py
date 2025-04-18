@@ -395,50 +395,74 @@ elif selected == "Candle Chart":
 elif selected == "Swing Trade Strategy":
     st.title("📊 Swing Trade Strategy")
 
-    # File uploader for CSV
+    # Upload CSV
     uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
 
     if uploaded_file is not None:
+        # Read CSV
         df = pd.read_csv(uploaded_file)
 
-        st.success("CSV loaded successfully.")
-        st.write("Preview of uploaded data:")
+        st.success("✅ CSV loaded successfully!")
+        st.subheader("🔍 Preview of Uploaded Data")
         st.dataframe(df.head())
 
-        # Optional: Parse datetime if not already parsed
+        # Parse Date column if present
         if 'Date' in df.columns:
             df['Date'] = pd.to_datetime(df['Date'])
             df.set_index('Date', inplace=True)
+        else:
+            st.error("❌ 'Date' column not found in CSV.")
+            st.stop()
 
-        # Calculate indicators for swing logic
+        # Check required column
+        if 'Close' not in df.columns:
+            st.error("❌ 'Close' column is required in the CSV file.")
+            st.stop()
+
+        # Calculate SMA indicators
         df['SMA_20'] = df['Close'].rolling(window=20).mean()
         df['SMA_50'] = df['Close'].rolling(window=50).mean()
 
+        # Signal generation logic
         df['Signal'] = None
         df.loc[df['SMA_20'] > df['SMA_50'], 'Signal'] = 'BUY'
         df.loc[df['SMA_20'] < df['SMA_50'], 'Signal'] = 'SELL'
 
-        st.subheader("Signal Output")
-        st.dataframe(df.tail(50))
+        st.subheader("📈 Swing Strategy Signals")
+        st.dataframe(df[['Close', 'SMA_20', 'SMA_50', 'Signal']].dropna().tail(50))
 
         # Plot chart
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=df.index, y=df['Close'], mode='lines', name='Close'))
+        fig.add_trace(go.Scatter(x=df.index, y=df['Close'], mode='lines', name='Close Price'))
         fig.add_trace(go.Scatter(x=df.index, y=df['SMA_20'], mode='lines', name='SMA 20'))
         fig.add_trace(go.Scatter(x=df.index, y=df['SMA_50'], mode='lines', name='SMA 50'))
 
+        # Add markers for BUY/SELL signals
         buy_signals = df[df['Signal'] == 'BUY']
         sell_signals = df[df['Signal'] == 'SELL']
 
-        fig.add_trace(go.Scatter(x=buy_signals.index, y=buy_signals['Close'], mode='markers',
-                                 marker=dict(color='lime', size=10, symbol='triangle-up'), name='BUY Signal'))
-        fig.add_trace(go.Scatter(x=sell_signals.index, y=sell_signals['Close'], mode='markers',
-                                 marker=dict(color='red', size=10, symbol='triangle-down'), name='SELL Signal'))
+        fig.add_trace(go.Scatter(
+            x=buy_signals.index, y=buy_signals['Close'],
+            mode='markers', name='BUY Signal',
+            marker=dict(symbol='triangle-up', size=10, color='lime')
+        ))
+        fig.add_trace(go.Scatter(
+            x=sell_signals.index, y=sell_signals['Close'],
+            mode='markers', name='SELL Signal',
+            marker=dict(symbol='triangle-down', size=10, color='red')
+        ))
 
-        fig.update_layout(title="Swing Trade Strategy Chart", xaxis_title="Date", yaxis_title="Price",
-                          xaxis_rangeslider_visible=False, template="plotly_dark")
+        fig.update_layout(
+            title="📊 Swing Trade Strategy - SMA Crossover",
+            xaxis_title="Date",
+            yaxis_title="Price",
+            xaxis_rangeslider_visible=False,
+            template="plotly_dark",
+            height=600
+        )
 
         st.plotly_chart(fig, use_container_width=True)
 
     else:
-        st.warning("Please upload a CSV file to analyze the swing trade strategy.")
+        st.info("📥 Please upload a CSV file to view swing trade signals.")
+
