@@ -96,6 +96,43 @@ if selected == "Dashboard":
                 st.info("No holdings available.")
         except Exception as e:
             st.error(f"Failed to fetch holdings: {e}")
+            # ✅ Orders
+        try:
+            st.subheader("🧾 Recent Orders")
+            orders = kite.orders()
+            if orders:
+                df_orders = pd.DataFrame(orders)
+                df_orders = df_orders[["order_id", "tradingsymbol", "transaction_type", "quantity", "price", "status", "order_timestamp"]]
+                df_orders = df_orders.sort_values(by="order_timestamp", ascending=False)
+                st.dataframe(df_orders.head(10), use_container_width=True)
+            else:
+                st.info("No recent orders found.")
+        except Exception as e:
+            st.error(f"Failed to fetch orders: {e}")
+
+        # ✅ Positions
+        try:
+            st.subheader("📌 Net Positions")
+            positions = kite.positions()
+            net_positions = positions['net']
+            if net_positions:
+                df_positions = pd.DataFrame(net_positions)
+                df_positions = df_positions[["tradingsymbol", "quantity", "average_price", "last_price", "pnl"]]
+                st.dataframe(
+                    df_positions.style.format({
+                        "average_price": "₹{:.2f}",
+                        "last_price": "₹{:.2f}",
+                        "pnl": "₹{:.2f}"
+                    }),
+                    use_container_width=True
+                )
+            else:
+                st.info("No open positions.")
+        except Exception as e:
+            st.error(f"Failed to fetch positions: {e}")
+
+    else:
+        st.warning("Please login to Kite Connect first.")
     else:
         st.warning("Please login to Kite Connect first.")
         
