@@ -47,6 +47,17 @@ st.markdown("""
         }
     </style>
 """, unsafe_allow_html=True)
+elif selected == "API":
+    st.title("🔌 API Access")
+    st.markdown("""
+    Use this section to connect with trading APIs, fetch real-time data, or integrate third-party tools.
+
+    **Ideas to include here:**
+    - API key input
+    - Endpoint testing tools
+    - Live data fetching
+    - Integration setup
+    """)
 
 if selected == "Dashboard":
     st.title("📊 Welcome to Trade Strategy Dashboard")
