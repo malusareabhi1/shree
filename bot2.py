@@ -12,18 +12,19 @@ st.set_page_config(layout="wide", page_title="Trade Strategy Dashboard")
 # Sidebar navigation
 with st.sidebar:
     selected = option_menu(
-        menu_title="Trade Strategy",
-        options=[
-            "Dashboard", "Get Stock Data", "Test Strategy", "Swing Trade Strategy",
-            "Intraday Stock Finder", "Trade Log", "Account Info", "Candle Chart", "Strategy Detail", "Project Detail"
-        ],
-        icons=[
-            "bar-chart", "search", "cpu", "arrow-repeat",
-            "search", "clipboard-data", "wallet2", "graph-up", "info-circle", "file-earmark"
-        ],
-        menu_icon="cast",
-        default_index=0,
-    )
+    menu_title="Trade Strategy",
+    options=[
+        "Dashboard", "Get Stock Data", "Test Strategy", "Swing Trade Strategy",
+        "Intraday Stock Finder", "Trade Log", "Account Info", "Candle Chart", "Strategy Detail", "Project Detail", "API"
+    ],
+    icons=[
+        "bar-chart", "search", "cpu", "arrow-repeat",
+        "search", "clipboard-data", "wallet2", "graph-up", "info-circle", "file-earmark", "code-slash"
+    ],
+    menu_icon="cast",
+    default_index=0,
+)
+
    
 
 # Main area rendering
