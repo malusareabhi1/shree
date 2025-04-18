@@ -393,79 +393,61 @@ elif selected == "Candle Chart":
         st.error(f"Error fetching data: {e}")
 
 elif selected == "Swing Trade Strategy":
-    st.title("📊 Swing Trade Strategy")
-
-    # Upload CSV
-    uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
+    st.subheader("📈 Swing Trade Strategy")
+    uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
 
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
 
-    # ✅ NEW: Try to find a suitable datetime column
-    datetime_col = None
-    for col in df.columns:
-        if 'date' in col.lower() or 'time' in col.lower():
-            datetime_col = col
-            break
+        # ✅ Safely find a datetime column
+        datetime_col = None
+        for col in df.columns:
+            if 'date' in col.lower() or 'time' in col.lower():
+                datetime_col = col
+                break
 
-    if datetime_col:
-        df[datetime_col] = pd.to_datetime(df[datetime_col])
-        df.set_index(datetime_col, inplace=True)
-        st.success(f"✅ Using '{datetime_col}' as the datetime index.")
-    else:
-        st.error("❌ No suitable datetime column (like 'Date' or 'Time') found in the CSV.")
-        st.stop()
+        if datetime_col:
+            df[datetime_col] = pd.to_datetime(df[datetime_col])
+            df.set_index(datetime_col, inplace=True)
+            st.success(f"✅ Using '{datetime_col}' as the datetime index.")
 
+            # Show DataFrame
+            st.dataframe(df)
 
-        # Check required column
-        if 'Close' not in df.columns:
-            st.error("❌ 'Close' column is required in the CSV file.")
-            st.stop()
+            # Plot with Plotly
+            fig = go.Figure()
+            fig.add_trace(go.Candlestick(
+                x=df.index,
+                open=df['Open'],
+                high=df['High'],
+                low=df['Low'],
+                close=df['Close'],
+                name='Candlestick'
+            ))
 
-        # Calculate SMA indicators
-        df['SMA_20'] = df['Close'].rolling(window=20).mean()
-        df['SMA_50'] = df['Close'].rolling(window=50).mean()
+            # BUY/SELL marker plot (if exists)
+            if 'Signal' in df.columns:
+                buy_signals = df[df['Signal'] == 'BUY']
+                sell_signals = df[df['Signal'] == 'SELL']
 
-        # Signal generation logic
-        df['Signal'] = None
-        df.loc[df['SMA_20'] > df['SMA_50'], 'Signal'] = 'BUY'
-        df.loc[df['SMA_20'] < df['SMA_50'], 'Signal'] = 'SELL'
+                fig.add_trace(go.Scatter(
+                    x=buy_signals.index,
+                    y=buy_signals['Close'],
+                    mode='markers',
+                    marker=dict(color='green', size=10, symbol='triangle-up'),
+                    name='BUY'
+                ))
 
-        st.subheader("📈 Swing Strategy Signals")
-        st.dataframe(df[['Close', 'SMA_20', 'SMA_50', 'Signal']].dropna().tail(50))
+                fig.add_trace(go.Scatter(
+                    x=sell_signals.index,
+                    y=sell_signals['Close'],
+                    mode='markers',
+                    marker=dict(color='red', size=10, symbol='triangle-down'),
+                    name='SELL'
+                ))
 
-        # Plot chart
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=df.index, y=df['Close'], mode='lines', name='Close Price'))
-        fig.add_trace(go.Scatter(x=df.index, y=df['SMA_20'], mode='lines', name='SMA 20'))
-        fig.add_trace(go.Scatter(x=df.index, y=df['SMA_50'], mode='lines', name='SMA 50'))
+            fig.update_layout(title="Swing Trade Candlestick Chart with Signals", xaxis_title="Time", yaxis_title="Price")
+            st.plotly_chart(fig, use_container_width=True)
 
-        # Add markers for BUY/SELL signals
-        buy_signals = df[df['Signal'] == 'BUY']
-        sell_signals = df[df['Signal'] == 'SELL']
-
-        fig.add_trace(go.Scatter(
-            x=buy_signals.index, y=buy_signals['Close'],
-            mode='markers', name='BUY Signal',
-            marker=dict(symbol='triangle-up', size=10, color='lime')
-        ))
-        fig.add_trace(go.Scatter(
-            x=sell_signals.index, y=sell_signals['Close'],
-            mode='markers', name='SELL Signal',
-            marker=dict(symbol='triangle-down', size=10, color='red')
-        ))
-
-        fig.update_layout(
-            title="📊 Swing Trade Strategy - SMA Crossover",
-            xaxis_title="Date",
-            yaxis_title="Price",
-            xaxis_rangeslider_visible=False,
-            template="plotly_dark",
-            height=600
-        )
-
-        st.plotly_chart(fig, use_container_width=True)
-
-    else:
-        st.info("📥 Please upload a CSV file to view swing trade signals.")
-
+        else:
+            st.error("❌ No suitable datetime column (like 'Date' or 'Time') found in the CSV.")
