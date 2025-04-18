@@ -25,8 +25,8 @@ with st.sidebar:
         menu_icon="cast",
         default_index=0,
     )
-st.markdown("### Select Stock & Date Range")
-
+    
+    st.markdown("### Select Stock & Date Range")
     selected_stock = st.selectbox("Select NIFTY 50 Stock", nifty_50_stocks, index=0, key="stock")
     from_date = st.date_input("From Date", datetime.now() - timedelta(days=30), key="from_date")
     to_date = st.date_input("To Date", datetime.now(), key="to_date")
