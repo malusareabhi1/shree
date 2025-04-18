@@ -73,16 +73,37 @@ if selected == "Dashboard":
         st.markdown('</div>', unsafe_allow_html=True)
         
 elif selected == "API":
-    st.title("🔌 API Access")
-    st.markdown("""
-    Use this section to connect with trading APIs, fetch real-time data, or integrate third-party tools.
 
-    **Ideas to include here:**
-    - API key input
-    - Endpoint testing tools
-    - Live data fetching
-    - Integration setup
-    """)        
+    st.subheader("🔐 Fyers API Integration")
+
+    from fyers_apiv3 import fyersModel
+    from fyers_apiv3.FyersWebsocket import data_ws
+
+    # --- User Inputs (you can also store these securely or load from .env)
+    app_id = st.text_input("📌 App ID", type="password")
+    access_token = st.text_input("🔑 Access Token", type="password")
+
+    if app_id and access_token:
+        try:
+            # --- Initialize session
+            fyers = fyersModel.FyersModel(client_id=app_id, token=access_token, log_path="")
+
+            # --- Fetch Profile
+            profile = fyers.get_profile()
+            st.success("✅ Connected to Fyers!")
+            st.json(profile)
+
+            # --- Optional: Fetch Holdings
+            holdings = fyers.holdings()
+            st.subheader("📁 Holdings")
+            st.json(holdings)
+
+        except Exception as e:
+            st.error(f"❌ Error: {str(e)}")
+
+    else:
+        st.info("ℹ️ Please enter App ID and Access Token to continue.")
+
 
 elif selected == "Get Stock Data":
     st.title("📈 Get Stock Data from NSE")
