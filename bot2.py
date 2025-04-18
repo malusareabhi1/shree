@@ -25,7 +25,18 @@ with st.sidebar:
         menu_icon="cast",
         default_index=0,
     )
+st.markdown("### Select Stock & Date Range")
 
+    selected_stock = st.selectbox("Select NIFTY 50 Stock", nifty_50_stocks, index=0, key="stock")
+    from_date = st.date_input("From Date", datetime.now() - timedelta(days=30), key="from_date")
+    to_date = st.date_input("To Date", datetime.now(), key="to_date")
+    interval = st.selectbox("Interval", ["5m", "15m", "30m", "1h", "1d"], index=0, key="interval")
+
+    # Store in session state
+    st.session_state.selected_stock = selected_stock
+    st.session_state.from_date = from_date
+    st.session_state.to_date = to_date
+    st.session_state.interval = interval
 # Main area rendering
 st.markdown("""
     <style>
