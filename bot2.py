@@ -16,18 +16,19 @@ with st.sidebar:
         menu_title="Trade Strategy",
         options=[
             "Dashboard", "Get Stock Data", "Test Strategy", 
+            "Swing Trade Strategy",  # <-- Added here
             "Trade Log", "Account Info", "Candle Chart", 
             "Strategy Detail", "Project Detail"
         ],
         icons=[
             "bar-chart", "search", "cpu", 
+            "graph-up-arrow",  # <-- Icon for Swing Trade Strategy
             "clipboard-data", "wallet2", "graph-up", 
             "info-circle", "file-earmark"
         ],
         menu_icon="cast",
         default_index=0,
     )
-    
 
    
 
