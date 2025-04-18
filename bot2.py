@@ -175,9 +175,11 @@ elif selected == "Test Strategy":
         if "Close" not in df.columns:
             st.error("CSV must contain a 'Close' column")
         else:
+            # Example strategy: Buy if Close increases by 5 points, Sell if it decreases by 5 points
             df['Signal'] = df['Close'].diff().apply(lambda x: 'BUY' if x > 5 else 'SELL' if x < -5 else None)
             df.dropna(subset=['Signal'], inplace=True)
 
+            # Generate the trade log
             trade_log = pd.DataFrame({
                 "Date": df['Date'],
                 "Stock": "TEST-STOCK",
@@ -187,12 +189,13 @@ elif selected == "Test Strategy":
                 "PnL": df['Close'].diff().fillna(0) * 10  # Example
             })
 
+            # Calculate net PnL and other stats
             net_pnl = trade_log["PnL"].sum()
             win_trades = trade_log[trade_log["PnL"] > 0].shape[0]
             lose_trades = trade_log[trade_log["PnL"] < 0].shape[0]
             last_order = f"{trade_log.iloc[-1]['Action']} - TEST-STOCK - 10 shares @ {trade_log.iloc[-1]['Price']}"
 
-            # ✅ Store to session state for Account Info
+            # Store to session state for Account Info
             st.session_state['net_pnl'] = float(net_pnl)
             st.session_state['used_capital'] = capital
             st.session_state['open_positions'] = {"TEST-STOCK": {"Qty": 10, "Avg Price": round(df['Close'].iloc[-1], 2)}}
@@ -204,13 +207,54 @@ elif selected == "Test Strategy":
             st.metric("Losing Trades", lose_trades)
             st.dataframe(trade_log)
 
+            # CSV download button
             csv = trade_log.to_csv(index=False).encode("utf-8")
             st.download_button("📥 Download Trade Log", data=csv, file_name="trade_log.csv", mime="text/csv")
-            # Example trade_log generated after strategy
-            # Ensure trade_log is a DataFrame
-            st.session_state['trade_log_df'] = trade_log  # ✅ Store in session
+            st.session_state['trade_log_df'] = trade_log  # Store trade log in session
 
+            # Create a Candlestick chart
+            fig = go.Figure(data=[go.Candlestick(
+                x=df['Date'],
+                open=df['Open'],
+                high=df['High'],
+                low=df['Low'],
+                close=df['Close'],
+                increasing_line_color='green',
+                decreasing_line_color='red',
+            )])
 
+            # Mark BUY and SELL signals on the chart
+            buy_signals = df[df['Signal'] == 'BUY']
+            sell_signals = df[df['Signal'] == 'SELL']
+
+            fig.add_trace(go.Scatter(
+                x=buy_signals['Date'],
+                y=buy_signals['Close'],
+                mode='markers',
+                name='Buy Signal',
+                marker=dict(symbol='triangle-up', color='green', size=12)
+            ))
+
+            fig.add_trace(go.Scatter(
+                x=sell_signals['Date'],
+                y=sell_signals['Close'],
+                mode='markers',
+                name='Sell Signal',
+                marker=dict(symbol='triangle-down', color='red', size=12)
+            ))
+
+            # Update the chart layout
+            fig.update_layout(
+                title=f'{stock} Candlestick Chart with Trade Entries and Exits',
+                xaxis_title='Date',
+                yaxis_title='Price (₹)',
+                xaxis_rangeslider_visible=False,  # Hide the range slider
+                template='plotly_dark',  # Use a dark template
+                hovermode='x unified',  # Hover across x-axis to get details
+            )
+
+            # Display the interactive candlestick chart
+            st.plotly_chart(fig)
 elif selected == "Trade Log":
     st.title("📘 Trade Log")
 
