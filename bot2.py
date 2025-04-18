@@ -95,6 +95,9 @@ elif selected == "Get Stock Data":
                 st.warning("No data returned. Check symbol or market hours for intraday intervals.")
             else:
                 df.reset_index(inplace=True)
+                # 🔧 Flatten MultiIndex columns (e.g., for "^NSEI")
+                if isinstance(df.columns, pd.MultiIndex):
+                    df.columns = ['_'.join(col).strip() if col[1] else col[0] for col in df.columns]
                 st.dataframe(df)
 
                 # CSV download button
