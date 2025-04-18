@@ -52,23 +52,6 @@ st.markdown("""
 
 
 if selected == "Dashboard":
-    st.title("📊 Welcome to Trade Strategy Dashboard")
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.markdown("<div class='card-title'>Capital Overview</div>", unsafe_allow_html=True)
-        st.metric(label="Available Capital", value="₹1,20,000")
-        st.metric(label="Used Capital", value="₹50,000")
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with col2:
-        st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.markdown("<div class='card-title'>Strategy Overview</div>", unsafe_allow_html=True)
-        st.metric(label="Hit Ratio", value="61.76%")
-        st.metric(label="Risk per Trade", value="1.5%")
-        st.markdown('</div>', unsafe_allow_html=True)
-elif selected == "Dashboard":
     st.subheader("📊 Dashboard - Zerodha Account Overview")
 
     if kite:
