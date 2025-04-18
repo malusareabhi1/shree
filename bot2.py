@@ -31,7 +31,7 @@ with st.sidebar:
     from_date = st.date_input("From Date", datetime.now() - timedelta(days=30), key="from_date")
     to_date = st.date_input("To Date", datetime.now(), key="to_date")
     interval = st.selectbox("Interval", ["5m", "15m", "30m", "1h", "1d"], index=0, key="interval")
-    with st.sidebar:
+with st.sidebar:
     st.markdown("### Select Stock & Date Range")
 
     selected_stock = st.selectbox("Select NIFTY 50 Stock", nifty_50_stocks, index=0, key="stock")
