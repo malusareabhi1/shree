@@ -460,10 +460,8 @@ elif selected == "Swing Trade Strategy":
         fig.add_trace(go.Scatter(x=buys.index, y=buys['Close'], mode='markers', marker=dict(symbol='triangle-up', color='green', size=12), name='BUY'))
         fig.add_trace(go.Scatter(x=sells.index, y=sells['Close'], mode='markers', marker=dict(symbol='triangle-down', color='red', size=12), name='SELL'))
         fig.update_layout(title="Swing Trade Chart", xaxis_rangeslider_visible=False, template="plotly_dark")
-        st.plotly_chart(fig, use_container_width=True)
-        
-import pandas as pd
-import yfinance as yf
+        st.plotly_chart(fig, use_container_width=True)      
+
 
 elif selected == "Intraday Stock Finder":
     st.subheader("🔍 Intraday Stock Finder")
