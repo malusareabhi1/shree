@@ -10,6 +10,9 @@ import random
 import requests
 from kiteconnect import KiteConnect
 
+# Global kite object placeholder
+if 'kite' not in st.session_state:
+    st.session_state.kite = None
 # Page configuration
 st.set_page_config(layout="wide", page_title="Trade Strategy Dashboard")
     
