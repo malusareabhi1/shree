@@ -57,8 +57,10 @@ st.markdown("""
 if selected == "Dashboard":
     st.subheader("📊 Dashboard - Zerodha Account Overview")
 
-    if kite:
-        # ✅ Fetch fund balance
+    if "kite" in st.session_state and st.session_state.kite is not None:
+        kite = st.session_state.kite
+
+        # ✅ Funds
         try:
             funds = kite.margins(segment="equity")
             available_cash = funds['available']['cash']
@@ -66,20 +68,20 @@ if selected == "Dashboard":
         except Exception as e:
             st.error(f"Failed to fetch funds: {e}")
 
-        # ✅ Fetch holdings
+        # ✅ Holdings
         try:
             holdings = kite.holdings()
             if holdings:
                 df_holdings = pd.DataFrame(holdings)
-                df_holdings = df_holdings[["tradingsymbol", "quantity", "average_price", "last_price", "pnl", "instrument_token"]]
+                df_holdings = df_holdings[["tradingsymbol", "quantity", "average_price", "last_price", "pnl"]]
                 st.write("📦 Your Holdings")
                 st.dataframe(df_holdings, use_container_width=True)
             else:
-                st.warning("No holdings found.")
+                st.info("No holdings available.")
         except Exception as e:
             st.error(f"Failed to fetch holdings: {e}")
     else:
-        st.warning("Please login to Kite Connect first.")  
+        st.warning("Please login to Kite Connect first.")
         
 elif selected == "API":
 
