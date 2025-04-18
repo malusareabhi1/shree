@@ -17,11 +17,11 @@ with st.sidebar:
     menu_title="Trade Strategy",
     options=[
         "Dashboard", "Get Stock Data", "Test Strategy", "Swing Trade Strategy",
-        "Intraday Stock Finder", "Trade Log", "Account Info", "Candle Chart", "Strategy Detail", "Project Detail", "API","Alpha Vantage API"
+        "Intraday Stock Finder", "Trade Log", "Account Info", "Candle Chart", "Strategy Detail", "Project Detail", "KITE API", "API","Alpha Vantage API"
     ],
     icons=[
         "bar-chart", "search", "cpu", "arrow-repeat",
-        "search", "clipboard-data", "wallet2", "graph-up", "info-circle", "file-earmark", "code-slash", "code-slash"
+        "search", "clipboard-data", "wallet2", "graph-up", "info-circle", "file-earmark", "code-slash", "code-slash", "code-slash"
     ],
     menu_icon="cast",
     default_index=0,
