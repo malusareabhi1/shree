@@ -47,17 +47,7 @@ st.markdown("""
         }
     </style>
 """, unsafe_allow_html=True)
-elif selected == "API":
-    st.title("🔌 API Access")
-    st.markdown("""
-    Use this section to connect with trading APIs, fetch real-time data, or integrate third-party tools.
 
-    **Ideas to include here:**
-    - API key input
-    - Endpoint testing tools
-    - Live data fetching
-    - Integration setup
-    """)
 
 if selected == "Dashboard":
     st.title("📊 Welcome to Trade Strategy Dashboard")
@@ -76,6 +66,18 @@ if selected == "Dashboard":
         st.metric(label="Hit Ratio", value="61.76%")
         st.metric(label="Risk per Trade", value="1.5%")
         st.markdown('</div>', unsafe_allow_html=True)
+        
+elif selected == "API":
+    st.title("🔌 API Access")
+    st.markdown("""
+    Use this section to connect with trading APIs, fetch real-time data, or integrate third-party tools.
+
+    **Ideas to include here:**
+    - API key input
+    - Endpoint testing tools
+    - Live data fetching
+    - Integration setup
+    """)        
 
 elif selected == "Get Stock Data":
     st.title("📈 Get Stock Data from NSE")
