@@ -68,6 +68,32 @@ if selected == "Dashboard":
         st.metric(label="Hit Ratio", value="61.76%")
         st.metric(label="Risk per Trade", value="1.5%")
         st.markdown('</div>', unsafe_allow_html=True)
+elif selected == "Dashboard":
+    st.subheader("📊 Dashboard - Zerodha Account Overview")
+
+    if kite:
+        # ✅ Fetch fund balance
+        try:
+            funds = kite.margins(segment="equity")
+            available_cash = funds['available']['cash']
+            st.metric("💰 Available Fund", f"₹ {available_cash:,.2f}")
+        except Exception as e:
+            st.error(f"Failed to fetch funds: {e}")
+
+        # ✅ Fetch holdings
+        try:
+            holdings = kite.holdings()
+            if holdings:
+                df_holdings = pd.DataFrame(holdings)
+                df_holdings = df_holdings[["tradingsymbol", "quantity", "average_price", "last_price", "pnl", "instrument_token"]]
+                st.write("📦 Your Holdings")
+                st.dataframe(df_holdings, use_container_width=True)
+            else:
+                st.warning("No holdings found.")
+        except Exception as e:
+            st.error(f"Failed to fetch holdings: {e}")
+    else:
+        st.warning("Please login to Kite Connect first.")  
         
 elif selected == "API":
 
