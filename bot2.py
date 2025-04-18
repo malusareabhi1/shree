@@ -106,12 +106,42 @@ elif selected == "Get Stock Data":
                     mime="text/csv"
                 )
 
-                # Show Close price chart
-                if "Date" in df.columns and "Close" in df.columns:
-                    fig = px.line(df, x="Date", y="Close", title=f"{stock} Close Price")
-                    st.plotly_chart(fig)
-                else:
-                    st.warning("Could not find 'Date' and 'Close' columns to generate chart.")
+# Show Close price line chart
+if "Date" in df.columns and "Close" in df.columns:
+    st.subheader("📈 Line Chart: Close Price")
+    fig_line = px.line(df, x="Date", y="Close", title=f"{stock} Close Price")
+    st.plotly_chart(fig_line)
+
+    # Show Candle chart if all OHLC columns exist
+    if all(col in df.columns for col in ["Open", "High", "Low", "Close"]):
+        st.subheader("🕯️ Candlestick Chart")
+        import plotly.graph_objects as go
+
+        fig_candle = go.Figure(data=[go.Candlestick(
+            x=df["Date"],
+            open=df["Open"],
+            high=df["High"],
+            low=df["Low"],
+            close=df["Close"],
+            increasing_line_color='green',
+            decreasing_line_color='red'
+        )])
+
+        fig_candle.update_layout(
+            title=f"{stock.upper()} Candlestick Chart",
+            xaxis_title="Date",
+            yaxis_title="Price",
+            xaxis_rangeslider_visible=False,
+            template="plotly_dark"
+        )
+
+        st.plotly_chart(fig_candle, use_container_width=True)
+    else:
+        st.warning("Missing OHLC data to render candle chart.")
+else:
+    st.warning("Could not find 'Date' and 'Close' columns to generate charts.")
+
+                    
         except Exception as e:
             st.error(f"Error fetching data: {e}")
 
