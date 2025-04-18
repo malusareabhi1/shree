@@ -12,8 +12,16 @@ st.set_page_config(layout="wide", page_title="Trade Strategy Dashboard")
 with st.sidebar:
     selected = option_menu(
         menu_title="Trade Strategy",
-        options=["Dashboard", "Get Stock Data", "Test Strategy", "Trade Log", "Account Info", "Strategy Detail", "Project Detail"],
-        icons=["bar-chart", "search", "cpu", "clipboard-data", "wallet2", "info-circle", "file-earmark"],
+        options=[
+            "Dashboard", "Get Stock Data", "Test Strategy", 
+            "Trade Log", "Account Info", "Candle Chart", 
+            "Strategy Detail", "Project Detail"
+        ],
+        icons=[
+            "bar-chart", "search", "cpu", 
+            "clipboard-data", "wallet2", "graph-up", 
+            "info-circle", "file-earmark"
+        ],
         menu_icon="cast",
         default_index=0,
     )
@@ -246,4 +254,39 @@ elif selected == "Project Detail":
     - Trade Simulation
     - Capital & Risk Management
     """)
+    elif selected == "Candle Chart":
+    st.title("📉 Candle Chart Viewer")
+
+    candle_stock = st.selectbox("Select Stock", options=nifty_50_stocks, index=nifty_50_stocks.index("TCS.NS"))
+    candle_from_date = st.date_input("From Date", datetime(2024, 1, 1))
+    candle_to_date = st.date_input("To Date", datetime.today())
+    candle_interval = st.selectbox("Select Interval", ["1m", "5m", "15m", "30m", "1h", "1d"], index=4)
+
+    if st.button("Show Candle Chart"):
+        st.info(f"Fetching candlestick data for {candle_stock.upper()}")
+
+        try:
+            candle_df = yf.download(candle_stock, start=candle_from_date, end=candle_to_date, interval=candle_interval)
+            if candle_df.empty:
+                st.warning("No data found.")
+            else:
+                import plotly.graph_objects as go
+
+                candle_df.reset_index(inplace=True)
+
+                fig = go.Figure(data=[go.Candlestick(
+                    x=candle_df['Date'],
+                    open=candle_df['Open'],
+                    high=candle_df['High'],
+                    low=candle_df['Low'],
+                    close=candle_df['Close'],
+                    increasing_line_color='green',
+                    decreasing_line_color='red'
+                )])
+
+                fig.update_layout(title=f'{candle_stock.upper()} Candlestick Chart', xaxis_rangeslider_visible=False)
+                st.plotly_chart(fig, use_container_width=True)
+
+        except Exception as e:
+            st.error(f"Error: {e}")
 
