@@ -19,3 +19,13 @@ session = accessToken.SessionModel(
 auth_url = session.generate_authcode()
 webbrowser.open(auth_url)
 print("Go to this URL, login, and paste the 'code' from the URL here.")
+
+
+auth_code = input("Enter the auth code from URL: ")
+
+session.set_token(auth_code)
+access_token = session.generate_token()["access_token"]
+
+# Save this token securely — it expires every 24 hours
+print("Access Token:", access_token)
+
