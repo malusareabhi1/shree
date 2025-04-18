@@ -15,21 +15,16 @@ with st.sidebar:
     selected = option_menu(
         menu_title="Trade Strategy",
         options=[
-            "Dashboard", "Get Stock Data", "Test Strategy", 
-            "Swing Trade Strategy",  # <-- Added here
-            "Trade Log", "Account Info", "Candle Chart", 
-            "Strategy Detail", "Project Detail"
+            "Dashboard", "Get Stock Data", "Test Strategy", "Swing Trade Strategy",
+            "Intraday Stock Finder", "Trade Log", "Account Info", "Candle Chart", "Strategy Detail", "Project Detail"
         ],
         icons=[
-            "bar-chart", "search", "cpu", 
-            "graph-up-arrow",  # <-- Icon for Swing Trade Strategy
-            "clipboard-data", "wallet2", "graph-up", 
-            "info-circle", "file-earmark"
+            "bar-chart", "search", "cpu", "arrow-repeat",
+            "search", "clipboard-data", "wallet2", "graph-up", "info-circle", "file-earmark"
         ],
         menu_icon="cast",
         default_index=0,
     )
-
    
 
 # Main area rendering
