@@ -465,50 +465,49 @@ elif selected == "Swing Trade Strategy":
 elif selected == "Intraday Stock Finder":
     st.subheader("🔍 Intraday Stock Finder")
 
-    # User inputs (thresholds)
     vol_mil = st.number_input("Min Avg Volume (millions)", min_value=1, max_value=100, value=10)
     pct_move = st.number_input("Min Price Change (%)", min_value=1.0, max_value=50.0, value=2.0)
 
     symbols = [
-        "RELIANCE.NS","TCS.NS","INFY.NS","HDFCBANK.NS","ICICIBANK.NS",
-        "HDFC.NS","LT.NS","SBIN.NS","KOTAKBANK.NS","AXISBANK.NS"
+        "RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS", "ICICIBANK.NS",
+        "HDFC.NS", "LT.NS", "SBIN.NS", "KOTAKBANK.NS", "AXISBANK.NS"
     ]
 
     filtered = []
+
     for sym in symbols:
-        # 1) Fetch 5‑min intraday data
-        df5 = yf.download(sym, period="1d", interval="5m")
+        df5 = yf.download(sym, period="1d", interval="5m", progress=False)
         if df5.empty:
             continue
 
-        # 2) Flatten multi‐index if needed (rare for these symbols)
-        if isinstance(df5.columns, pd.MultiIndex):
-            df5.columns = ["_".join(col).strip() for col in df5.columns]
+        # Check if all required columns are present
+        required_cols = {"Open", "Close", "Volume"}
+        if not required_cols.issubset(df5.columns):
+            st.warning(f"⚠️ Missing expected columns in {sym}, skipping.")
+            continue
 
-        # 3) Compute scalars
-        avg_vol  = df5["Volume"].mean()                       # scalar
-        open_pr  = df5["Open"].iloc[0]                        # scalar
-        close_pr = df5["Close"].iloc[-1]                      # scalar
-        change_pct = (close_pr - open_pr) / open_pr * 100     # scalar
+        # Calculate volume and price change
+        avg_vol = df5["Volume"].mean()
+        open_price = df5["Open"].iloc[0]
+        close_price = df5["Close"].iloc[-1]
+        change_pct = (close_price - open_price) / open_price * 100
 
-        # 4) Apply thresholds
-        if (avg_vol >= vol_mil * 1_000_000) and (abs(change_pct) >= pct_move):
+        # Apply filters
+        if avg_vol >= vol_mil * 1_000_000 and abs(change_pct) >= pct_move:
             filtered.append({
                 "Symbol": sym,
-                "Avg Volume (M)": round(avg_vol/1e6, 2),
+                "Avg Volume (M)": round(avg_vol / 1e6, 2),
                 "Price Change (%)": round(change_pct, 2)
             })
 
-    # Show results
     if filtered:
         df_f = pd.DataFrame(filtered)
         st.dataframe(df_f)
 
-        # Let user pick one to see its chart
-        choice = st.selectbox("Chart which symbol?", df_f["Symbol"])
-        df_chart = yf.download(choice, period="1d", interval="5m")
+        selected_sym = st.selectbox("📈 View chart for:", df_f["Symbol"])
+        df_chart = yf.download(selected_sym, period="1d", interval="5m", progress=False)
 
-        st.subheader(f"📉 {choice} 5‑Min Intraday Close")
+        st.subheader(f"Intraday Chart: {selected_sym}")
         st.line_chart(df_chart["Close"])
     else:
-        st.write("No stocks met your criteria.")
+        st.info("No stocks matched the given criteria.")
