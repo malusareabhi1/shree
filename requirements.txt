@@ -9,4 +9,4 @@ requests
 streamlit_option_menu 
 nsepython 
 utils
-import random
+random
