@@ -624,3 +624,37 @@ elif selected == "Alpha Vantage API":
         else:
             st.error("❌ Failed to fetch data from Alpha Vantage.")
 
+elif selected == "KITE API":
+    st.subheader("🔐 Kite Connect API (Zerodha) Integration")
+
+    # Input API credentials
+    api_key = st.text_input("Enter your API Key", type="password")
+    api_secret = st.text_input("Enter your API Secret", type="password")
+
+    if api_key and api_secret:
+        try:
+            kite = KiteConnect(api_key=api_key)
+            login_url = kite.login_url()
+
+            st.markdown(f"👉 [Click here to login with Zerodha and get your request token]({login_url})")
+            request_token = st.text_input("Paste the request token here after login")
+
+            if request_token:
+                try:
+                    data = kite.generate_session(request_token, api_secret=api_secret)
+                    kite.set_access_token(data["access_token"])
+
+                    st.success("✅ Login successful!")
+                    st.write("📋 Your profile:")
+                    st.json(kite.profile())
+
+                    st.write("💼 Holdings (if any):")
+                    st.json(kite.holdings())
+
+                except Exception as e:
+                    st.error(f"Login failed: {e}")
+
+        except Exception as e:
+            st.error(f"Error generating login URL: {e}")
+    else:
+        st.info("Enter your API Key and Secret to start.")
