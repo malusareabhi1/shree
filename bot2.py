@@ -399,7 +399,7 @@ elif selected == "Swing Trade Strategy":
     uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
 
     if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
+        df = pd.read_csv(uploaded_file)
 
     # ✅ NEW: Try to find a suitable datetime column
     datetime_col = None
