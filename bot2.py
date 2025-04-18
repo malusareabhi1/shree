@@ -462,6 +462,9 @@ elif selected == "Swing Trade Strategy":
         fig.update_layout(title="Swing Trade Chart", xaxis_rangeslider_visible=False, template="plotly_dark")
         st.plotly_chart(fig, use_container_width=True)
         
+import pandas as pd
+import yfinance as yf
+
 elif selected == "Intraday Stock Finder":
     st.subheader("🔍 Intraday Stock Finder")
 
@@ -476,23 +479,41 @@ elif selected == "Intraday Stock Finder":
     filtered = []
 
     for sym in symbols:
-        df5 = yf.download(sym, period="1d", interval="5m", progress=False)
+        try:
+            df5 = yf.download(sym, period="1d", interval="5m", progress=False)
+        except Exception as e:
+            st.warning(f"❌ Failed to fetch data for {sym}: {e}")
+            continue
+
         if df5.empty:
             continue
 
-        # Check if all required columns are present
-        required_cols = {"Open", "Close", "Volume"}
-        if not required_cols.issubset(df5.columns):
+        # Flatten multi-level columns if necessary
+        if isinstance(df5.columns, pd.MultiIndex):
+            df5.columns = [' '.join(col).strip() for col in df5.columns.values]
+
+        # Normalize expected column names
+        col_map = {
+            "Open": None,
+            "Close": None,
+            "Volume": None
+        }
+
+        for col in df5.columns:
+            if "open" in col.lower(): col_map["Open"] = col
+            if "close" in col.lower(): col_map["Close"] = col
+            if "volume" in col.lower(): col_map["Volume"] = col
+
+        if None in col_map.values():
             st.warning(f"⚠️ Missing expected columns in {sym}, skipping.")
             continue
 
-        # Calculate volume and price change
-        avg_vol = df5["Volume"].mean()
-        open_price = df5["Open"].iloc[0]
-        close_price = df5["Close"].iloc[-1]
+        # Compute
+        avg_vol = df5[col_map["Volume"]].mean()
+        open_price = df5[col_map["Open"]].iloc[0]
+        close_price = df5[col_map["Close"]].iloc[-1]
         change_pct = (close_price - open_price) / open_price * 100
 
-        # Apply filters
         if avg_vol >= vol_mil * 1_000_000 and abs(change_pct) >= pct_move:
             filtered.append({
                 "Symbol": sym,
