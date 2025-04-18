@@ -8,6 +8,8 @@ import plotly.graph_objects as go
 #from utils import generate_mock_data
 import random
 import requests
+from kiteconnect import KiteConnect
+
 # Page configuration
 st.set_page_config(layout="wide", page_title="Trade Strategy Dashboard")
     
