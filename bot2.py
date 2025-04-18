@@ -254,7 +254,7 @@ elif selected == "Project Detail":
     - Trade Simulation
     - Capital & Risk Management
     """)
-    elif selected == "Candle Chart":
+elif selected == "Candle Chart":
     st.title("📉 Candle Chart Viewer")
 
     candle_stock = st.selectbox("Select Stock", options=nifty_50_stocks, index=nifty_50_stocks.index("TCS.NS"))
