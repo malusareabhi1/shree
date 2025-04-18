@@ -74,8 +74,24 @@ if selected == "Dashboard":
             if holdings:
                 df_holdings = pd.DataFrame(holdings)
                 df_holdings = df_holdings[["tradingsymbol", "quantity", "average_price", "last_price", "pnl"]]
-                st.write("📦 Your Holdings")
-                st.dataframe(df_holdings, use_container_width=True)
+                df_holdings["holding_value"] = df_holdings["quantity"] * df_holdings["last_price"]
+
+                total_holding_value = df_holdings["holding_value"].sum()
+                total_pnl = df_holdings["pnl"].sum()
+
+                st.metric("📦 Total Holding Value", f"₹ {total_holding_value:,.2f}")
+                st.metric("📈 Total P&L", f"₹ {total_pnl:,.2f}", delta_color="normal")
+
+                st.write("📄 Your Holdings:")
+                st.dataframe(
+                    df_holdings.style.format({
+                        "average_price": "₹{:.2f}",
+                        "last_price": "₹{:.2f}",
+                        "pnl": "₹{:.2f}",
+                        "holding_value": "₹{:.2f}"
+                    }),
+                    use_container_width=True
+                )
             else:
                 st.info("No holdings available.")
         except Exception as e:
