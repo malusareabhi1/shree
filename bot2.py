@@ -399,20 +399,23 @@ elif selected == "Swing Trade Strategy":
     uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
 
     if uploaded_file is not None:
-        # Read CSV
-        df = pd.read_csv(uploaded_file)
+    df = pd.read_csv(uploaded_file)
 
-        st.success("✅ CSV loaded successfully!")
-        st.subheader("🔍 Preview of Uploaded Data")
-        st.dataframe(df.head())
+    # ✅ NEW: Try to find a suitable datetime column
+    datetime_col = None
+    for col in df.columns:
+        if 'date' in col.lower() or 'time' in col.lower():
+            datetime_col = col
+            break
 
-        # Parse Date column if present
-        if 'Date' in df.columns:
-            df['Date'] = pd.to_datetime(df['Date'])
-            df.set_index('Date', inplace=True)
-        else:
-            st.error("❌ 'Date' column not found in CSV.")
-            st.stop()
+    if datetime_col:
+        df[datetime_col] = pd.to_datetime(df[datetime_col])
+        df.set_index(datetime_col, inplace=True)
+        st.success(f"✅ Using '{datetime_col}' as the datetime index.")
+    else:
+        st.error("❌ No suitable datetime column (like 'Date' or 'Time') found in the CSV.")
+        st.stop()
+
 
         # Check required column
         if 'Close' not in df.columns:
