@@ -6,7 +6,6 @@ import yfinance as yf
 import plotly.express as px
 import plotly.graph_objects as go
 
-
 # Page configuration
 st.set_page_config(layout="wide", page_title="Trade Strategy Dashboard")
 
