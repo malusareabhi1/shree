@@ -656,6 +656,7 @@ elif selected == "KITE API":
                     kite.set_access_token(data["access_token"])
 
                     st.success("✅ Login successful!")
+                    st.session_state.kite = kite
 
                     # Create tabs
                     tab1, tab2, tab3 = st.tabs(["👤 Profile", "📈 Holdings", "📝 Orders"])
