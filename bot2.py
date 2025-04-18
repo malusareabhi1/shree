@@ -626,6 +626,7 @@ elif selected == "Alpha Vantage API":
         else:
             st.error("❌ Failed to fetch data from Alpha Vantage.")
 
+
 elif selected == "KITE API":
     st.subheader("🔐 Kite Connect API (Zerodha) Integration")
 
