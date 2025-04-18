@@ -12,21 +12,7 @@ import random
 # Page configuration
 st.set_page_config(layout="wide", page_title="Trade Strategy Dashboard")
 
-def generate_mock_data():
-        mock_data = []
-        for symbol in nifty50_stocks:
-            open_price = random.uniform(100, 1500)
-            price = open_price * random.uniform(0.98, 1.05)
-            prev_close = open_price * random.uniform(0.97, 1.03)
-            volume = random.randint(400000, 1200000)
-            mock_data.append({
-                "symbol": symbol,
-                "price": round(price, 2),
-                "volume": volume,
-                "open_price": round(open_price, 2),
-                "prev_close": round(prev_close, 2)
-            })
-        return mock_data
+
     
 # Sidebar navigation
 with st.sidebar:
@@ -497,7 +483,6 @@ elif selected == "Swing Trade Strategy":
 
 
 elif selected == "Intraday Stock Finder":
-    
 
     st.subheader("📊 Intraday Stock Finder (Simulated on NIFTY 50)")
 
