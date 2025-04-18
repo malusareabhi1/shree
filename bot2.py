@@ -26,16 +26,7 @@ with st.sidebar:
         default_index=0,
     )
     
-stock = st.session_state.get("selected_stock", None)
-from_date = st.session_state.get("from_date", None)
-to_date = st.session_state.get("to_date", None)
-interval = st.session_state.get("interval", None)
 
-if not all([stock, from_date, to_date, interval]):
-    st.warning("Please select stock, date range, and interval in the sidebar first.")
-    st.stop()
-
-    
    
 
 # Main area rendering
@@ -123,6 +114,16 @@ elif selected == "Get Stock Data":
                     st.warning("Could not find 'Date' and 'Close' columns to generate chart.")
         except Exception as e:
             st.error(f"Error fetching data: {e}")
+stock = st.session_state.get("selected_stock", None)
+from_date = st.session_state.get("from_date", None)
+to_date = st.session_state.get("to_date", None)
+interval = st.session_state.get("interval", None)
+
+if not all([stock, from_date, to_date, interval]):
+    st.warning("Please select stock, date range, and interval in the sidebar first.")
+    st.stop()
+
+    
 
 
 elif selected == "Test Strategy":
