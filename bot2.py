@@ -258,7 +258,16 @@ elif selected == "Project Detail":
     """)
 elif selected == "Candle Chart":
     st.title("📉 Candle Chart Viewer")
-    
+
+    try:
+        stock = st.session_state.selected_stock
+        from_date = st.session_state.from_date
+        to_date = st.session_state.to_date
+        interval = st.session_state.interval
+    except KeyError:
+        st.error("Please select a stock and date range in the sidebar first.")
+        st.stop()
+
     st.markdown(f"### Showing Candle Chart for: **{stock.upper()}**")
     st.markdown(f"**Date Range:** {from_date} to {to_date}  \n**Interval:** {interval}")
 
