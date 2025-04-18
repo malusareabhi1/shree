@@ -98,6 +98,8 @@ elif selected == "Get Stock Data":
                 # 🔧 Flatten MultiIndex columns (e.g., for "^NSEI")
                 if isinstance(df.columns, pd.MultiIndex):
                     df.columns = ['_'.join(col).strip() if col[1] else col[0] for col in df.columns]
+                    st.write("🧪 Column Names:", df.columns.tolist())
+
                 st.dataframe(df)
 
                 # CSV download button
