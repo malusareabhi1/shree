@@ -594,3 +594,38 @@ elif selected == "Intraday Stock Finder":
         
         else:
             st.warning("No suitable intraday stocks found based on current filters.")
+
+elif option_menu == "Alpha Vantage API":
+    st.subheader("📈 Stock Data from Alpha Vantage")
+
+    # Input for API key and symbol
+    api_key = st.text_input("🔑 Enter your Alpha Vantage API Key")
+    symbol = st.text_input("📌 Enter Stock Symbol (e.g., AAPL, MSFT, RELIANCE.BSE)")
+
+    if st.button("Fetch Data") and api_key and symbol:
+        url = f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval=15min&apikey={api_key}"
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            data = response.json()
+
+            if "Time Series (15min)" in data:
+                df = pd.DataFrame.from_dict(data["Time Series (15min)"], orient='index')
+                df = df.astype(float)
+                df.index = pd.to_datetime(df.index)
+                df = df.sort_index()
+
+                st.success(f"Showing intraday data for {symbol.upper()}")
+                st.line_chart(df["4. close"])
+
+                with st.expander("📋 Show Raw Data"):
+                    st.dataframe(df)
+
+                # CSV Export
+                csv = df.to_csv().encode("utf-8")
+                st.download_button("⬇️ Download CSV", csv, f"{symbol}_intraday.csv", "text/csv")
+            else:
+                st.warning("⚠️ No intraday data found. Check symbol or API limit.")
+        else:
+            st.error("❌ Failed to fetch data from Alpha Vantage.")
+
