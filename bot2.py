@@ -133,8 +133,7 @@ if selected == "Dashboard":
 
     else:
         st.warning("Please login to Kite Connect first.")
-    else:
-        st.warning("Please login to Kite Connect first.")
+  
         
 elif selected == "API":
 
