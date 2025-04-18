@@ -464,69 +464,78 @@ elif selected == "Swing Trade Strategy":
 
 
 elif selected == "Intraday Stock Finder":
-    st.subheader("🔍 Intraday Stock Finder")
+    import random
 
-    vol_mil = st.number_input("Min Avg Volume (millions)", min_value=1, max_value=100, value=10)
-    pct_move = st.number_input("Min Price Change (%)", min_value=1.0, max_value=50.0, value=2.0)
+    st.subheader("📊 Intraday Stock Finder (Simulated on NIFTY 50)")
 
-    symbols = [
-        "RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS", "ICICIBANK.NS",
-        "HDFC.NS", "LT.NS", "SBIN.NS", "KOTAKBANK.NS", "AXISBANK.NS"
+    # --- Mock NIFTY 50 stock data for simulation ---
+    nifty50_stocks = [
+        "ADANIENT", "ADANIPORTS", "ASIANPAINT", "AXISBANK", "BAJAJ-AUTO", "BAJFINANCE", "BAJAJFINSV",
+        "BPCL", "BHARTIARTL", "BRITANNIA", "CIPLA", "COALINDIA", "DIVISLAB", "DRREDDY", "EICHERMOT",
+        "GRASIM", "HCLTECH", "HDFCBANK", "HDFCLIFE", "HEROMOTOCO", "HINDALCO", "HINDUNILVR", "ICICIBANK",
+        "ITC", "INDUSINDBK", "INFY", "JSWSTEEL", "KOTAKBANK", "LT", "M&M", "MARUTI", "NTPC", "NESTLEIND",
+        "ONGC", "POWERGRID", "RELIANCE", "SBILIFE", "SBIN", "SUNPHARMA", "TCS", "TATACONSUM", "TATAMOTORS",
+        "TATASTEEL", "TECHM", "TITAN", "UPL", "ULTRACEMCO", "WIPRO"
     ]
 
-    filtered = []
-
-    for sym in symbols:
-        try:
-            df5 = yf.download(sym, period="1d", interval="5m", progress=False)
-        except Exception as e:
-            st.warning(f"❌ Failed to fetch data for {sym}: {e}")
-            continue
-
-        if df5.empty:
-            continue
-
-        # Flatten multi-level columns if necessary
-        if isinstance(df5.columns, pd.MultiIndex):
-            df5.columns = [' '.join(col).strip() for col in df5.columns.values]
-
-        # Normalize expected column names
-        col_map = {
-            "Open": None,
-            "Close": None,
-            "Volume": None
-        }
-
-        for col in df5.columns:
-            if "open" in col.lower(): col_map["Open"] = col
-            if "close" in col.lower(): col_map["Close"] = col
-            if "volume" in col.lower(): col_map["Volume"] = col
-
-        if None in col_map.values():
-            st.warning(f"⚠️ Missing expected columns in {sym}, skipping.")
-            continue
-
-        # Compute
-        avg_vol = df5[col_map["Volume"]].mean()
-        open_price = df5[col_map["Open"]].iloc[0]
-        close_price = df5[col_map["Close"]].iloc[-1]
-        change_pct = (close_price - open_price) / open_price * 100
-
-        if avg_vol >= vol_mil * 1_000_000 and abs(change_pct) >= pct_move:
-            filtered.append({
-                "Symbol": sym,
-                "Avg Volume (M)": round(avg_vol / 1e6, 2),
-                "Price Change (%)": round(change_pct, 2)
+    # --- Generate mock stock data ---
+    def generate_mock_data():
+        mock_data = []
+        for symbol in nifty50_stocks:
+            open_price = random.uniform(100, 1500)
+            price = open_price * random.uniform(0.98, 1.05)
+            prev_close = open_price * random.uniform(0.97, 1.03)
+            volume = random.randint(400000, 1200000)
+            mock_data.append({
+                "symbol": symbol,
+                "price": round(price, 2),
+                "volume": volume,
+                "open_price": round(open_price, 2),
+                "prev_close": round(prev_close, 2)
             })
+        return mock_data
 
-    if filtered:
-        df_f = pd.DataFrame(filtered)
-        st.dataframe(df_f)
+    # --- Scanner configuration ---
+    MIN_VOLUME = 500000
+    PRICE_RANGE = (50, 1500)
+    PRICE_CHANGE_THRESHOLD = 0.015  # 1.5%
 
-        selected_sym = st.selectbox("📈 View chart for:", df_f["Symbol"])
-        df_chart = yf.download(selected_sym, period="1d", interval="5m", progress=False)
+    # --- Simulate technical conditions ---
+    def simulate_technical_conditions(stock):
+        rsi = random.randint(25, 75)
+        vwap = stock['open_price'] + random.uniform(-10, 10)
+        above_vwap = stock['price'] > vwap
+        breakout_15min = stock['price'] > stock['open_price'] * 1.015
+        return rsi, above_vwap, breakout_15min
 
-        st.subheader(f"Intraday Chart: {selected_sym}")
-        st.line_chart(df_chart["Close"])
+    # --- Scan logic ---
+    def scan_intraday_stocks(stocks):
+        shortlisted = []
+        for stock in stocks:
+            if PRICE_RANGE[0] <= stock['price'] <= PRICE_RANGE[1] and stock['volume'] >= MIN_VOLUME:
+                price_change = (stock['price'] - stock['prev_close']) / stock['prev_close']
+                if abs(price_change) >= PRICE_CHANGE_THRESHOLD:
+                    rsi, above_vwap, breakout_15min = simulate_technical_conditions(stock)
+
+                    if above_vwap and breakout_15min:
+                        shortlisted.append({
+                            "symbol": stock['symbol'],
+                            "price": stock['price'],
+                            "rsi": rsi,
+                            "above_vwap": above_vwap,
+                            "breakout": breakout_15min,
+                            "volume": stock['volume']
+                        })
+        return shortlisted
+
+    # --- Run scanner ---
+    mock_stocks = generate_mock_data()
+    result = scan_intraday_stocks(mock_stocks)
+
+    # --- Display results ---
+    if result:
+        df = pd.DataFrame(result)
+        st.success(f"{len(df)} stocks shortlisted for intraday trading")
+        st.dataframe(df)
     else:
-        st.info("No stocks matched the given criteria.")
+        st.warning("No suitable intraday stocks found based on current filters.")
