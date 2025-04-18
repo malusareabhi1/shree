@@ -87,73 +87,76 @@ elif selected == "Get Stock Data":
     to_date = st.date_input("To Date", datetime.today())
     interval = st.selectbox("Select Interval", ["1m", "5m", "15m", "30m", "1h", "1d", "1wk", "1mo"], index=5)
 
-   if st.button("Fetch Data"):
-    st.info(f"Fetching data for {stock.upper()} from {from_date} to {to_date} at interval {interval}")
-    try:
-        df = yf.download(stock, start=from_date, end=to_date, interval=interval)
-
-        if df.empty:
-            st.warning("No data returned. Check symbol or market hours for intraday intervals.")
-        else:
-            # Reset index to get 'Date' column
-            df.reset_index(inplace=True)
-
-            # Flatten multi-index columns if needed
-            if isinstance(df.columns, pd.MultiIndex):
-                df.columns = ['_'.join(col).strip() if col[1] else col[0] for col in df.columns]
-
-            # Show the raw column names to debug
-            st.write("📊 Columns:", df.columns.tolist())
-
-            # Rename columns for consistency
-            rename_map = {}
-            for col in df.columns:
-                if "Open" in col and "Adj" not in col: rename_map[col] = "Open"
-                if "High" in col: rename_map[col] = "High"
-                if "Low" in col: rename_map[col] = "Low"
-                if "Close" in col and "Adj" not in col: rename_map[col] = "Close"
-                if "Volume" in col: rename_map[col] = "Volume"
-            df.rename(columns=rename_map, inplace=True)
-
-            # Show dataframe
-            st.dataframe(df)
-
-            # CSV download
-            csv = df.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="📥 Download CSV",
-                data=csv,
-                file_name=f"{stock.upper()}_{interval}_data.csv",
-                mime="text/csv"
-            )
-
-            # Plot candlestick chart
-            if {"Date", "Open", "High", "Low", "Close"}.issubset(df.columns):
-                fig = go.Figure(data=[
-                    go.Candlestick(
-                        x=df["Date"],
-                        open=df["Open"],
-                        high=df["High"],
-                        low=df["Low"],
-                        close=df["Close"],
-                        increasing_line_color="green",
-                        decreasing_line_color="red"
-                    )
-                ])
-                fig.update_layout(
-                    title=f"{stock.upper()} Candlestick Chart",
-                    xaxis_title="Date",
-                    yaxis_title="Price",
-                    xaxis_rangeslider_visible=False,
-                    template="plotly_dark"
-                )
-                st.plotly_chart(fig, use_container_width=True)
+     if st.button("Fetch Data"):
+        st.info(f"Fetching data for {stock.upper()} from {from_date} to {to_date} at interval {interval}")
+        try:
+            df = yf.download(stock, start=from_date, end=to_date, interval=interval)
+    
+            if df.empty:
+                st.warning("No data returned. Check symbol or market hours for intraday intervals.")
             else:
-                st.warning("Could not find required columns to generate candlestick chart.")
+                # Reset index to get 'Date' column
+                df.reset_index(inplace=True)
+    
+                # Flatten multi-index columns if needed
+                if isinstance(df.columns, pd.MultiIndex):
+                    df.columns = ['_'.join(col).strip() if col[1] else col[0] for col in df.columns]
+    
+                # Show the raw column names to debug
+                st.write("📊 Columns:", df.columns.tolist())
+    
+                # Rename columns for consistency
+                rename_map = {}
+                for col in df.columns:
+                    if "Open" in col and "Adj" not in col: rename_map[col] = "Open"
+                    if "High" in col: rename_map[col] = "High"
+                    if "Low" in col: rename_map[col] = "Low"
+                    if "Close" in col and "Adj" not in col: rename_map[col] = "Close"
+                    if "Volume" in col: rename_map[col] = "Volume"
+                df.rename(columns=rename_map, inplace=True)
+    
+                # Show dataframe
+                st.dataframe(df)
+    
+                # CSV download
+                csv = df.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="📥 Download CSV",
+                    data=csv,
+                    file_name=f"{stock.upper()}_{interval}_data.csv",
+                    mime="text/csv"
+                )
+    
+                # Plot candlestick chart
+                if {"Date", "Open", "High", "Low", "Close"}.issubset(df.columns):
+                    fig = go.Figure(data=[
+                        go.Candlestick(
+                            x=df["Date"],
+                            open=df["Open"],
+                            high=df["High"],
+                            low=df["Low"],
+                            close=df["Close"],
+                            increasing_line_color="green",
+                            decreasing_line_color="red"
+                        )
+                    ])
+                    fig.update_layout(
+                        title=f"{stock.upper()} Candlestick Chart",
+                        xaxis_title="Date",
+                        yaxis_title="Price",
+                        xaxis_rangeslider_visible=False,
+                        template="plotly_dark"
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.warning("Could not find required columns to generate candlestick chart.")
+    
+        except Exception as e:
+            st.error(f"❌ Error fetching data: {e}")
+        
+    
 
-    except Exception as e:
-        st.error(f"❌ Error fetching data: {e}")
-
+  
     
 
 
