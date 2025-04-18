@@ -595,8 +595,8 @@ elif selected == "Intraday Stock Finder":
 elif selected == "Alpha Vantage API":
     st.subheader("📈 Stock Data from Alpha Vantage")
 
-    # Input for API key and symbol
-    api_key = st.text_input("🔑 Enter your Alpha Vantage API Key")
+    # Input for API key and symbol 
+    api_key = st.text_input("🔑 Enter your Alpha Vantage API Key- 10MY6CQY1UCYDAOB ")
     symbol = st.text_input("📌 Enter Stock Symbol (e.g., AAPL, MSFT, RELIANCE.BSE)")
 
     if st.button("Fetch Data") and api_key and symbol:
