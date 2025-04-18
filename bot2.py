@@ -222,6 +222,7 @@ elif selected == "Test Strategy":
                 increasing_line_color='green',
                 decreasing_line_color='red',
             )])
+            
 
             # Mark BUY and SELL signals on the chart
             buy_signals = df[df['Signal'] == 'BUY']
@@ -255,6 +256,7 @@ elif selected == "Test Strategy":
 
             # Display the interactive candlestick chart
             st.plotly_chart(fig)
+            
 elif selected == "Trade Log":
     st.title("📘 Trade Log")
 
