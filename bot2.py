@@ -6,6 +6,7 @@ import yfinance as yf
 import plotly.express as px
 import plotly.graph_objects as go
 #from utils import generate_mock_data
+import random
 
 # Page configuration
 st.set_page_config(layout="wide", page_title="Trade Strategy Dashboard")
@@ -479,7 +480,7 @@ elif selected == "Swing Trade Strategy":
 
 
 elif selected == "Intraday Stock Finder":
-    import random
+    
 
     st.subheader("📊 Intraday Stock Finder (Simulated on NIFTY 50)")
 
