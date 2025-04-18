@@ -87,7 +87,7 @@ elif selected == "Get Stock Data":
     to_date = st.date_input("To Date", datetime.today())
     interval = st.selectbox("Select Interval", ["1m", "5m", "15m", "30m", "1h", "1d", "1wk", "1mo"], index=5)
 
-     if st.button("Fetch Data"):
+    if st.button("Fetch Data"):
         st.info(f"Fetching data for {stock.upper()} from {from_date} to {to_date} at interval {interval}")
         try:
             df = yf.download(stock, start=from_date, end=to_date, interval=interval)
