@@ -461,47 +461,54 @@ elif selected == "Swing Trade Strategy":
         fig.add_trace(go.Scatter(x=sells.index, y=sells['Close'], mode='markers', marker=dict(symbol='triangle-down', color='red', size=12), name='SELL'))
         fig.update_layout(title="Swing Trade Chart", xaxis_rangeslider_visible=False, template="plotly_dark")
         st.plotly_chart(fig, use_container_width=True)
-if selected == "Intraday Stock Finder":
+        
+elif selected == "Intraday Stock Finder":
     st.subheader("🔍 Intraday Stock Finder")
-    
-    # User input for filtering stocks
-    volume_threshold = st.number_input("Minimum Volume (in millions)", min_value=1, max_value=100, value=10)
-    price_change_threshold = st.number_input("Minimum Price Change (%)", min_value=1, max_value=50, value=2)
-    
-    # Define the Nifty 50 stock symbols (example)
-    nifty_50_symbols = [
-        "RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS", "ICICIBANK.NS", "HDFC.NS", "LT.NS", "SBIN.NS", 
-        "KOTAKBANK.NS", "AXISBANK.NS"
+
+    # User inputs (thresholds)
+    vol_mil = st.number_input("Min Avg Volume (millions)", min_value=1, max_value=100, value=10)
+    pct_move = st.number_input("Min Price Change (%)", min_value=1.0, max_value=50.0, value=2.0)
+
+    symbols = [
+        "RELIANCE.NS","TCS.NS","INFY.NS","HDFCBANK.NS","ICICIBANK.NS",
+        "HDFC.NS","LT.NS","SBIN.NS","KOTAKBANK.NS","AXISBANK.NS"
     ]
-    
-    # Fetch stock data
-    filtered_stocks = []
-    
-    for symbol in nifty_50_symbols:
-        stock_data = yf.download(symbol, period="1d", interval="5m")
-        
-        # Calculate Price Change % for the day
-        price_change = (stock_data['Close'].iloc[-1] - stock_data['Open'].iloc[0]) / stock_data['Open'].iloc[0] * 100
-        
-        # Check if the stock meets the filters
-        if stock_data['Volume'].mean() >= volume_threshold * 1_000_000 and abs(price_change) >= price_change_threshold:
-            filtered_stocks.append({
-                'Symbol': symbol,
-                'Price Change (%)': price_change,
-                'Avg Volume': stock_data['Volume'].mean() / 1_000_000
+
+    filtered = []
+    for sym in symbols:
+        # 1) Fetch 5‑min intraday data
+        df5 = yf.download(sym, period="1d", interval="5m")
+        if df5.empty:
+            continue
+
+        # 2) Flatten multi‐index if needed (rare for these symbols)
+        if isinstance(df5.columns, pd.MultiIndex):
+            df5.columns = ["_".join(col).strip() for col in df5.columns]
+
+        # 3) Compute scalars
+        avg_vol  = df5["Volume"].mean()                       # scalar
+        open_pr  = df5["Open"].iloc[0]                        # scalar
+        close_pr = df5["Close"].iloc[-1]                      # scalar
+        change_pct = (close_pr - open_pr) / open_pr * 100     # scalar
+
+        # 4) Apply thresholds
+        if (avg_vol >= vol_mil * 1_000_000) and (abs(change_pct) >= pct_move):
+            filtered.append({
+                "Symbol": sym,
+                "Avg Volume (M)": round(avg_vol/1e6, 2),
+                "Price Change (%)": round(change_pct, 2)
             })
-    
-    # Show the filtered stocks as a DataFrame
-    if filtered_stocks:
-        filtered_df = pd.DataFrame(filtered_stocks)
-        st.dataframe(filtered_df)
-        
-        # Show charts for selected stock
-        selected_stock = st.selectbox("Select Stock for Chart", filtered_df['Symbol'])
-        stock_data = yf.download(selected_stock, period="1d", interval="5m")
-        
-        st.subheader(f"📉 {selected_stock} Intraday Chart")
-        st.line_chart(stock_data['Close'])
-        
+
+    # Show results
+    if filtered:
+        df_f = pd.DataFrame(filtered)
+        st.dataframe(df_f)
+
+        # Let user pick one to see its chart
+        choice = st.selectbox("Chart which symbol?", df_f["Symbol"])
+        df_chart = yf.download(choice, period="1d", interval="5m")
+
+        st.subheader(f"📉 {choice} 5‑Min Intraday Close")
+        st.line_chart(df_chart["Close"])
     else:
-        st.write("No stocks found with the given filters.")
+        st.write("No stocks met your criteria.")
