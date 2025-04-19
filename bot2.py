@@ -22,7 +22,7 @@ with st.sidebar:
     menu_title="ALGO BOT Trade ",
     options=[
         "Dashboard", "Get Stock Data", "Test Strategy", "Swing Trade Strategy",
-        "Intraday Stock Finder", "Trade Log", "Account Info", "Candle Chart", "Strategy Detail", "Project Detail", "KITE API", "API","Alpha Vantage API","PaperTrade"
+        "Intraday Stock Finder", "Trade Log", "Account Info", "Candle Chart", "Strategy Detail", "Project Detail", "KITE API", "API","Alpha Vantage API","Live Algo Tradinge"
     ],
     icons=[
         "bar-chart", "search", "cpu", "arrow-repeat",
@@ -925,4 +925,70 @@ elif selected == "PaperTrade":
 
     else:
         st.info("📌 Please upload a CSV file to begin the simulation.")
+
+elif selected == "Live Algo Trading":
+    st.title("🤖 Live Algo Trading (Paper/Real Mode)")
+
+    # Select broker and mode
+    broker = st.selectbox("Choose Broker", ["Zerodha", "Fyers"], index=0)
+    mode = st.radio("Trading Mode", ["Paper Trading", "Live Trading"], horizontal=True)
+
+    # Login Inputs
+    if broker == "Zerodha":
+        api_key = st.text_input("🔐 Zerodha API Key", type="password")
+        access_token = st.text_input("🪪 Access Token", type="password")
+
+    elif broker == "Fyers":
+        app_id = st.text_input("🔐 Fyers App ID", type="password")
+        access_token = st.text_input("🪪 Fyers Access Token", type="password")
+
+    symbol = st.text_input("📈 Enter Stock Symbol (e.g., NSE:INFY)")
+    capital = st.number_input("💰 Capital Allocation", value=50000)
+    qty = st.number_input("📦 Quantity per trade", value=10)
+
+    if st.button("🚀 Start Algo Bot"):
+        st.success("✅ Algo Bot Started...")
+
+        # Simulated loop (use real-time feed here later)
+        placeholder = st.empty()
+        balance = capital
+        position = 0
+        trade_log = []
+
+        # Sample streaming data — replace with WebSocket/API
+        for i in range(50):  # Simulate 50 ticks
+            # Simulate price
+            import random
+            price = 100 + random.uniform(-3, 3)
+
+            # Strategy: Buy if price drops 2%, sell if it rises 2%
+            action = None
+            if position == 0 and random.random() < 0.3:
+                action = "BUY"
+                position = qty
+                balance -= qty * price
+            elif position > 0 and random.random() < 0.3:
+                action = "SELL"
+                position = 0
+                balance += qty * price
+
+            if action:
+                trade_log.append({
+                    "Price": round(price, 2),
+                    "Action": action,
+                    "Qty": qty,
+                    "Balance": round(balance, 2)
+                })
+
+            # Display dashboard
+            with placeholder.container():
+                st.metric("📊 Current Price", f"₹{round(price, 2)}")
+                st.metric("💼 Balance", f"₹{round(balance, 2)}")
+                st.metric("📈 Position", f"{position} shares")
+                st.dataframe(pd.DataFrame(trade_log[-5:]))  # show last 5 trades
+
+            time.sleep(1)
+
+        st.success("✅ Live simulation complete!")
+
 
