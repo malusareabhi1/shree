@@ -22,7 +22,7 @@ with st.sidebar:
     menu_title="ALGO BOT Trade ",
     options=[
         "Dashboard", "Get Stock Data", "Test Strategy", "Swing Trade Strategy",
-        "Intraday Stock Finder", "Trade Log", "Account Info", "Candle Chart", "Strategy Detail", "Project Detail", "KITE API", "API","Alpha Vantage API","Live Algo Tradinge"
+        "Intraday Stock Finder", "Trade Log", "Account Info", "Candle Chart", "Strategy Detail", "Project Detail", "KITE API", "API","Alpha Vantage API","Live Algo Trading"
     ],
     icons=[
         "bar-chart", "search", "cpu", "arrow-repeat",
