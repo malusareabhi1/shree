@@ -9,6 +9,7 @@ import plotly.graph_objects as go
 import random
 import requests
 from kiteconnect import KiteConnect
+import time
 
 # Global kite object placeholder
 if 'kite' not in st.session_state:
