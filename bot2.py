@@ -133,6 +133,19 @@ if selected == "Dashboard":
 
     else:
         st.warning("Please login to Kite Connect first.")
+        import streamlit.components.v1 as components
+
+        # Embed TradingView Ticker Tape widget
+        ticker_embed_code = """
+        <iframe src="https://www.tradingview.com/widgetembed/?frameElementId=tradingview_e9ab9&symbol=NSE%3ANIFTY%2CNSE%3ABANKNIFTY" 
+        width="100%" height="100" style="border: none;"></iframe>
+        """
+
+# Display the ticker in the main area
+st.subheader("📈 Live Market Ticker (Nifty & BankNifty)")
+components.html(ticker_embed_code, height=100)
+
+
   
         
 elif selected == "API":
