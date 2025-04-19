@@ -840,3 +840,76 @@ elif selected == "KITE API":
             st.error(f"Error generating login URL: {e}")
     else:
         st.info("Please enter your API Key and Secret to continue.")
+
+elif selected == "PaperTrade":
+
+    st.subheader("📊 Backtest + Paper Trading Simulator")
+
+    st.markdown("Upload your stock data with `Date`, `Open`, `High`, `Low`, `Close`, and `Signal` columns.")
+    
+    uploaded_file = st.file_uploader("📁 Upload CSV File", type=["csv"])
+
+    if uploaded_file:
+        try:
+            # Load and preprocess data
+            df = pd.read_csv(uploaded_file, parse_dates=["Date"])
+            df.set_index("Date", inplace=True)
+
+            st.success("✅ File successfully uploaded and processed!")
+            st.dataframe(df.head())
+
+            # Initial balance input
+            initial_balance = st.number_input("💰 Initial Capital (INR)", value=100000, step=1000)
+
+            # Backtest logic
+            def backtest_paper_trade(df, initial_balance=100000):
+                balance = initial_balance
+                position = 0
+                trade_log = []
+
+                for i in range(1, len(df)):
+                    price = df['Close'].iloc[i]
+                    signal = df['Signal'].iloc[i]
+                    date = df.index[i]
+
+                    if signal == 1 and position == 0:
+                        shares = balance // price
+                        cost = shares * price
+                        position = shares
+                        balance -= cost
+                        trade_log.append({
+                            'Date': date, 'Action': 'BUY', 'Shares': shares,
+                            'Price': price, 'Balance': balance
+                        })
+
+                    elif signal == -1 and position > 0:
+                        revenue = position * price
+                        balance += revenue
+                        trade_log.append({
+                            'Date': date, 'Action': 'SELL', 'Shares': position,
+                            'Price': price, 'Balance': balance
+                        })
+                        position = 0
+
+                final_value = balance + (position * df['Close'].iloc[-1])
+                returns = (final_value - initial_balance) / initial_balance * 100
+
+                return pd.DataFrame(trade_log), final_value, returns
+
+            # Run simulation
+            trade_log, final_value, returns = backtest_paper_trade(df, initial_balance)
+
+            # Display results
+            st.subheader("📘 Trade Log")
+            st.dataframe(trade_log)
+
+            st.subheader("📈 Summary")
+            st.write(f"**Final Portfolio Value**: ₹{final_value:,.2f}")
+            st.write(f"**Total Return**: {returns:.2f}%")
+
+        except Exception as e:
+            st.error(f"❌ Error processing file: {e}")
+
+    else:
+        st.info("📌 Please upload a CSV file to begin the simulation.")
+
