@@ -410,7 +410,7 @@ elif selected == "Trade Log":
         else:
             st.warning("No 'PnL' column found in CSV.")
     else:
-    st.info("Upload a CSV file to view trade log.")
+        st.info("Upload a CSV file to view trade log.")
    
        
       
