@@ -20,7 +20,7 @@ tradingview_chart = """
 components.html(tradingview_chart, height=500)
 
 symbol_map = {
-    "NIFTY 50": "^NSEI",
+    "NIFTY 50": "NSE:NIFTY",
     "BANK NIFTY": "NSE:BANKNIFTY",
     "SENSEX (BSE)": "BSE:SENSEX",
     "RELIANCE": "NSE:RELIANCE"
