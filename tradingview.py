@@ -38,4 +38,4 @@ tradingview_embed_code = """
 """
 
 # Display TradingView chart
-components.html(tradingview_embed_code, height=500)
+components.html(tradingview_embed_code, height=900,width=900)
