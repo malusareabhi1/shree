@@ -27,7 +27,8 @@ symbol_map = {
 }
 
 selected_symbol = st.selectbox("📌 Select Market/Stock", options=list(symbol_map.keys()))
-chart_url = f"https://www.tradingview.com/chart/?symbol={symbol_map[selected_symbol]}"
+#chart_url = f"https://www.tradingview.com/chart/?symbol={symbol_map[selected_symbol]}"
+chart_url = f"https://www.tradingview.com/widgetembed/?frameElementId=tradingview_live&symbol=={symbol_map[selected_symbol]}"
 
 components.html(f"<iframe src='{chart_url}' width='100%' height='500' frameborder='0'></iframe>", height=500)
 
