@@ -1,3 +1,18 @@
+import streamlit as st
+import streamlit.components.v1 as components
+
+st.subheader("📈 Live NIFTY 50 Chart")
+
+tradingview_chart = """
+<!-- TradingView Widget BEGIN -->
+<div class="tradingview-widget-container">
+  <iframe src="https://www.tradingview.com/chart/?symbol=NSE:NIFTY" width="100%" height="500" frameborder="0" allowfullscreen></iframe>
+</div>
+<!-- TradingView Widget END -->
+"""
+
+components.html(tradingview_chart, height=500)
+
 symbol_map = {
     "NIFTY 50": "NSE:NIFTY",
     "BANK NIFTY": "NSE:BANKNIFTY",
