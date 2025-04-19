@@ -65,7 +65,7 @@ if selected == "Dashboard":
     #%2CNSE%3ABANKNIFTY
      # Display the ticker in the main area
     st.subheader("📈 Live Market Ticker (Nifty & BankNifty)")
-    components.html(ticker_embed_code, height=500)
+    components.html(ticker_embed_code, height=900)
 
         
 
