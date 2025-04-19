@@ -197,6 +197,14 @@ elif selected == "Get Stock Data":
             else:
                 # Reset index to get 'Date' column
                 df.reset_index(inplace=True)
+                # Ensure proper column names and date
+                if 'Datetime' in df.columns:
+                    df.rename(columns={'Datetime': 'Date'}, inplace=True)
+                elif 'Date' not in df.columns:
+                    df.insert(0, 'Date', df.index)  # fallback
+                
+                # Rename OHLCV columns to match expected format
+                df.rename(columns=lambda x: x.strip().capitalize(), inplace=True)  # e.g., "open" -> "Open"
     
                 # Flatten multi-index columns if needed
                 if isinstance(df.columns, pd.MultiIndex):
