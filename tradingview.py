@@ -1,48 +1,41 @@
 import streamlit as st
-import pandas as pd
-import plotly.graph_objs as go
-import yfinance as yf
-from datetime import datetime, timedelta
+import streamlit.components.v1 as components
 
-# --- Streamlit App Layout ---
-st.set_page_config(layout="wide")
-st.title("📅 NIFTY50 Candlestick Viewer - Daily Chart")
+# Example: Embedding TradingView widget for NIFTY 50 chart
+st.subheader("📊 TradingView NIFTY 50 Chart")
 
-nifty_50_stocks = {
-    'Reliance': 'RELIANCE.NS', 'TCS': 'TCS.NS', 'Infosys': 'INFY.NS', 'HDFC Bank': 'HDFCBANK.NS',
-    'ICICI Bank': 'ICICIBANK.NS', 'Axis Bank': 'AXISBANK.NS', 'Kotak Bank': 'KOTAKBANK.NS',
-    'ITC': 'ITC.NS', 'LT': 'LT.NS', 'SBIN': 'SBIN.NS'
+# TradingView Embed Code (replace with the generated embed code from TradingView)
+tradingview_embed_code = """
+<!-- TradingView Widget BEGIN -->
+<div class="tradingview-widget-container" style="height:100%;width:100%">
+  <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
+  <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text">Track all markets on TradingView</span></a></div>
+  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+  {
+  "autosize": true,
+  "symbol": "NASDAQ:AAPL",
+  "interval": "D",
+  "timezone": "Etc/UTC",
+  "theme": "light",
+  "style": "1",
+  "locale": "en",
+  "allow_symbol_change": true,
+  "watchlist": [
+    "NSEIX:NIFTY1!",
+    "NSEIX:BANKNIFTY1!",
+    "NSE:BSE"
+  ],
+  "studies": [
+    "STD;Bollinger_Bands",
+    "STD;MACD",
+    "STD;RSI"
+  ],
+  "support_host": "https://www.tradingview.com"
 }
+  </script>
+</div>
+<!-- TradingView Widget END -->
+"""
 
-selected_stock = st.selectbox("📊 Select a NIFTY 50 Stock", options=list(nifty_50_stocks.keys()))
-
-if selected_stock:
-    symbol = nifty_50_stocks[selected_stock]
-    end_date = datetime.today()
-    start_date = end_date - timedelta(days=30)
-
-    df = yf.download(symbol, start=start_date, end=end_date, interval='1d')
-    df.dropna(inplace=True)
-
-    st.subheader(f"📈 Daily Candlestick Chart for {selected_stock} ({symbol})")
-
-    fig = go.Figure(data=[go.Candlestick(
-        x=df.index,
-        open=df['Open'],
-        high=df['High'],
-        low=df['Low'],
-        close=df['Close'],
-        name='Daily Candles'
-    )])
-
-    fig.update_layout(
-        xaxis_title='Date',
-        yaxis_title='Price (INR)',
-        xaxis_rangeslider_visible=False,
-        height=600
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
-
-    st.subheader("📋 Raw Data")
-    st.dataframe(df.reset_index())
+# Display TradingView chart
+components.html(tradingview_embed_code, height=500)
