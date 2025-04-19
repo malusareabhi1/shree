@@ -991,5 +991,15 @@ elif selected == "Live Algo Trading":
             time.sleep(1)
 
         st.success("✅ Live simulation complete!")
+        # 🔽 Export Trade Log as CSV
+        if trade_log:
+            df_trades = pd.DataFrame(trade_log)
+            csv_data = df_trades.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Download Trade Log",
+                data=csv_data,
+                file_name=f"{symbol.replace(':', '_')}_trade_log.csv",
+                mime='text/csv'
+            )
 
 
