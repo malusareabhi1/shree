@@ -461,58 +461,58 @@ elif selected == "Strategy Detail":
     - Buy when the price crosses above the moving average and volatility is low.
     - Sell when the price falls below the moving average and volatility is high.
     ✅ Doctor Algo-BOT Strategy – English Version
-1. Chart Setup
-Use Bollinger Bands (20 SMA, 2 SD) on the chart.
-
-Use Candlestick pattern, not line or Heikin-Ashi.
-
-Timeframe: 5-minute chart.
-
-Only take trades after 9:30 AM.
-
-2. Center Line (20 SMA) Crossing Logic
-The middle line of the Bollinger Band (20 SMA) should be crossed from below to above by Nifty or Bank Nifty.
-
-The candle that crosses the 20 SMA must also close above it.
-
-The next candle after the crossover should also close above the 20 SMA, without touching it.
-
-This second candle is marked as the "Reference Candle".
-
-The candle before the Reference Candle is called the "Pre-Reference Candle".
-
-3. Breakout and Trade Execution
-Identify:
-
-High of the Pre-Reference Candle
-
-Close of the Reference Candle
-
-Take the maximum of these two values = breakout_level
-
-Trade Trigger: If a future 5-minute candle crosses breakout_level from below, execute the trade (Call Option Buy).
-
-Stop Loss (SL): 10% below the entry price.
-
-4. Implied Volatility (IV) Check
-At the time of trade, Nifty/Bank Nifty IV should be ≥ 16.
-
-Only then the trade is valid.
-
-5. Option Selection
-On breakout, buy the nearest In-The-Money (ITM) Call Option for Nifty/Bank Nifty.
-
-6. Risk Management – SL and Trailing Logic
-
-Profit Reached	Trailing Stop Loss Moves To
-5%	Entry Price (No-Loss Zone)
-10%	Trail SL to 4% profit
-15%	Trail SL to 11% profit
-20%	Book full profit
-7. Time-Based Exit
-If none of SL or Target is hit within 10 minutes of trade initiation,
-
-Then exit the trade immediately, regardless of PnL.
+    1. Chart Setup
+    Use Bollinger Bands (20 SMA, 2 SD) on the chart.
+    
+    Use Candlestick pattern, not line or Heikin-Ashi.
+    
+    Timeframe: 5-minute chart.
+    
+    Only take trades after 9:30 AM.
+    
+    2. Center Line (20 SMA) Crossing Logic
+    The middle line of the Bollinger Band (20 SMA) should be crossed from below to above by Nifty or Bank Nifty.
+    
+    The candle that crosses the 20 SMA must also close above it.
+    
+    The next candle after the crossover should also close above the 20 SMA, without touching it.
+    
+    This second candle is marked as the "Reference Candle".
+    
+    The candle before the Reference Candle is called the "Pre-Reference Candle".
+    
+    3. Breakout and Trade Execution
+    Identify:
+    
+    High of the Pre-Reference Candle
+    
+    Close of the Reference Candle
+    
+    Take the maximum of these two values = breakout_level
+    
+    Trade Trigger: If a future 5-minute candle crosses breakout_level from below, execute the trade (Call Option Buy).
+    
+    Stop Loss (SL): 10% below the entry price.
+    
+    4. Implied Volatility (IV) Check
+    At the time of trade, Nifty/Bank Nifty IV should be ≥ 16.
+    
+    Only then the trade is valid.
+    
+    5. Option Selection
+    On breakout, buy the nearest In-The-Money (ITM) Call Option for Nifty/Bank Nifty.
+    
+    6. Risk Management – SL and Trailing Logic
+    
+    Profit Reached	Trailing Stop Loss Moves To
+    5%	Entry Price (No-Loss Zone)
+    10%	Trail SL to 4% profit
+    15%	Trail SL to 11% profit
+    20%	Book full profit
+    7. Time-Based Exit
+    If none of SL or Target is hit within 10 minutes of trade initiation,
+    
+    Then exit the trade immediately, regardless of PnL.
 
 
     """)
