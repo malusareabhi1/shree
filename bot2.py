@@ -257,7 +257,10 @@ elif selected == "Get Stock Data":
                     )
                     st.plotly_chart(fig, use_container_width=True)
                 else:
-                    st.warning("Could not find required columns to generate candlestick chart.")
+                      st.warning("Could not find required columns to generate candlestick chart.")
+                      # ✅ Add line chart for Close price
+                      st.subheader("📈 Line Chart - Close Price")
+                      st.line_chart(df.set_index("Date")["Close"])
     
         except Exception as e:
             st.error(f"❌ Error fetching data: {e}")
