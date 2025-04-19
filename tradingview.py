@@ -5,7 +5,7 @@ import streamlit.components.v1 as components
 st.subheader("📊 TradingView NIFTY 50 Chart")
 
 # TradingView Embed Code (replace with the generated embed code from TradingView)
-tradingview_embed_code = """
+tradingview_embed_code = "
 <!-- TradingView Widget BEGIN -->
 <div class="tradingview-widget-container" style="height:100%;width:100%">
   <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
@@ -35,7 +35,7 @@ tradingview_embed_code = """
   </script>
 </div>
 <!-- TradingView Widget END -->
-"""
+"
 
 # Display TradingView chart
 components.html(tradingview_embed_code, height=900,width=900)
