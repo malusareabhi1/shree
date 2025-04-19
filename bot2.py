@@ -372,6 +372,19 @@ elif selected == "Test Strategy":
 
             # Display the interactive candlestick chart
             st.plotly_chart(fig)
+            # Convert 'BUY'/'SELL' signals to numeric form for backtesting compatibility
+            df['Signal_Code'] = df['Signal'].map({'BUY': 1, 'SELL': -1})
+            
+            # Save the DataFrame with signal for backtest/papertrade usage
+            csv_with_signal = df[["Date", "Open", "High", "Low", "Close", "Signal_Code"]]
+            csv_data = csv_with_signal.rename(columns={"Signal_Code": "Signal"}).to_csv(index=False).encode("utf-8")
+            
+            st.download_button(
+                label="📥 Download CSV with Signals",
+                data=csv_data,
+                file_name="signal_output.csv",
+                mime="text/csv"
+            )
             
 elif selected == "Trade Log":
     st.title("📘 Trade Log")
