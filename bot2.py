@@ -401,9 +401,10 @@ elif selected == "Trade Log":
             file_name='trade_log.csv',
             mime='text/csv'
         )
+        """
     else:
-        st.info("No trade log found. Run 'Test Strategy' first.")"""
-
+        st.info("No trade log found. Run 'Test Strategy' first.")
+      
 
 elif selected == "Account Info":
     st.title("💼 Account Information")
