@@ -56,16 +56,7 @@ st.markdown("""
 
 if selected == "Dashboard":
     st.subheader("📊 Dashboard - Zerodha Account Overview")
-    import streamlit.components.v1 as components
-    # Embed TradingView Ticker Tape widget
-    ticker_embed_code = """
-    <iframe src="https://www.tradingview.com/widgetembed/?frameElementId=tradingview_e9ab9&symbol=NSE%3ANIFTY" 
-    width="100%" height="100%" style="border: none;"></iframe>
-   """
-    #%2CNSE%3ABANKNIFTY
-     # Display the ticker in the main area
-    st.subheader("📈 Live Market Ticker (Nifty & BankNifty)")
-    components.html(ticker_embed_code, height=900)
+    
 
         
 
