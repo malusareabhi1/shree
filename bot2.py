@@ -376,7 +376,7 @@ elif selected == "Trade Log":
         
         st.subheader("Trade Log Table")
         st.dataframe(trade_log)
-
+     """
         # 📉 PnL Over Time Chart
         st.subheader("PnL Over Time")
         #pnl_chart = px.line(trade_log, x="Timestamp", y="PnL", title="PnL Over Time")
@@ -402,7 +402,7 @@ elif selected == "Trade Log":
             mime='text/csv'
         )
     else:
-        st.info("No trade log found. Run 'Test Strategy' first.")
+        st.info("No trade log found. Run 'Test Strategy' first.")"""
 
 
 elif selected == "Account Info":
