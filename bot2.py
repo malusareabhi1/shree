@@ -1091,7 +1091,7 @@ def close_trade(status):
 st.title("📊 Doctor Trade Strategy")
 
 # Sidebar inputs
-uploaded_file = st.sidebar.file_uploader("Upload OHLCV CSV File", type=["csv"])
+uploaded_file = st.file_uploader("Upload OHLCV CSV File", type=["csv"])
 
 # Handle CSV file upload
 if uploaded_file is not None:
