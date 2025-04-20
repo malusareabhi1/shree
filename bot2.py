@@ -1332,7 +1332,62 @@ elif selected == "Strategy2.0 Detail":
         9:30 AM च्या आधी किंवा 3:00 PM नंतर ट्रेड सुरू होणार नाही.
         
         या स्टेप्समध्ये, प्रत्येक ट्रेडमध्ये तुम्ही सुरक्षितपणे आणि परिणामकारकपणे ट्रेड घेण्याचा प्रयत्न करू शकता. आपला Doctor Trade Strategy याप्रमाणे अधिक मजबूत आणि प्रॉफिटेबल होईल.
-            """)
+
+        ✅ Development Checklist:
+        डेटा सोर्सिंग:
+        
+        5-minute candles for Nifty/Bank Nifty (live + historical).
+        
+        Bollinger Bands (20 SMA basis) calculation.
+        
+        IV value from NSE option chain or API.
+        
+        Reference Candle Logic:
+        
+        SMA cross check
+        
+        Close above 20 SMA without touching
+        
+        Identify reference and pre-reference candles
+        
+        Trigger check (next candle breaking pre-reference high/close)
+        
+        Trade Execution (Paper Trading / Live via Zerodha/Fyers API):
+        
+        ATM Call Option Buy
+        
+        SL/Target apply
+        
+        Trailing SL updates
+        
+        Time-based exit after 10 min if no SL/TP
+        
+        Trade Management Logic:
+        
+        Risk Management Module (as per Step 12)
+        
+        Trail logic:
+        
+        4% → No loss
+        
+        10% → SL @ 4%
+        
+        15% → SL @ 11%
+        
+        20% → Book full
+        
+        Streamlit Dashboard UI:
+        
+        Left Sidebar: Stock selection, Time range, Capital, Risk %, etc.
+        
+        Right Main: Chart view (candles + BB + markers), Live log, Trade Summary
+        
+        Telegram Alerts Integration:
+        
+        Entry/Exit alerts with levels
+        
+        IV alert (if below 16%, don’t trade)
+                    """)
 
 
 
