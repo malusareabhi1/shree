@@ -15,28 +15,24 @@ def fetch_data(stock_symbol, start_date, end_date):
 
 # Step 2: Check for Crossing of the Center Line (20 SMA)
 def check_crossing(data):
-    # Ensure 'Close' column exists
-    if 'Close' not in data.columns:
-        raise ValueError("'Close' column not found in data.")
-    
     # Calculate 20-period SMA
     data['SMA_20'] = data['Close'].rolling(window=20).mean()
 
-    # Debugging output to check if 'SMA_20' column exists and to inspect the data
+    # Print columns and inspect data for debugging
     print("Columns after SMA calculation:", data.columns)
-    print(data.head())  # Print the first few rows for inspection
+    print(data.head())  # Print first few rows to inspect 'SMA_20'
+
+    # Check if 'SMA_20' exists
+    if 'SMA_20' not in data.columns:
+        raise KeyError("'SMA_20' column not found after calculation.")
 
     # Drop rows where 'SMA_20' is NaN (due to rolling window)
-    try:
-        data = data.dropna(subset=['SMA_20'])
-    except KeyError as e:
-        print("Error while dropping NaN values:", e)
-        print("Columns available:", data.columns)
-        raise
+    data = data.dropna(subset=['SMA_20'])
 
     # Perform the crossing check
     data['crossed'] = np.where(data['Close'] > data['SMA_20'], 1, 0)
     return data
+
 
 
 # Step 3: Add Implied Volatility check
