@@ -5,121 +5,117 @@ import numpy as np
 import datetime
 import plotly.graph_objects as go
 
-# Define functions for the strategy logic
-
-# Step 1: Fetch historical data for Nifty
+# Step 1: Fetch historical data
 def fetch_data(stock_symbol, start_date, end_date):
-    data = yf.download(stock_symbol, start=start_date, end=end_date, interval="5m")
-    data = data.dropna()  # Drop missing values to ensure clean data
-    return data
+    try:
+        data = yf.download(stock_symbol, start=start_date, end=end_date, interval="5m", progress=False)
+        if data.empty:
+            st.warning("⚠️ No data fetched. Please check your date range or symbol.")
+            return pd.DataFrame()
+        data.dropna(inplace=True)
+        return data
+    except Exception as e:
+        st.error(f"Error fetching data: {e}")
+        return pd.DataFrame()
 
-# Step 2: Check for Crossing of the Center Line (20 SMA)
+# Step 2: Calculate SMA and detect crossover
 def check_crossing(data):
-    # Debug: Show available columns
-    print("\n✅ Available Columns:", data.columns.tolist())
-
-    # Check if 'Close' column exists
     if 'Close' not in data.columns:
-        raise KeyError("❌ 'Close' column is missing in the DataFrame!")
-
-    # Check if 'Close' column has any valid (non-NaN) data
+        raise KeyError("❌ 'Close' column is missing in the data.")
     if data['Close'].dropna().empty:
-        raise ValueError("❌ 'Close' column has no valid data (all values are NaN)!")
+        raise ValueError("❌ 'Close' column has all NaN values.")
 
-    # Calculate 20-period SMA
     data['SMA_20'] = data['Close'].rolling(window=20).mean()
-
-    # Check if SMA_20 column was created
-    if 'SMA_20' not in data.columns or data['SMA_20'].dropna().empty:
-        raise ValueError("❌ 'SMA_20' column was not properly calculated (all NaNs)!")
-
-    # Drop rows where SMA is NaN
-    data = data.dropna(subset=['SMA_20'])
-
-    # Add crossing logic
+    if data['SMA_20'].dropna().empty:
+        raise ValueError("❌ SMA_20 could not be calculated (all NaN).")
+    
+    data.dropna(subset=['SMA_20'], inplace=True)
     data['crossed'] = (data['Close'] > data['SMA_20']).astype(int)
-
-    print("✅ Crossing logic applied successfully.")
     return data
 
-
-# Step 3: Add Implied Volatility check
+# Step 3: Add Implied Volatility (mock)
 def check_iv(data, iv_threshold=16):
-    # For this example, assume IV data is fetched from a separate function or API
-    data['IV'] = 17  # Mock IV data; in reality, you'd get it from the API
+    data['IV'] = 17  # Mock constant IV
     data['iv_check'] = np.where(data['IV'] >= iv_threshold, 1, 0)
     return data
 
-# Step 4: Trade Execution
+# Step 4: Execute trade if conditions are met
 def execute_trade(data):
     for i in range(1, len(data)):
-        if data['crossed'][i] == 1 and data['iv_check'][i] == 1:
-            entry_price = data['Close'][i]
-            stop_loss = entry_price * (1 - 0.10)  # 10% stop loss
-            profit_target = entry_price * (1 + 0.05)  # 5% profit target
-            entry_time = data.index[i]  # Capture the time when the trade is executed
-            st.write(f"Trade Executed at {entry_price}, SL: {stop_loss}, Target: {profit_target}")
+        if data['crossed'].iloc[i] == 1 and data['iv_check'].iloc[i] == 1:
+            entry_price = data['Close'].iloc[i]
+            stop_loss = entry_price * (1 - 0.10)
+            profit_target = entry_price * (1 + 0.05)
+            entry_time = data.index[i]
+            st.success(f"✅ Trade Executed at ₹{entry_price:.2f} | SL: ₹{stop_loss:.2f} | Target: ₹{profit_target:.2f}")
             return entry_price, stop_loss, profit_target, entry_time
+    st.info("No trade executed based on current conditions.")
     return None, None, None, None
 
-# Step 5: Profit Booking and Stop Loss Adjustment
+# Step 5: Manage risk
 def manage_risk(entry_price, stop_loss, profit_target, data):
     for i in range(len(data)):
-        if data['Close'][i] >= profit_target:
-            st.write(f"Profit Target hit at {data['Close'][i]}. Book Profit!")
-            return True  # Profit booked
-        elif data['Close'][i] <= stop_loss:
-            st.write(f"Stop Loss hit at {data['Close'][i]}. Exit Trade!")
-            return True  # Stop loss hit
-    return False  # No exit
+        price = data['Close'].iloc[i]
+        if price >= profit_target:
+            st.success(f"🎯 Profit Target hit at ₹{price:.2f}. Book Profit!")
+            return True
+        elif price <= stop_loss:
+            st.error(f"🛑 Stop Loss hit at ₹{price:.2f}. Exit Trade!")
+            return True
+    return False
 
-# Step 6: Time-based Exit (After 10 minutes)
-def time_based_exit(entry_time, data, max_time=10):
-    time_elapsed = (data.index[-1] - entry_time).total_seconds() / 60
-    if time_elapsed >= max_time:
-        st.write(f"Time-based exit after {max_time} minutes. Exit trade!")
+# Step 6: Time-based exit
+def time_based_exit(entry_time, data, max_minutes=10):
+    if not entry_time:
+        return False
+    last_time = data.index[-1]
+    elapsed_minutes = (last_time - entry_time).total_seconds() / 60
+    if elapsed_minutes >= max_minutes:
+        st.warning(f"⌛ Time-based exit after {max_minutes} minutes.")
         return True
     return False
 
 # Streamlit UI
+st.set_page_config(page_title="Doctor Trade Strategy", layout="wide")
+st.title("💉 Doctor Trade Strategy (5-Minute Chart)")
 
-# Page setup
-st.title("Doctor Trade Strategy (5-Minute Time Frame)")
-
-# User inputs
-stock_symbol = st.selectbox("Select Stock", ["^NSEBANK", "^NSEI"])  # Nifty or BankNifty
+stock_symbol = st.selectbox("📈 Select Symbol", ["^NSEI", "^NSEBANK"], index=0)
 start_date = st.date_input("Start Date", datetime.date(2023, 1, 1))
 end_date = st.date_input("End Date", datetime.date(2023, 12, 31))
 
-# Fetch data
-data = fetch_data(stock_symbol, start_date, end_date)
+if start_date >= end_date:
+    st.error("⚠️ Start date must be before end date.")
+else:
+    data = fetch_data(stock_symbol, start_date, end_date)
+    if not data.empty:
+        try:
+            data = check_crossing(data)
+            data = check_iv(data)
 
-# Add technical indicators
-data = check_crossing(data)
-data = check_iv(data)
+            # Chart
+            fig = go.Figure()
+            fig.add_trace(go.Candlestick(
+                x=data.index,
+                open=data['Open'], high=data['High'],
+                low=data['Low'], close=data['Close'],
+                name='Candlestick'
+            ))
+            fig.add_trace(go.Scatter(
+                x=data.index, y=data['SMA_20'],
+                mode='lines', name='SMA 20',
+                line=dict(color='orange')
+            ))
+            fig.update_layout(title=f"{stock_symbol} | Candlestick with 20 SMA",
+                              xaxis_title="Time", yaxis_title="Price",
+                              xaxis_rangeslider_visible=False)
+            st.plotly_chart(fig, use_container_width=True)
 
-# Plot data
-fig = go.Figure(data=[go.Candlestick(x=data.index,
-                                    open=data['Open'],
-                                    high=data['High'],
-                                    low=data['Low'],
-                                    close=data['Close'],
-                                    name='Candlestick'),
-                     go.Scatter(x=data.index, y=data['SMA_20'], mode='lines', name='20 SMA')])
-
-fig.update_layout(title=f"{stock_symbol} Price Chart", xaxis_title="Date", yaxis_title="Price")
-st.plotly_chart(fig)
-
-# Execute trade logic
-entry_price, stop_loss, profit_target, entry_time = execute_trade(data)
-
-if entry_price:
-    st.write(f"Entry Price: {entry_price}, Stop Loss: {stop_loss}, Profit Target: {profit_target}")
-
-    # Manage risk and check for exit
-    if manage_risk(entry_price, stop_loss, profit_target, data):
-        st.write("Trade Closed")
-
-    # Time-based exit after 10 minutes
-    if time_based_exit(entry_time, data):
-        st.write("Trade Closed due to Time-based Exit")
+            # Execute trade
+            entry_price, stop_loss, profit_target, entry_time = execute_trade(data)
+            if entry_price:
+                if manage_risk(entry_price, stop_loss, profit_target, data):
+                    st.info("🔁 Trade Closed via Risk Management.")
+                elif time_based_exit(entry_time, data):
+                    st.info("⏳ Trade Closed via Time Exit.")
+        except Exception as e:
+            st.error(f"🚫 Strategy Error: {e}")
