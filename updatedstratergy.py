@@ -120,8 +120,8 @@ if st.button("🚀 Fetch Data and Run Strategy"):
                     st.info("🔁 Trade Closed (Risk Management)")
 
                 # Check for time-based exit
-                elif time_based_exit(entry_time, data):
-                    st.info("⏳ Trade Closed (Time-based Exit)")
+                #elif time_based_exit(entry_time, data):
+                    #st.info("⏳ Trade Closed (Time-based Exit)")
 
             else:
                 st.info("⚠️ No valid trade signal found in this range.")
