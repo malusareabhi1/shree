@@ -1245,7 +1245,7 @@ elif selected == "Doctor2.0 Strategy":
         else:
             st.warning("No valid trades found based on strategy rules.")
 
-elif selected == "Stratergy2.0 Detail":
+elif selected == "Strategy2.0 Detail":
     st.title("📋 Project Details")
 
     st.markdown("""
