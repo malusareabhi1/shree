@@ -5,6 +5,9 @@ import numpy as np
 import datetime
 import plotly.graph_objects as go
 
+# Trade log to store trade details
+trade_log = []
+
 def fetch_data(stock_symbol, start_date, end_date, interval="5m"):
     try:
         data = yf.download(stock_symbol,
@@ -27,7 +30,6 @@ def fetch_data(stock_symbol, start_date, end_date, interval="5m"):
         return pd.DataFrame()
 
 def check_crossing(data):
-    # Ensure 'Close' exists now that we've flattened columns
     if 'Close' not in data.columns:
         raise KeyError("❌ 'Close' column is missing in the DataFrame!")
 
@@ -53,8 +55,19 @@ def execute_trade(data):
             entry = data['Close'].iat[i]
             sl = entry * 0.90
             tg = entry * 1.05
+            entry_time = data.index[i]
+            
+            # Log the trade details
+            trade_log.append({
+                'Entry Time': entry_time,
+                'Entry Price': entry,
+                'Stop Loss': sl,
+                'Target Price': tg,
+                'Status': 'Open'
+            })
+            
             st.success(f"✅ Trade @ ₹{entry:.2f}  SL: ₹{sl:.2f}  TG: ₹{tg:.2f}")
-            return entry, sl, tg, data.index[i]
+            return entry, sl, tg, entry_time
     st.info("ℹ️ No trade signal.")
     return None, None, None, None
 
@@ -62,17 +75,24 @@ def manage_risk(entry, sl, tg, data):
     for price in data['Close']:
         if price >= tg:
             st.success(f"🎯 Target hit @ ₹{price:.2f}")
+            close_trade('Target Hit')
             return True
         if price <= sl:
             st.error(f"🛑 SL hit @ ₹{price:.2f}")
+            close_trade('Stop Loss Hit')
             return True
     return False
+
+def close_trade(status):
+    # Update the last trade in the log to "Closed"
+    if trade_log:
+        trade_log[-1]['Status'] = status
 
 # --- Streamlit UI ---
 st.title("📊 Doctor Trade Strategy")
 
 # Sidebar inputs
-symbol = st.selectbox("Symbol", ["^NSEI","RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS"])
+symbol = st.selectbox("Symbol", ["RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS"])
 start = st.date_input("Start Date", datetime.date.today() - datetime.timedelta(days=10))
 end   = st.date_input("End Date",   datetime.date.today())
 interval = st.selectbox("Interval", ["1m","5m","15m","30m","1h","3h","6h","12h","1d"])
@@ -109,3 +129,9 @@ if st.button("Fetch & Run"):
 
         except Exception as e:
             st.error(f"❌ Strategy error: {e}")
+
+# Display trade log
+if trade_log:
+    st.subheader("Trade Log")
+    trade_df = pd.DataFrame(trade_log)
+    st.dataframe(trade_df)
