@@ -32,9 +32,9 @@ def determine_trend(df):
     if df is None or len(df) < 50:
         return "Insufficient Data"
     last_row = df.iloc[-1]
-    if last_row['SMA20'] > last_row['SMA50']:
+    if float(last_row['SMA20']) > float(last_row['SMA50']):
         return "Uptrend"
-    elif last_row['SMA20'] < last_row['SMA50']:
+    elif float(last_row['SMA20']) < float(last_row['SMA50']):
         return "Downtrend"
     else:
         return "Sideways"
