@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 def fetch_data(stock_symbol, start_date, end_date, interval="5m"):
     try:
         data = yf.download(stock_symbol, start=start_date, end=end_date, interval=interval)
-        data = data.dropna()
+        data = data.dropna()  # Drop any rows with NaN values
         return data
     except Exception as e:
         st.error(f"⚠️ Error fetching data: {e}")
@@ -22,16 +22,22 @@ def check_crossing(data):
     if data['Close'].dropna().empty:
         raise ValueError("❌ 'Close' column has no valid data (all values are NaN)!")
 
+    # Calculate 20-period SMA and check if it's calculated correctly
     data['SMA_20'] = data['Close'].rolling(window=20).mean()
-    if 'SMA_20' not in data.columns or data['SMA_20'].dropna().empty:
-        raise ValueError("❌ 'SMA_20' column was not properly calculated (all NaNs)!")
 
+    if data['SMA_20'].isna().all():
+        raise ValueError("❌ 'SMA_20' column has no valid data (all NaNs)!")
+
+    # Drop rows with NaN in SMA_20
     data = data.dropna(subset=['SMA_20'])
+
+    # Add crossing logic
     data['crossed'] = (data['Close'] > data['SMA_20']).astype(int)
+
     return data
 
 def check_iv(data, iv_threshold=16):
-    data['IV'] = 17  # Mock IV value
+    data['IV'] = 17  # Mock IV value (replace with actual IV data from API)
     data['iv_check'] = np.where(data['IV'] >= iv_threshold, 1, 0)
     return data
 
