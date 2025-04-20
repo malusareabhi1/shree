@@ -11,6 +11,7 @@ from ta.volatility import BollingerBands
 # Step 1: Fetch historical data for Nifty
 def fetch_data(stock_symbol, start_date, end_date):
     data = yf.download(stock_symbol, start=start_date, end=end_date, interval="5m")
+    data = data.dropna()  # Drop missing values to ensure clean data
     return data
 
 # Step 2: Add Bollinger Bands
@@ -30,22 +31,21 @@ def check_crossing(data):
 # Step 4: Add Implied Volatility check
 def check_iv(data, iv_threshold=16):
     # For this example, assume IV data is fetched from a separate function or API
-    # Here we mock the IV data; in a real scenario, you'd get it from the API
-    data['IV'] = 17  # Assume IV is above threshold for this mock
+    data['IV'] = 17  # Mock IV data; in reality, you'd get it from the API
     data['iv_check'] = np.where(data['IV'] >= iv_threshold, 1, 0)
     return data
 
 # Step 5: Trade Execution
 def execute_trade(data):
-    # Logic for executing trade after cross, IV check, and conditions met
     for i in range(1, len(data)):
         if data['crossed'][i] == 1 and data['iv_check'][i] == 1:
             entry_price = data['Close'][i]
             stop_loss = entry_price * (1 - 0.10)  # 10% stop loss
             profit_target = entry_price * (1 + 0.05)  # 5% profit target
+            entry_time = data.index[i]  # Capture the time when the trade is executed
             st.write(f"Trade Executed at {entry_price}, SL: {stop_loss}, Target: {profit_target}")
-            return entry_price, stop_loss, profit_target
-    return None, None, None
+            return entry_price, stop_loss, profit_target, entry_time
+    return None, None, None, None
 
 # Step 6: Profit Booking and Stop Loss Adjustment
 def manage_risk(entry_price, stop_loss, profit_target, data):
@@ -62,7 +62,7 @@ def manage_risk(entry_price, stop_loss, profit_target, data):
 def time_based_exit(entry_time, data, max_time=10):
     time_elapsed = (data.index[-1] - entry_time).total_seconds() / 60
     if time_elapsed >= max_time:
-        st.write("Time-based exit after 10 minutes. Exit trade!")
+        st.write(f"Time-based exit after {max_time} minutes. Exit trade!")
         return True
     return False
 
@@ -99,7 +99,7 @@ fig.update_layout(title=f"{stock_symbol} Price Chart", xaxis_title="Date", yaxis
 st.plotly_chart(fig)
 
 # Execute trade logic
-entry_price, stop_loss, profit_target = execute_trade(data)
+entry_price, stop_loss, profit_target, entry_time = execute_trade(data)
 
 if entry_price:
     st.write(f"Entry Price: {entry_price}, Stop Loss: {stop_loss}, Profit Target: {profit_target}")
@@ -109,5 +109,5 @@ if entry_price:
         st.write("Trade Closed")
 
     # Time-based exit after 10 minutes
-    if time_based_exit(data.index[0], data):
+    if time_based_exit(entry_time, data):
         st.write("Trade Closed due to Time-based Exit")
