@@ -6,9 +6,9 @@ import datetime
 import plotly.graph_objects as go
 
 # Define functions for the strategy logic
-def fetch_data(stock_symbol, start_date, end_date):
+def fetch_data(stock_symbol, start_date, end_date, interval="5m"):
     try:
-        data = yf.download(stock_symbol, start=start_date, end=end_date, interval="5m")
+        data = yf.download(stock_symbol, start=start_date, end=end_date, interval=interval)
         data = data.dropna()
         return data
     except Exception as e:
@@ -66,15 +66,18 @@ def time_based_exit(entry_time, data, max_time=10):
     return False
 
 # Streamlit UI
-st.title("📊 Doctor Trade Strategy (5-Minute Time Frame)")
+st.title("📊 Doctor Trade Strategy (Customizable Time Frame)")
 
 # Sidebar inputs
 stock_symbol = st.selectbox("📈 Select Stock Symbol", ["RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS"])
 start_date = st.date_input("📅 Start Date", datetime.date.today() - datetime.timedelta(days=10))
 end_date = st.date_input("📅 End Date", datetime.date.today())
 
+# Interval input
+interval = st.selectbox("⏱ Select Data Interval", ["1m", "5m", "15m", "30m", "1h", "3h", "6h", "12h", "1d"])
+
 if st.button("🚀 Fetch Data and Run Strategy"):
-    data = fetch_data(stock_symbol, start_date, end_date)
+    data = fetch_data(stock_symbol, start_date, end_date, interval)
 
     if data.empty:
         st.warning("⚠️ No data fetched. Please check your date range (max last 60 days) and symbol (use NSE stock symbols ending with '.NS').")
@@ -94,7 +97,7 @@ if st.button("🚀 Fetch Data and Run Strategy"):
                                                  close=data['Close'],
                                                  name='Candlestick'),
                                   go.Scatter(x=data.index, y=data['SMA_20'], mode='lines', name='20 SMA')])
-            fig.update_layout(title=f"{stock_symbol} - 5min Chart", xaxis_title="Date", yaxis_title="Price")
+            fig.update_layout(title=f"{stock_symbol} - {interval} Chart", xaxis_title="Date", yaxis_title="Price")
             st.plotly_chart(fig)
 
             # Trade logic
