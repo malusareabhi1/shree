@@ -22,11 +22,11 @@ with st.sidebar:
     selected = option_menu(
     menu_title="ALGO BOT Trade ",
     options=[
-        "Dashboard", "Get Stock Data", "Test Strategy", "Swing Trade Strategy",
+        "Dashboard", "Get Stock Data", "Test Strategy","Test Doctor2 Strategy", "Swing Trade Strategy",
         "Intraday Stock Finder", "Trade Log", "Account Info", "Candle Chart", "Strategy Detail", "Project Detail", "KITE API", "API","Alpha Vantage API","Live Algo Trading"
     ],
     icons=[
-        "bar-chart", "search", "cpu", "arrow-repeat",
+        "bar-chart", "search", "cpu", "cpu", "arrow-repeat",
         "search", "clipboard-data", "wallet2", "graph-up", "info-circle", "file-earmark", "code-slash", "code-slash", "code-slash","journal-text"
     ],
     menu_icon="cast",
