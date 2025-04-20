@@ -10,7 +10,10 @@ def fetch_data(stock_symbol, start_date, end_date, interval="5m"):
     try:
         # Fetching stock data
         data = yf.download(stock_symbol, start=start_date, end=end_date, interval=interval)
-        data = data.dropna()  # Drop rows with NaN values
+        # Debugging: Check if data is empty or missing expected columns
+        st.write("Debug: Fetched data columns:", data.columns.tolist())
+        if 'Close' not in data.columns:
+            st.error("❌ 'Close' column is missing in the fetched data!")
         return data
     except Exception as e:
         st.error(f"⚠️ Error fetching data: {e}")
