@@ -13,4 +13,3 @@ fyers_apiv3
 setuptools
 kiteconnect
 ta
-talib
