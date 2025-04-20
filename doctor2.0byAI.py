@@ -44,9 +44,9 @@ if selected == "Doctor2.0 Strategy":
             candle = df.iloc[i]
             prev_candle = df.iloc[i-1]
 
-            # Step 2-4: 20 SMA Cross & confirmation
+            # Step 2-4: 20 SMA Cross & confirmation (relaxed condition)
             crossed_up = prev_candle['Close'] < prev_candle['20sma'] and candle['Close'] > candle['20sma']
-            closed_above = candle['Close'] > candle['20sma'] and candle['Low'] > candle['20sma']
+            closed_above = candle['Close'] > candle['20sma']  # relaxed: removed candle['Low'] > candle['20sma']
 
             if crossed_up and closed_above:
                 reference_candle = candle
@@ -55,9 +55,8 @@ if selected == "Doctor2.0 Strategy":
                 ref_level = max(prev2_candle['High'], prev2_candle['Close'])
                 next_candle = df.iloc[i+1]
 
-                is_bullish = next_candle['Close'] > next_candle['Open']
-
-                if next_candle['High'] > ref_level and is_bullish:
+                # relaxed: only breakout check
+                if next_candle['High'] > ref_level:
                     entry_price = ref_level
                     sl_price = entry_price * 0.90
                     target1 = entry_price * 1.05
