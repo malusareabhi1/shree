@@ -14,3 +14,4 @@ setuptools
 kiteconnect
 ta
 gradio 
+db_pool
