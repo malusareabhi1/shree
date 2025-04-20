@@ -1006,6 +1006,7 @@ elif selected == "Test Doctor2 Strategy":
     st.title("🤖 Test Doctor2 Strategy")
     # Trade log to store trade details
 trade_log = []
+import numpy as np
 
 def read_csv_data(uploaded_file):
     try:
