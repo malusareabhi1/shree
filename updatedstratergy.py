@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 import datetime
 import plotly.graph_objects as go
-from ta.volatility import BollingerBands
 
 # Define functions for the strategy logic
 
@@ -14,33 +13,20 @@ def fetch_data(stock_symbol, start_date, end_date):
     data = data.dropna()  # Drop missing values to ensure clean data
     return data
 
-# Step 2: Add Bollinger Bands
-def add_bollinger_bands(data):
-    # Ensure no missing values in 'Close' column before calculation
-    data['Close'] = data['Close'].fillna(method='ffill')  # Fill missing values using forward fill
-    bb = BollingerBands(data['Close'])
-    
-    # Check if the calculation has been done properly and return the calculated Bollinger Bands
-    data['BB_upper'] = bb.bollinger_hband()
-    data['BB_lower'] = bb.bollinger_lband()
-    data['BB_middle'] = bb.bollinger_mavg()
-    
-    return data
-
-# Step 3: Check for Crossing of the Center Line (20 SMA)
+# Step 2: Check for Crossing of the Center Line (20 SMA)
 def check_crossing(data):
     data['SMA_20'] = data['Close'].rolling(window=20).mean()
     data['crossed'] = np.where(data['Close'] > data['SMA_20'], 1, 0)
     return data
 
-# Step 4: Add Implied Volatility check
+# Step 3: Add Implied Volatility check
 def check_iv(data, iv_threshold=16):
     # For this example, assume IV data is fetched from a separate function or API
     data['IV'] = 17  # Mock IV data; in reality, you'd get it from the API
     data['iv_check'] = np.where(data['IV'] >= iv_threshold, 1, 0)
     return data
 
-# Step 5: Trade Execution
+# Step 4: Trade Execution
 def execute_trade(data):
     for i in range(1, len(data)):
         if data['crossed'][i] == 1 and data['iv_check'][i] == 1:
@@ -52,7 +38,7 @@ def execute_trade(data):
             return entry_price, stop_loss, profit_target, entry_time
     return None, None, None, None
 
-# Step 6: Profit Booking and Stop Loss Adjustment
+# Step 5: Profit Booking and Stop Loss Adjustment
 def manage_risk(entry_price, stop_loss, profit_target, data):
     for i in range(len(data)):
         if data['Close'][i] >= profit_target:
@@ -63,7 +49,7 @@ def manage_risk(entry_price, stop_loss, profit_target, data):
             return True  # Stop loss hit
     return False  # No exit
 
-# Step 7: Time-based Exit (After 10 minutes)
+# Step 6: Time-based Exit (After 10 minutes)
 def time_based_exit(entry_time, data, max_time=10):
     time_elapsed = (data.index[-1] - entry_time).total_seconds() / 60
     if time_elapsed >= max_time:
@@ -85,7 +71,6 @@ end_date = st.date_input("End Date", datetime.date(2023, 12, 31))
 data = fetch_data(stock_symbol, start_date, end_date)
 
 # Add technical indicators
-data = add_bollinger_bands(data)
 data = check_crossing(data)
 data = check_iv(data)
 
@@ -96,8 +81,6 @@ fig = go.Figure(data=[go.Candlestick(x=data.index,
                                     low=data['Low'],
                                     close=data['Close'],
                                     name='Candlestick'),
-                     go.Scatter(x=data.index, y=data['BB_upper'], mode='lines', name='BB Upper'),
-                     go.Scatter(x=data.index, y=data['BB_lower'], mode='lines', name='BB Lower'),
                      go.Scatter(x=data.index, y=data['SMA_20'], mode='lines', name='20 SMA')])
 
 fig.update_layout(title=f"{stock_symbol} Price Chart", xaxis_title="Date", yaxis_title="Price")
