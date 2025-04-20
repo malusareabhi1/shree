@@ -97,7 +97,7 @@ if results:
 
     # 🧪 Summary of Strategy
     total_trades = len(df_result)
-    avg_entry = df_result['Entry Price'].mean()
+    avg_entry = pd.to_numeric(df_result['Entry Price'], errors='coerce').mean()
     st.markdown("### 📊 Backtest Summary")
     st.write(f"Total Signals: {total_trades}")
     st.write(f"Average Entry Price: ₹{avg_entry:.2f}")
