@@ -92,7 +92,14 @@ def close_trade(status):
 st.title("📊 Doctor Trade Strategy")
 
 # Sidebar inputs
-symbol = st.selectbox("Symbol", ["RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS"])
+symbol = st.selectbox("Symbol", ["ADANIENT.NS", "ASIANPAINT.NS", "AXISBANK.NS", "BAJAJ-AUTO.NS", "BAJFINANCE.NS",
+    "BAJAJFINSV.NS", "BPCL.NS", "BHARTIARTL.NS", "BRITANNIA.NS", "CIPLA.NS", "COALINDIA.NS",
+    "DRREDDY.NS", "EICHERMOT.NS", "GRASIM.NS", "HCLTECH.NS", "HDFCBANK.NS", "HDFCLIFE.NS",
+    "HEROMOTOCO.NS", "HINDALCO.NS", "HINDUNILVR.NS", "ICICIBANK.NS", "INDUSINDBK.NS",
+    "INFY.NS", "ITC.NS", "JSWSTEEL.NS", "KOTAKBANK.NS", "LT.NS", "M&M.NS", "MARUTI.NS",
+    "NESTLEIND.NS", "NTPC.NS", "ONGC.NS", "POWERGRID.NS", "RELIANCE.NS", "SBIN.NS",
+    "SHREECEM.NS", "SUNPHARMA.NS", "TATACONSUM.NS", "TATAMOTORS.NS", "TATASTEEL.NS",
+    "TCS.NS", "TECHM.NS", "TITAN.NS", "ULTRACEMCO.NS", "UPL.NS", "WIPRO.NS"])
 start = st.date_input("Start Date", datetime.date.today() - datetime.timedelta(days=10))
 end   = st.date_input("End Date",   datetime.date.today())
 interval = st.selectbox("Interval", ["1m","5m","15m","30m","1h","3h","6h","12h","1d"])
