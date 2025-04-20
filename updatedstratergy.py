@@ -26,6 +26,12 @@ def check_crossing(data):
     # Calculate the 20-period Simple Moving Average (SMA)
     data['SMA_20'] = data['Close'].rolling(window=20).mean()
 
+    # Debug: Check if the 'SMA_20' column is created correctly
+    if 'SMA_20' not in data.columns:
+        raise KeyError("❌ 'SMA_20' column was not created!")
+    if data['SMA_20'].isna().all():
+        raise ValueError("❌ 'SMA_20' column has all NaN values!")
+
     # Drop rows with NaN values in SMA_20
     data = data.dropna(subset=['SMA_20'])
 
@@ -108,13 +114,6 @@ if st.button("🚀 Fetch Data and Run Strategy"):
                 # Manage risk and check for exit
                 if manage_risk(entry_price, stop_loss, profit_target, data):
                     st.info("🔁 Trade Closed (Risk Management)")
-
-                # Uncomment this block if you want to re-enable time-based exit:
-                # elif time_based_exit(entry_time, data):
-                #     st.info("⏳ Trade Closed (Time-based Exit)")
-
-            else:
-                st.info("⚠️ No valid trade signal found in this range.")
 
         except Exception as e:
             st.error(f"❌ Error during strategy logic: {e}")
