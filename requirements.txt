@@ -13,6 +13,3 @@ fyers_apiv3
 setuptools
 kiteconnect
 ta
-gradio 
-db_pool
-
