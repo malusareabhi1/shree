@@ -26,7 +26,7 @@ def fetch_stock_data(symbol):
         df.dropna(inplace=True)
         df['SMA20'] = df['Close'].rolling(20).mean()
         df['SMA50'] = df['Close'].rolling(50).mean()
-        df['RSI'] = df['Close'].rolling(14).apply(lambda x: 100 - 100/(1 + (x.diff().clip(lower=0).mean() / abs(x.diff().clip(upper=0)).mean())), raw=False)
+        df['RSI'] = df['Close'].rolling(14).apply(lambda x: 100 - 100/(1 + (x.diff().clip(lower=0).mean() / abs(x.diff().clip(upper=0)).mean())) if abs(x.diff().clip(upper=0)).mean() != 0 else 0, raw=False)
         df['Volume_SMA'] = df['Volume'].rolling(20).mean()
         df['ATR'] = df['High'] - df['Low']
         return df
@@ -41,13 +41,17 @@ def check_trade_signal(df):
     row = df.iloc[-1]
     prev = df.iloc[-2]
 
-    if (
-        row['Close'] > row['SMA20'] > row['SMA50'] and
-        50 <= row['RSI'] <= 65 and
-        row['Volume'] > row['Volume_SMA'] and
-        row['Close'] > prev['Close']
-    ):
-        return True, row['Close']
+    try:
+        if (
+            float(row['Close']) > float(row['SMA20']) > float(row['SMA50']) and
+            50 <= float(row['RSI']) <= 65 and
+            float(row['Volume']) > float(row['Volume_SMA']) and
+            float(row['Close']) > float(prev['Close'])
+        ):
+            return True, row['Close']
+    except:
+        return False, None
+
     return False, None
 
 # Scan NIFTY 50 stocks
