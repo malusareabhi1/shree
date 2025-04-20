@@ -16,10 +16,15 @@ def fetch_data(stock_symbol, start_date, end_date):
 
 # Step 2: Add Bollinger Bands
 def add_bollinger_bands(data):
+    # Ensure no missing values in 'Close' column before calculation
+    data['Close'] = data['Close'].fillna(method='ffill')  # Fill missing values using forward fill
     bb = BollingerBands(data['Close'])
+    
+    # Check if the calculation has been done properly and return the calculated Bollinger Bands
     data['BB_upper'] = bb.bollinger_hband()
     data['BB_lower'] = bb.bollinger_lband()
     data['BB_middle'] = bb.bollinger_mavg()
+    
     return data
 
 # Step 3: Check for Crossing of the Center Line (20 SMA)
