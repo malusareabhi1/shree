@@ -63,17 +63,6 @@ def manage_risk(entry_price, stop_loss, profit_target, data):
             return True  # Stop loss hit
     return False  # No exit yet
 
-# Function for time-based exit (after a set period, e.g., 10 minutes)
-# Commented out as per your request
-# def time_based_exit(entry_time, data, max_time=10):
-#     if entry_time is None:
-#         return False
-#     time_elapsed = (data.index[-1] - entry_time).total_seconds() / 60
-#     if time_elapsed >= max_time:
-#         st.warning(f"⏰ Time-based exit after {max_time} minutes")
-#         return True
-#     return False
-
 # Streamlit UI setup
 st.title("📊 Doctor Trade Strategy")
 
@@ -120,6 +109,12 @@ if st.button("🚀 Fetch Data and Run Strategy"):
                 if manage_risk(entry_price, stop_loss, profit_target, data):
                     st.info("🔁 Trade Closed (Risk Management)")
 
-                # Commented time-based exit logic for now
+                # Uncomment this block if you want to re-enable time-based exit:
                 # elif time_based_exit(entry_time, data):
-                #     st.info("⏳ Trade Closed (Time
+                #     st.info("⏳ Trade Closed (Time-based Exit)")
+
+            else:
+                st.info("⚠️ No valid trade signal found in this range.")
+
+        except Exception as e:
+            st.error(f"❌ Error during strategy logic: {e}")
