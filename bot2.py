@@ -926,6 +926,51 @@ elif selected == "PaperTrade":
 
     else:
         st.info("📌 Please upload a CSV file to begin the simulation.")
+        st.subheader("🕯️ Live Chart (Candlestick + Buy/Sell Signals)")
+
+        fig = go.Figure()
+        
+        # Candlestick chart
+        fig.add_trace(go.Candlestick(
+            x=df.index,
+            open=df['Open'],
+            high=df['High'],
+            low=df['Low'],
+            close=df['Close'],
+            name='Price'
+        ))
+        
+        # Buy signals
+        buy_signals = df[df['Signal'] == 1]
+        fig.add_trace(go.Scatter(
+            x=buy_signals.index,
+            y=buy_signals['Close'],
+            mode='markers',
+            marker=dict(symbol='triangle-up', color='green', size=10),
+            name='Buy Signal'
+        ))
+        
+        # Sell signals
+        sell_signals = df[df['Signal'] == -1]
+        fig.add_trace(go.Scatter(
+            x=sell_signals.index,
+            y=sell_signals['Close'],
+            mode='markers',
+            marker=dict(symbol='triangle-down', color='red', size=10),
+            name='Sell Signal'
+        ))
+        
+        # Layout settings
+        fig.update_layout(
+            xaxis_title="Date",
+            yaxis_title="Price",
+            xaxis_rangeslider_visible=False,
+            height=600,
+            template="plotly_dark",
+            showlegend=True
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
 
 elif selected == "Live Algo Trading":
     st.title("🤖 Live Algo Trading (Paper/Real Mode)")
