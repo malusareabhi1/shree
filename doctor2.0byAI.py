@@ -33,7 +33,6 @@ if selected == "Doctor2.0 Strategy":
         df['upper_band'] = df['20sma'] + 2 * df['stddev']
         df['lower_band'] = df['20sma'] - 2 * df['stddev']
 
-        # Drop rows with NaN from indicator columns
         df.dropna(subset=['20sma', 'stddev'], inplace=True)
 
         trades = []
@@ -65,7 +64,8 @@ if selected == "Doctor2.0 Strategy":
                     target3 = entry_price * 1.15
                     final_target = entry_price * 1.20
 
-                    quantity = int((capital * (risk_per_trade_pct / 100)) / (entry_price - sl_price))
+                    risk_amount = entry_price - sl_price
+                    quantity = int((capital * (risk_per_trade_pct / 100)) / risk_amount) if risk_amount > 0 else 0
                     result = "Open"
                     outcome_index = None
 
@@ -82,10 +82,13 @@ if selected == "Doctor2.0 Strategy":
                             break
                         elif high >= target3:
                             result = "T3"
+                            outcome_index = j
                         elif high >= target2:
                             result = "T2"
+                            outcome_index = j
                         elif high >= target1:
                             result = "T1"
+                            outcome_index = j
 
                     trades.append({
                         'Entry Time': next_candle.name,
@@ -110,14 +113,12 @@ if selected == "Doctor2.0 Strategy":
             csv = trades_df.to_csv(index=False).encode('utf-8')
             st.download_button("📥 Download Trade Log", csv, "doctor2_trades.csv", "text/csv")
 
-            # Backtest Performance Summary
             outcomes = trades_df['Outcome'].value_counts().to_dict()
             total_trades = len(trades_df)
             win_trades = sum([outcomes.get(k, 0) for k in ['T1', 'T2', 'T3', 'T4']])
             win_rate = round((win_trades / total_trades) * 100, 2)
             st.markdown(f"**Total Trades:** {total_trades} | **Win Rate:** {win_rate}%")
 
-            # Equity Curve
             pnl = []
             for _, row in trades_df.iterrows():
                 if row['Outcome'] == 'SL':
@@ -130,7 +131,6 @@ if selected == "Doctor2.0 Strategy":
             equity_curve = pd.Series(pnl).cumsum()
             st.line_chart(equity_curve)
 
-            # Plot chart
             fig = go.Figure()
             fig.add_trace(go.Candlestick(
                 x=df.index,
@@ -140,15 +140,19 @@ if selected == "Doctor2.0 Strategy":
             fig.add_trace(go.Scatter(x=df.index, y=df['20sma'], line=dict(color='blue'), name="20 SMA"))
 
             for trade in trades:
-                fig.add_trace(go.Scatter(
-                    x=[trade['Entry Time']], y=[trade['Entry Price']],
-                    mode='markers', marker=dict(color='blue', size=10), name='Entry 🔵'
-                ))
-                fig.add_trace(go.Scatter(
-                    x=[trade['Exit Time']], y=[trade['SL'] if trade['Outcome'] == 'SL' else trade[trade['Outcome']]],
-                    mode='markers', marker=dict(color='red' if trade['Outcome']=='SL' else 'green', size=10),
-                    name='SL 🔻' if trade['Outcome']=='SL' else 'TP 🟢'
-                ))
+                if trade['Entry Time'] is not None:
+                    fig.add_trace(go.Scatter(
+                        x=[trade['Entry Time']], y=[trade['Entry Price']],
+                        mode='markers', marker=dict(color='blue', size=10), name='Entry 🔵'
+                    ))
+                if trade['Exit Time'] is not None:
+                    y_val = trade['SL'] if trade['Outcome'] == 'SL' else trade.get(trade['Outcome'], None)
+                    if y_val is not None:
+                        fig.add_trace(go.Scatter(
+                            x=[trade['Exit Time']], y=[y_val],
+                            mode='markers', marker=dict(color='red' if trade['Outcome']=='SL' else 'green', size=10),
+                            name='SL 🔻' if trade['Outcome']=='SL' else 'TP 🟢'
+                        ))
 
             st.plotly_chart(fig, use_container_width=True)
         else:
