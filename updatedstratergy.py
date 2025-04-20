@@ -21,14 +21,19 @@ def check_crossing(data):
     
     # Calculate 20-period SMA
     data['SMA_20'] = data['Close'].rolling(window=20).mean()
-    
-    # Check if SMA_20 is being created properly
-    if 'SMA_20' not in data.columns:
-        raise ValueError("'SMA_20' column creation failed.")
+
+    # Debugging output to check if 'SMA_20' column exists and to inspect the data
+    print("Columns after SMA calculation:", data.columns)
+    print(data.head())  # Print the first few rows for inspection
 
     # Drop rows where 'SMA_20' is NaN (due to rolling window)
-    data = data.dropna(subset=['SMA_20'])
-    
+    try:
+        data = data.dropna(subset=['SMA_20'])
+    except KeyError as e:
+        print("Error while dropping NaN values:", e)
+        print("Columns available:", data.columns)
+        raise
+
     # Perform the crossing check
     data['crossed'] = np.where(data['Close'] > data['SMA_20'], 1, 0)
     return data
