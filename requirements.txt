@@ -15,3 +15,4 @@ kiteconnect
 ta
 gradio 
 db_pool
+geoip2
