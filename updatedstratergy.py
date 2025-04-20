@@ -15,36 +15,32 @@ def fetch_data(stock_symbol, start_date, end_date):
 
 # Step 2: Check for Crossing of the Center Line (20 SMA)
 def check_crossing(data):
-    print("\n===> Step 1: Columns present:", list(data.columns))
-    
+    # Debug: Show available columns
+    print("\n✅ Available Columns:", data.columns.tolist())
+
+    # Check if 'Close' column exists
     if 'Close' not in data.columns:
-        print("❌ 'Close' column is missing!")
-        print("Data sample:\n", data.head())
-        raise KeyError("'Close' column not found. Cannot calculate SMA.")
+        raise KeyError("❌ 'Close' column is missing in the DataFrame!")
 
-    if data['Close'].isnull().all():
-        print("❌ All values in 'Close' column are NaN.")
-        print("Data sample:\n", data.head())
-        raise ValueError("'Close' column is full of NaNs.")
+    # Check if 'Close' column has any valid (non-NaN) data
+    if data['Close'].dropna().empty:
+        raise ValueError("❌ 'Close' column has no valid data (all values are NaN)!")
 
-    # Calculate SMA_20 safely
+    # Calculate 20-period SMA
     data['SMA_20'] = data['Close'].rolling(window=20).mean()
-    
-    if 'SMA_20' not in data.columns or data['SMA_20'].isnull().all():
-        print("❌ 'SMA_20' not created properly.")
-        raise KeyError("'SMA_20' column is missing after calculation.")
 
-    print("✅ 'SMA_20' column created successfully.")
-    print(data[['Close', 'SMA_20']].head(25))
+    # Check if SMA_20 column was created
+    if 'SMA_20' not in data.columns or data['SMA_20'].dropna().empty:
+        raise ValueError("❌ 'SMA_20' column was not properly calculated (all NaNs)!")
 
-    # Drop rows with NaN in SMA_20
+    # Drop rows where SMA is NaN
     data = data.dropna(subset=['SMA_20'])
 
-    # Mark crossings
-    data['crossed'] = np.where(data['Close'] > data['SMA_20'], 1, 0)
+    # Add crossing logic
+    data['crossed'] = (data['Close'] > data['SMA_20']).astype(int)
 
+    print("✅ Crossing logic applied successfully.")
     return data
-
 
 
 # Step 3: Add Implied Volatility check
