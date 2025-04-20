@@ -26,9 +26,6 @@ def check_crossing(data):
         raise ValueError("❌ 'Close' column has all NaN values.")
 
     data['SMA_20'] = data['Close'].rolling(window=20).mean()
-    if data['SMA_20'].dropna().empty:
-        raise ValueError("❌ SMA_20 could not be calculated (all NaN).")
-    
     data.dropna(subset=['SMA_20'], inplace=True)
     data['crossed'] = (data['Close'] > data['SMA_20']).astype(int)
     return data
@@ -83,39 +80,46 @@ stock_symbol = st.selectbox("📈 Select Symbol", ["^NSEI", "^NSEBANK"], index=0
 start_date = st.date_input("Start Date", datetime.date(2023, 1, 1))
 end_date = st.date_input("End Date", datetime.date(2023, 12, 31))
 
-if start_date >= end_date:
-    st.error("⚠️ Start date must be before end date.")
-else:
-    data = fetch_data(stock_symbol, start_date, end_date)
-    if not data.empty:
-        try:
-            data = check_crossing(data)
-            data = check_iv(data)
+fetch_btn = st.button("📥 Fetch Data")
 
-            # Chart
-            fig = go.Figure()
-            fig.add_trace(go.Candlestick(
-                x=data.index,
-                open=data['Open'], high=data['High'],
-                low=data['Low'], close=data['Close'],
-                name='Candlestick'
-            ))
-            fig.add_trace(go.Scatter(
-                x=data.index, y=data['SMA_20'],
-                mode='lines', name='SMA 20',
-                line=dict(color='orange')
-            ))
-            fig.update_layout(title=f"{stock_symbol} | Candlestick with 20 SMA",
-                              xaxis_title="Time", yaxis_title="Price",
-                              xaxis_rangeslider_visible=False)
-            st.plotly_chart(fig, use_container_width=True)
+if fetch_btn:
+    if start_date >= end_date:
+        st.error("⚠️ Start date must be before end date.")
+    else:
+        data = fetch_data(stock_symbol, start_date, end_date)
+        if not data.empty:
+            try:
+                data = check_crossing(data)
+                data = check_iv(data)
 
-            # Execute trade
-            entry_price, stop_loss, profit_target, entry_time = execute_trade(data)
-            if entry_price:
-                if manage_risk(entry_price, stop_loss, profit_target, data):
-                    st.info("🔁 Trade Closed via Risk Management.")
-                elif time_based_exit(entry_time, data):
-                    st.info("⏳ Trade Closed via Time Exit.")
-        except Exception as e:
-            st.error(f"🚫 Strategy Error: {e}")
+                # Plot chart
+                fig = go.Figure()
+                fig.add_trace(go.Candlestick(
+                    x=data.index,
+                    open=data['Open'], high=data['High'],
+                    low=data['Low'], close=data['Close'],
+                    name='Candlestick'
+                ))
+                fig.add_trace(go.Scatter(
+                    x=data.index, y=data['SMA_20'],
+                    mode='lines', name='SMA 20',
+                    line=dict(color='orange')
+                ))
+                fig.update_layout(title=f"{stock_symbol} | Candlestick with 20 SMA",
+                                  xaxis_title="Time", yaxis_title="Price",
+                                  xaxis_rangeslider_visible=False)
+                st.plotly_chart(fig, use_container_width=True)
+
+                # Show data
+                with st.expander("📊 Show DataFrame"):
+                    st.dataframe(data.tail(50), use_container_width=True)
+
+                # Execute trade logic
+                entry_price, stop_loss, profit_target, entry_time = execute_trade(data)
+                if entry_price:
+                    if manage_risk(entry_price, stop_loss, profit_target, data):
+                        st.info("🔁 Trade Closed via Risk Management.")
+                    elif time_based_exit(entry_time, data):
+                        st.info("⏳ Trade Closed via Time Exit.")
+            except Exception as e:
+                st.error(f"🚫 Strategy Error: {e}")
