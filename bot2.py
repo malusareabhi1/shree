@@ -1185,110 +1185,65 @@ elif selected == "Test Doctor2 Strategy":
 elif selected == "Doctor2.0 Strategy":
     st.title("⚙️ Test Doctor2.0 Strategy")
 
-    st.markdown("### 📁 Upload 5-min Candle CSV (with datetime, open, high, low, close, volume)")
-    uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
-
-    if uploaded_file is not None:
+    uploaded_file = st.file_uploader("Upload 5-minute Nifty/Bank Nifty CSV file", type=["csv"])
+    if uploaded_file:
         df = pd.read_csv(uploaded_file)
-        df.columns = [col.lower() for col in df.columns]
-        df['datetime'] = pd.to_datetime(df['datetime'])
-        df.set_index('datetime', inplace=True)
-        df = df.sort_index()
 
-        # Bollinger Band Calculation
-        df['20sma'] = df['close'].rolling(window=20).mean()
-        df['stddev'] = df['close'].rolling(window=20).std()
-        df['upper_bb'] = df['20sma'] + (2 * df['stddev'])
-        df['lower_bb'] = df['20sma'] - (2 * df['stddev'])
+        # Convert and prepare datetime
+        df['Date'] = pd.to_datetime(df['Date'])
+        df = df.sort_values('Date')
+        df.set_index('Date', inplace=True)
 
-        # Inputs
-        iv_threshold = st.slider("IV Threshold (%)", 10.0, 25.0, 16.0)
-        stop_loss_pct = st.slider("Stop Loss (%)", 5.0, 15.0, 10.0)
-        profit_target_pct = st.slider("Profit Target (%)", 3.0, 20.0, 5.0)
+        # Calculate Bollinger Bands (20 SMA)
+        df['20sma'] = df['Close'].rolling(window=20).mean()
+        df['stddev'] = df['Close'].rolling(window=20).std()
+        df['upper_band'] = df['20sma'] + 2 * df['stddev']
+        df['lower_band'] = df['20sma'] - 2 * df['stddev']
 
-        capital = st.number_input("Capital (₹)", value=100000)
-        max_trades = st.slider("Max Trades per Day", 1, 10, 3)
-
-        st.subheader("📊 Running Strategy...")
-
+        # Track trades
         trades = []
-        in_trade = False
-        entry_price = 0
-        trade_time = None
-        trailing_sl = 0
-        sl_hit = pt_hit = time_exit = False
 
-        for i in range(21, len(df) - 3):
-            row = df.iloc[i]
-            prev_row = df.iloc[i - 1]
-            ref_candle = df.iloc[i]
+        for i in range(21, len(df)-2):
+            candle = df.iloc[i]
+            prev_candle = df.iloc[i-1]
 
-            # Step 2: 20 SMA Cross from below
-            if (
-                prev_row['close'] < prev_row['20sma'] and
-                ref_candle['close'] > ref_candle['20sma']
-            ):
-                # Step 3: Reference Candle closes above 20 SMA
-                if ref_candle['close'] > ref_candle['20sma']:
-                    # Step 4: Next candle must also close above 20 SMA
-                    next_row = df.iloc[i + 1]
-                    if next_row['low'] > ref_candle['20sma']:
-                        # Step 5: Reference candle marked
-                        pre_ref = df.iloc[i - 1]
-                        breakout_level = max(pre_ref['high'], pre_ref['close'])
+            # Step 2-4: 20 SMA Cross & confirmation
+            crossed_up = prev_candle['Close'] < prev_candle['20sma'] and candle['Close'] > candle['20sma']
+            closed_above = candle['Close'] > candle['20sma'] and candle['Low'] > candle['20sma']
 
-                        # Step 6 & 8: Entry if next candle crosses the breakout level
-                        trigger_row = df.iloc[i + 2]
-                        if trigger_row['high'] > breakout_level:
-                            entry_price = breakout_level
-                            sl = entry_price * (1 - stop_loss_pct / 100)
-                            target = entry_price * (1 + profit_target_pct / 100)
-                            trailing_sl = entry_price  # No-loss trail start
-                            trade_time = trigger_row.name
-                            entry_time_str = trade_time.strftime('%H:%M:%S')
+            if crossed_up and closed_above:
+                reference_candle = candle
+                prev2_candle = df.iloc[i-2]
 
-                            # Step 10: IV Check (IV simulated here as 17 for demo)
-                            implied_vol = 17  # Replace with actual data if needed
-                            if implied_vol >= iv_threshold:
-                                in_trade = True
-                                sl_hit = pt_hit = time_exit = False
-                                for j in range(i + 2, min(i + 10, len(df))):  # 10 min window
-                                    t_row = df.iloc[j]
-                                    if t_row['low'] < sl:
-                                        sl_hit = True
-                                        exit_price = sl
-                                        exit_time = t_row.name
-                                        break
-                                    elif t_row['high'] > target:
-                                        pt_hit = True
-                                        exit_price = target
-                                        exit_time = t_row.name
-                                        break
-                                else:
-                                    time_exit = True
-                                    exit_price = df.iloc[i + 11]['close']
-                                    exit_time = df.iloc[i + 11].name
+                ref_level = max(prev2_candle['High'], prev2_candle['Close'])
+                next_candle = df.iloc[i+1]
 
-                                trades.append({
-                                    "Entry Time": trade_time,
-                                    "Entry": entry_price,
-                                    "Exit Time": exit_time,
-                                    "Exit": round(exit_price, 2),
-                                    "Result": "Target" if pt_hit else "Stop Loss" if sl_hit else "Timed Exit",
-                                    "P&L": round(exit_price - entry_price, 2)
-                                })
+                if next_candle['High'] > ref_level:
+                    entry_price = next_candle['Close']
+                    sl_price = entry_price * 0.90
+                    target1 = entry_price * 1.05
+                    target2 = entry_price * 1.10
+                    target3 = entry_price * 1.15
+                    final_target = entry_price * 1.20
 
-        st.markdown("### 📜 Trade Log")
+                    trades.append({
+                        'Entry Time': next_candle.name,
+                        'Entry Price': round(entry_price, 2),
+                        'SL': round(sl_price, 2),
+                        'T1': round(target1, 2),
+                        'T2': round(target2, 2),
+                        'T3': round(target3, 2),
+                        'T4': round(final_target, 2),
+                        'Reference High': round(ref_level, 2)
+                    })
+
+        # Display trades
+        st.subheader("📈 Doctor2.0 Strategy Trades")
         if trades:
-            result_df = pd.DataFrame(trades)
-            result_df['P&L (%)'] = ((result_df['Exit'] - result_df['Entry']) / result_df['Entry']) * 100
-            st.dataframe(result_df)
-
-            total_profit = result_df['P&L'].sum()
-            st.success(f"💰 Total P&L: ₹{round(total_profit, 2)}")
+            trades_df = pd.DataFrame(trades)
+            st.dataframe(trades_df)
         else:
-            st.warning("No trades found based on the strategy conditions.")
-    
+            st.warning("No valid trades found based on strategy rules.")
 
 
 
