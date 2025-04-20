@@ -15,25 +15,32 @@ def fetch_data(stock_symbol, start_date, end_date):
 
 # Step 2: Check for Crossing of the Center Line (20 SMA)
 def check_crossing(data):
-    print("\n===> Initial columns in data:", list(data.columns))
+    print("\n===> Step 1: Columns present:", list(data.columns))
     
-    # Check if 'Close' column exists
     if 'Close' not in data.columns:
-        raise KeyError("'Close' column not found in DataFrame!")
+        print("❌ 'Close' column is missing!")
+        print("Data sample:\n", data.head())
+        raise KeyError("'Close' column not found. Cannot calculate SMA.")
 
-    # Calculate SMA_20
+    if data['Close'].isnull().all():
+        print("❌ All values in 'Close' column are NaN.")
+        print("Data sample:\n", data.head())
+        raise ValueError("'Close' column is full of NaNs.")
+
+    # Calculate SMA_20 safely
     data['SMA_20'] = data['Close'].rolling(window=20).mean()
+    
+    if 'SMA_20' not in data.columns or data['SMA_20'].isnull().all():
+        print("❌ 'SMA_20' not created properly.")
+        raise KeyError("'SMA_20' column is missing after calculation.")
 
-    print("===> Columns after SMA_20 calc:", list(data.columns))
-    print("===> Head preview:\n", data[['Close', 'SMA_20']].head(25))  # Check if SMA_20 is populated
+    print("✅ 'SMA_20' column created successfully.")
+    print(data[['Close', 'SMA_20']].head(25))
 
-    # Drop NaN rows
-    if 'SMA_20' in data.columns:
-        data = data.dropna(subset=['SMA_20'])
-    else:
-        raise KeyError("'SMA_20' column still not found after calculation!")
+    # Drop rows with NaN in SMA_20
+    data = data.dropna(subset=['SMA_20'])
 
-    # Crossing logic
+    # Mark crossings
     data['crossed'] = np.where(data['Close'] > data['SMA_20'], 1, 0)
 
     return data
