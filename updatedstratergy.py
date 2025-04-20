@@ -16,9 +16,13 @@ def fetch_data(stock_symbol, start_date, end_date):
 # Step 2: Check for Crossing of the Center Line (20 SMA)
 def check_crossing(data):
     data['SMA_20'] = data['Close'].rolling(window=20).mean()
+    
+    # Remove rows with NaN values in the 'SMA_20' column before comparison
+    data = data.dropna(subset=['SMA_20'])
+    
+    # Now perform the crossing check
     data['crossed'] = np.where(data['Close'] > data['SMA_20'], 1, 0)
     return data
-
 # Step 3: Add Implied Volatility check
 def check_iv(data, iv_threshold=16):
     # For this example, assume IV data is fetched from a separate function or API
