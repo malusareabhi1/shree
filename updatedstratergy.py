@@ -26,8 +26,15 @@ def check_crossing(data):
     if 'Close' not in data.columns:
         raise KeyError("❌ 'Close' column is missing in the DataFrame!")
 
-    if data['Close'].dropna().empty:
-        raise ValueError("❌ 'Close' column has no valid data (all values are NaN)!")
+    # Check if Close column has NaN values and handle them
+    st.write("Debug: Checking for NaN values in 'Close' column")
+    st.write(data['Close'].isna().sum())  # Display how many NaN values in 'Close'
+
+    # Drop NaN values from Close column before calculating SMA
+    data = data.dropna(subset=['Close'])
+
+    if data['Close'].empty:
+        raise ValueError("❌ 'Close' column has no valid data after dropping NaNs!")
 
     # Calculate the 20-period Simple Moving Average (SMA)
     data['SMA_20'] = data['Close'].rolling(window=20).mean()
@@ -125,4 +132,3 @@ if st.button("🚀 Fetch Data and Run Strategy"):
 
         except Exception as e:
             st.error(f"❌ Error during strategy logic: {e}")
-
