@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 # Function to fetch historical stock data
 def fetch_data(stock_symbol, start_date, end_date, interval="5m"):
     try:
+        # Fetching stock data
         data = yf.download(stock_symbol, start=start_date, end=end_date, interval=interval)
         data = data.dropna()  # Drop rows with NaN values
         return data
@@ -17,6 +18,11 @@ def fetch_data(stock_symbol, start_date, end_date, interval="5m"):
 
 # Function to apply the crossing logic based on 20-period SMA
 def check_crossing(data):
+    # Debugging: Show first few rows and columns
+    st.write("Debug: Checking available columns and first few rows of the data:")
+    st.write(data.head())
+    st.write("Columns:", data.columns.tolist())
+
     if 'Close' not in data.columns:
         raise KeyError("❌ 'Close' column is missing in the DataFrame!")
 
@@ -26,10 +32,12 @@ def check_crossing(data):
     # Calculate the 20-period Simple Moving Average (SMA)
     data['SMA_20'] = data['Close'].rolling(window=20).mean()
 
-    # Debug: Check if the 'SMA_20' column is created correctly
-    if 'SMA_20' not in data.columns:
-        raise KeyError("❌ 'SMA_20' column was not created!")
-    if data['SMA_20'].isna().all():
+    # Debugging: Check if the SMA_20 column is created correctly
+    st.write("Debug: First few rows after SMA_20 calculation:")
+    st.write(data[['Close', 'SMA_20']].head())
+
+    # Check if SMA_20 is valid
+    if 'SMA_20' not in data.columns or data['SMA_20'].isna().all():
         raise ValueError("❌ 'SMA_20' column has all NaN values!")
 
     # Drop rows with NaN values in SMA_20
@@ -117,3 +125,4 @@ if st.button("🚀 Fetch Data and Run Strategy"):
 
         except Exception as e:
             st.error(f"❌ Error during strategy logic: {e}")
+
