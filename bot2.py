@@ -135,6 +135,56 @@ if selected == "Dashboard":
         except Exception as e:
             st.error(f"Failed to fetch positions: {e}")
 
+                    # 📈 Live NIFTY 50 Price Chart
+        st.subheader("📈 Live NIFTY 50 Chart")
+
+       
+
+        # Setup live prices tracking
+        if 'live_prices' not in st.session_state:
+            st.session_state.live_prices = []
+
+        if 'ws_started' not in st.session_state:
+            def start_websocket():
+                try:
+                    kws = KiteTicker(api_key, st.session_state.access_token)
+                    
+                    def on_ticks(ws, ticks):
+                        for tick in ticks:
+                            price = tick['last_price']
+                            timestamp = datetime.now()
+                            st.session_state.live_prices.append((timestamp, price))
+                            if len(st.session_state.live_prices) > 100:
+                                st.session_state.live_prices.pop(0)
+
+                    def on_connect(ws, response):
+                        ws.subscribe([256265])  # Token for NIFTY 50 spot
+
+                    def on_close(ws, code, reason):
+                        print("WebSocket closed:", reason)
+
+                    kws.on_ticks = on_ticks
+                    kws.on_connect = on_connect
+                    kws.on_close = on_close
+                    kws.connect(threaded=True)
+                except Exception as e:
+                    print("WebSocket Error:", e)
+
+            thread = threading.Thread(target=start_websocket, daemon=True)
+            thread.start()
+            st.session_state.ws_started = True
+
+        # Display the chart
+        def show_chart():
+            if st.session_state.live_prices:
+                df = pd.DataFrame(st.session_state.live_prices, columns=["Time", "Price"])
+                fig = go.Figure(data=[go.Scatter(x=df["Time"], y=df["Price"], mode="lines+markers")])
+                fig.update_layout(title="NIFTY 50 Live Price", xaxis_title="Time", yaxis_title="Price", height=400)
+                st.plotly_chart(fig, use_container_width=True)
+
+        show_chart()
+
+
     else:
         st.warning("Please login to Kite Connect first.")
         
