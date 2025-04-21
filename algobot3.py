@@ -345,6 +345,12 @@ elif selected == "Doctor Strategy":
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
         st.success("File uploaded successfully")
+        # Convert to datetime and localize/convert timezone
+        df['Datetime'] = pd.to_datetime(df['Datetime'])
+        df['Datetime'] = df['Datetime'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
+        
+        # Filter only market hours
+        df = df[df['Datetime'].dt.time.between(pd.to_datetime('09:15:00').time(), pd.to_datetime('15:30:00').time())]
 
         if "Close" not in df.columns:
             st.error("CSV must contain a 'Close' column")
