@@ -3,11 +3,11 @@ import yfinance as yf
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
-    st.set_page_config(page_title="📈 Candlestick Chart with Date Range", layout="wide")
-    st.title("📊 Candlestick Chart Viewer")
+st.set_page_config(page_title="📈 Candlestick Chart with Date Range", layout="wide")
+st.title("📊 Candlestick Chart Viewer")
     
-    uploaded_file = st.file_uploader("Upload CSV file with Date, Open, High, Low, Close columns", type=["csv"])
-    if uploaded_file is not None:
+uploaded_file = st.file_uploader("Upload CSV file with Date, Open, High, Low, Close columns", type=["csv"])
+if uploaded_file is not None:
         df = pd.read_csv(uploaded_file, parse_dates=["Date"])
         df.columns = df.columns.str.strip()
         required_cols = {"Date","Open","High","Low","Close"}
@@ -43,5 +43,6 @@ from datetime import datetime, timedelta
                 st.plotly_chart(fig, use_container_width=True)
     else:
         st.info("Please upload a CSV file to view the chart.")
+    
 
    
