@@ -1648,7 +1648,7 @@ elif selected == "Strategy2.0 Detail":
         IV alert (if below 16%, don’t trade)
                     """)
 
-elif selected == "Doctor3.0  Strategy":
+elif selected == "Doctor3.0 Strategy":
     st.title("⚙️ Test Doctor3.0 Strategy")
 
     st.markdown("""
