@@ -2,16 +2,22 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 
-# Set Streamlit page config first!
+# 🔹 Must be first Streamlit command
 st.set_page_config(page_title="📈 NIFTY 100 Stocks", layout="wide")
 
-# Title
-st.title("📊 NIFTY 100 Stock Overview")
-st.caption("Live Close, % Change, and Volume")
+st.title("📊 NIFTY 100 Stocks Live Overview")
 
-# NIFTY 100 stock symbols (partial for example, full list recommended)
+# ✅ Define highlight function BEFORE using it
+def highlight_change(val):
+    try:
+        color = 'green' if val > 0 else 'red'
+        return f'background-color: {color}; color: white'
+    except:
+        return ''
+
+# 🔸 NIFTY 100 stock symbols (Yahoo format)
 nifty100_symbols = [
-   "RELIANCE.NS", "TCS.NS", "HDFCBANK.NS", "ICICIBANK.NS", "INFY.NS", "LT.NS", "ITC.NS", "SBIN.NS", "AXISBANK.NS",
+    "RELIANCE.NS", "TCS.NS", "HDFCBANK.NS", "ICICIBANK.NS", "INFY.NS", "LT.NS", "ITC.NS", "SBIN.NS", "AXISBANK.NS",
     "HINDUNILVR.NS", "BHARTIARTL.NS", "KOTAKBANK.NS", "BAJFINANCE.NS", "ASIANPAINT.NS", "MARUTI.NS", "DMART.NS",
     "HCLTECH.NS", "SUNPHARMA.NS", "WIPRO.NS", "ULTRACEMCO.NS", "NTPC.NS", "TITAN.NS", "POWERGRID.NS", "TATASTEEL.NS",
     "JSWSTEEL.NS", "ADANIENT.NS", "ADANIPORTS.NS", "HDFCLIFE.NS", "BAJAJFINSV.NS", "BPCL.NS", "CIPLA.NS", "DIVISLAB.NS",
@@ -23,48 +29,33 @@ nifty100_symbols = [
     "ICICIGI.NS", "BOSCHLTD.NS", "CANBK.NS", "BANDHANBNK.NS", "INDIGO.NS", "PAGEIND.NS", "LUPIN.NS", "PFC.NS", "PNB.NS",
     "RECLTD.NS", "IDFCFIRSTB.NS", "BEL.NS", "IRCTC.NS", "POLYCAB.NS", "SYNGENE.NS", "ABB.NS", "INDUSTOWER.NS",
     "MARICO.NS", "BANKBARODA.NS", "MCDOWELL-N.NS", "AUBANK.NS", "BHEL.NS", "ATGL.NS", "HAL.NS", "JINDALSTEL.NS"
-
-    # Add remaining NIFTY 100 tickers here...
 ]
 
-# Progress bar
-progress = st.progress(0)
+# 🔹 Download last 2 days to compute % change
+data = yf.download(tickers=nifty100_symbols, period="2d", interval="1d", group_by='ticker', progress=False)
 
-# Empty list for storing data
 stock_data = []
 
-for i, symbol in enumerate(nifty100_symbols):
+for symbol in nifty100_symbols:
     try:
-        ticker = yf.Ticker(symbol)
-        df = ticker.history(period='1d', interval='1m')
-        if not df.empty:
-            last = df.iloc[-1]
-            first = df.iloc[0]
-            close = round(last['Close'], 2)
-            change_pct = round(((last['Close'] - first['Close']) / first['Close']) * 100, 2)
-            volume = int(last['Volume'])
-            stock_data.append({
-                "Symbol": symbol.replace(".NS", ""),
-                "Close": close,
-                "Change %": change_pct,
-                "Volume": volume
-            })
-    except Exception as e:
-        st.warning(f"Failed to fetch {symbol}: {e}")
+        df = data[symbol]
+        close_yesterday = df['Close'].iloc[0]
+        close_today = df['Close'].iloc[1]
+        volume_today = df['Volume'].iloc[1]
+        pct_change = ((close_today - close_yesterday) / close_yesterday) * 100
 
-    progress.progress((i + 1) / len(nifty100_symbols))
+        stock_data.append({
+            'Symbol': symbol.replace(".NS", ""),
+            'Close': round(close_today, 2),
+            '% Change': round(pct_change, 2),
+            'Volume': int(volume_today)
+        })
+    except:
+        continue
 
-# Create DataFrame
-df_final = pd.DataFrame(stock_data)
-df_final = df_final.sort_values(by="Change %", ascending=False)
+df_stocks = pd.DataFrame(stock_data)
 
+# ✅ Use the highlight function here
+styled_df = df_stocks.style.applymap(highlight_change, subset=['% Change'])
 
-#  Apply color formatting
-def highlight_change(val):
-    color = 'green' if val > 0 else 'red'
-    return f'background-color: {color}; color: white'
-# Show data table
-#st.dataframe(df_final, use_container_width=True)
-# 🔹 Display styled DataFrame
-st.dataframe(df_stocks.style.applymap(highlight_change, subset=['% Change']), use_container_width=True)
-
+st.dataframe(styled_df, use_container_width=True)
