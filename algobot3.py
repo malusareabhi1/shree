@@ -346,8 +346,8 @@ elif selected == "Doctor Strategy":
         df = pd.read_csv(uploaded_file)
         st.success("File uploaded successfully")
         # Convert to datetime and localize/convert timezone
-        df['Datetime'] = pd.to_datetime(df['Datetime'])
-        df['Datetime'] = df['Datetime'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
+        df['Date'] = pd.to_datetime(df['Date'])
+        df['Date'] = df['Date'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
         
         # Filter only market hours
         df = df[df['Datetime'].dt.time.between(pd.to_datetime('09:15:00').time(), pd.to_datetime('15:30:00').time())]
