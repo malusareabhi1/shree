@@ -59,7 +59,17 @@ st.markdown("""
 
 if selected == "Dashboard":
     st.subheader("📊 Dashboard - Zerodha Account Overview")       
-
+    # Get current time in UTC
+    utc_now = datetime.datetime.utcnow()
+    
+    # Define the Indian time zone
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    
+    # Localize the UTC time to IST
+    ist_now = utc_now.replace(tzinfo=pytz.utc).astimezone(ist_timezone)
+    
+    # Display the time in Streamlit
+    st.write("Current time in IST:", ist_now.strftime("%Y-%m-%d %H:%M:%S %Z%z"))
     if "kite" in st.session_state and st.session_state.kite is not None:
         kite = st.session_state.kite
 
