@@ -12,6 +12,7 @@ from kiteconnect import KiteConnect
 import time
 import threading
 
+
 # Global kite object placeholder
 if 'kite' not in st.session_state:
     st.session_state.kite = None
