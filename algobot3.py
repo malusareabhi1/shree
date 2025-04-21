@@ -439,7 +439,7 @@ elif selected == "Doctor Strategy":
 
 
 elif selected == "Doctor1.0 Strategy":
-    st.title("⚙️ Test Trade Strategy")
+    st.title("⚙️ Test Doctor1.0 Strategy ")
 
     uploaded_file = st.file_uploader("Upload CSV file", type="csv")
     capital = st.number_input("Capital Allocation (₹)", value=50000)
