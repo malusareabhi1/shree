@@ -64,7 +64,7 @@ def highlight_change(val):
     color = 'green' if val > 0 else 'red'
     return f'background-color: {color}; color: white'
 # Show data table
-st.dataframe(df_final, use_container_width=True)
+#st.dataframe(df_final, use_container_width=True)
 # 🔹 Display styled DataFrame
 st.dataframe(df_stocks.style.applymap(highlight_change, subset=['% Change']), use_container_width=True)
 
