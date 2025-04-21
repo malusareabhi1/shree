@@ -14,3 +14,4 @@ setuptools
 kiteconnect
 ta
 pandas_ta
+streamlit-autorefresh
