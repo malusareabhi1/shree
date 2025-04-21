@@ -330,79 +330,86 @@ elif selected == "Get Stock Data":
 
 
 elif selected == "Test Strategy":
-    st.title("⚙️ Test Trade Strategy")
+    st.title("⚙️ Test Trade Strategy (From CSV File)")
 
-    ticker = st.selectbox("Select NIFTY 50 Stock", ["^NSE","RELIANCE.NS", "TCS.NS", "INFY.NS", "ICICIBANK.NS", "HDFCBANK.NS"])
-    start_date = st.date_input("Start Date", datetime(2024, 1, 1))
-    end_date = st.date_input("End Date", datetime.today())
-    interval = st.selectbox("Interval", ["5m", "15m", "30m", "1h", "1d"])
+    uploaded_file = st.sidebar.file_uploader("Upload OHLCV CSV File", type=["csv"])
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file)
 
-    data = yf.download(ticker, start=start_date, end=end_date, interval=interval)
-    if data.empty:
-        st.warning("No data found for selected ticker and date range.")
-        st.stop()
+        # Normalize column names
+        df.columns = [col.strip().capitalize() for col in df.columns]
 
-    df = data.copy()
-    df = df.dropna()
-    df.reset_index(inplace=True)
+        # Check for required columns
+        required_cols = {"Datetime", "Open", "High", "Low", "Close", "Volume"}
+        if not required_cols.issubset(set(df.columns)):
+            st.error(f"CSV must contain the following columns: {required_cols}")
+            st.stop()
 
-    # Indicators
-    df['SMA20'] = df['Close'].rolling(window=20).mean()
-    df['STD'] = df['Close'].rolling(window=20).std()
-    df['UpperBand'] = df['SMA20'] + 2 * df['STD']
-    df['LowerBand'] = df['SMA20'] - 2 * df['STD']
-    df['AvgVolume'] = df['Volume'].rolling(window=20).mean()
+        # Convert datetime
+        df["Datetime"] = pd.to_datetime(df["Datetime"])
+        df.sort_values("Datetime", inplace=True)
+        df.reset_index(drop=True, inplace=True)
 
-    # Strategy Logic
-    df['Signal'] = df.apply(
-        lambda row: 'BUY' if row['Close'] > row['UpperBand'] and row['Close'] > row['SMA20'] and row['Volume'] > row['AvgVolume']
-        else 'SELL' if row['Close'] < row['LowerBand'] and row['Close'] < row['SMA20'] and row['Volume'] > row['AvgVolume']
-        else None, axis=1
-    )
+        # Indicators
+        df['SMA20'] = df['Close'].rolling(window=20).mean()
+        df['STD'] = df['Close'].rolling(window=20).std()
+        df['UpperBand'] = df['SMA20'] + 2 * df['STD']
+        df['LowerBand'] = df['SMA20'] - 2 * df['STD']
+        df['AvgVolume'] = df['Volume'].rolling(window=20).mean()
 
-    # Avoid repeat signals
-    last_signal = None
-    filtered_signals = []
-    for signal in df['Signal']:
-        if signal != last_signal and signal is not None:
-            filtered_signals.append(signal)
-            last_signal = signal
-        else:
-            filtered_signals.append(None)
-    df['Filtered_Signal'] = filtered_signals
+        # Strategy Logic
+        df['Signal'] = df.apply(
+            lambda row: 'BUY' if row['Close'] > row['UpperBand'] and row['Close'] > row['SMA20'] and row['Volume'] > row['AvgVolume']
+            else 'SELL' if row['Close'] < row['LowerBand'] and row['Close'] < row['SMA20'] and row['Volume'] > row['AvgVolume']
+            else None, axis=1
+        )
 
-    # Candlestick Chart
-    fig = go.Figure(data=[
-        go.Candlestick(
-            x=df['Datetime'], open=df['Open'], high=df['High'],
-            low=df['Low'], close=df['Close'], name='Candles'
-        ),
-        go.Scatter(x=df['Datetime'], y=df['SMA20'], mode='lines', name='SMA20'),
-        go.Scatter(x=df['Datetime'], y=df['UpperBand'], mode='lines', name='Upper Band'),
-        go.Scatter(x=df['Datetime'], y=df['LowerBand'], mode='lines', name='Lower Band')
-    ])
+        # Filter duplicate signals
+        last_signal = None
+        filtered_signals = []
+        for signal in df['Signal']:
+            if signal != last_signal and signal is not None:
+                filtered_signals.append(signal)
+                last_signal = signal
+            else:
+                filtered_signals.append(None)
+        df['Filtered_Signal'] = filtered_signals
 
-    buy_signals = df[df['Filtered_Signal'] == 'BUY']
-    sell_signals = df[df['Filtered_Signal'] == 'SELL']
+        # Chart
+        fig = go.Figure(data=[
+            go.Candlestick(
+                x=df['Datetime'], open=df['Open'], high=df['High'],
+                low=df['Low'], close=df['Close'], name='Candles'
+            ),
+            go.Scatter(x=df['Datetime'], y=df['SMA20'], mode='lines', name='SMA20'),
+            go.Scatter(x=df['Datetime'], y=df['UpperBand'], mode='lines', name='Upper Band'),
+            go.Scatter(x=df['Datetime'], y=df['LowerBand'], mode='lines', name='Lower Band')
+        ])
 
-    fig.add_trace(go.Scatter(x=buy_signals['Datetime'], y=buy_signals['Close'],
-                             mode='markers', name='BUY',
-                             marker=dict(symbol='triangle-up', size=10, color='green')))
-    fig.add_trace(go.Scatter(x=sell_signals['Datetime'], y=sell_signals['Close'],
-                             mode='markers', name='SELL',
-                             marker=dict(symbol='triangle-down', size=10, color='red')))
+        buy_signals = df[df['Filtered_Signal'] == 'BUY']
+        sell_signals = df[df['Filtered_Signal'] == 'SELL']
 
-    fig.update_layout(title=f"Test Strategy - {ticker}", xaxis_rangeslider_visible=False)
-    st.plotly_chart(fig, use_container_width=True)
+        fig.add_trace(go.Scatter(x=buy_signals['Datetime'], y=buy_signals['Close'],
+                                 mode='markers', name='BUY',
+                                 marker=dict(symbol='triangle-up', size=10, color='green')))
+        fig.add_trace(go.Scatter(x=sell_signals['Datetime'], y=sell_signals['Close'],
+                                 mode='markers', name='SELL',
+                                 marker=dict(symbol='triangle-down', size=10, color='red')))
 
-    # Trade Log
-    df_signals = df[df['Filtered_Signal'].notnull()][['Datetime', 'Filtered_Signal', 'Close']]
-    df_signals.columns = ['Datetime', 'Signal', 'Price']
-    st.subheader("📋 Trade Log")
-    st.dataframe(df_signals)
+        fig.update_layout(title="Doctor Strategy 2.0 Signals", xaxis_rangeslider_visible=False)
+        st.plotly_chart(fig, use_container_width=True)
 
-    csv = df_signals.to_csv(index=False).encode()
-    st.download_button("Download Trade Log CSV", data=csv, file_name="test_strategy_trades.csv", mime='text/csv')
+        # Trade Log
+        df_signals = df[df['Filtered_Signal'].notnull()][['Datetime', 'Filtered_Signal', 'Close']]
+        df_signals.columns = ['Datetime', 'Signal', 'Price']
+        st.subheader("📋 Trade Log")
+        st.dataframe(df_signals)
+
+        csv = df_signals.to_csv(index=False).encode()
+        st.download_button("Download Trade Log CSV", data=csv, file_name="doctor_strategy_signals.csv", mime='text/csv')
+
+    else:
+        st.info("Please upload a CSV file with OHLCV data to test the strategy.")
 
             
 elif selected == "Trade Log":
