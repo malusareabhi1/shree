@@ -6,6 +6,10 @@ import numpy as np
 # Function to fetch stock data
 def fetch_data(stock, start, end):
     data = yf.download(stock, start=start, end=end)
+    # Flatten MultiIndex columns if any
+    if isinstance(data.columns, pd.MultiIndex):
+        data.columns = ['_'.join(col).strip() if isinstance(col, tuple) else col for col in data.columns]
+
     return data
 
 # Function to calculate the 14-day RSI
