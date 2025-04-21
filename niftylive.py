@@ -1,29 +1,23 @@
 import streamlit as st
 import yfinance as yf
-import pandas as pd
-import time
+from streamlit_autorefresh import st_autorefresh
 
-st.set_page_config(page_title="NIFTY 50 Live Chart", layout="wide")
+# Autorefresh every 60 seconds (60000 ms)
+st_autorefresh(interval=60000, key="refresh")
 
-st.title("📈 NIFTY 50 Live Chart")
+st.set_page_config(page_title="📊 NIFTY 50 Live Chart", layout="wide")
 
-# Load NIFTY 50 Index
+st.title("📈 NIFTY 50 Live Chart (1-min)")
+
+# Fetch live data from Yahoo Finance
 ticker = "^NSEI"
-
-# Auto refresh toggle
-refresh = st.checkbox("Auto-refresh every 60 seconds", value=True)
-
-# Live price
 nifty = yf.Ticker(ticker)
 data = nifty.history(period="1d", interval="1m")
-live_price = data["Close"].iloc[-1]
 
-st.metric(label="NIFTY 50 Live Price", value=f"{live_price:.2f}")
-
-# Plot chart
-st.line_chart(data["Close"])
-
-# Optional auto-refresh
-if refresh:
-    time.sleep(60)
-    st.experimental_rerun()
+# Get the latest price
+if not data.empty:
+    live_price = data["Close"].iloc[-1]
+    st.metric(label="NIFTY 50 Live Price", value=f"{live_price:.2f}")
+    st.line_chart(data["Close"])
+else:
+    st.warning("⚠️ Failed to fetch data. Please check your internet connection or try again later.")
