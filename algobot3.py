@@ -431,8 +431,6 @@ elif selected == "Doctor Strategy":
                 file_name="signal_output.csv",
                 mime="text/csv"
             )
-        
-    
 
   
     
