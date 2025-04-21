@@ -58,10 +58,7 @@ st.markdown("""
 
 
 if selected == "Dashboard":
-    st.subheader("📊 Dashboard - Zerodha Account Overview")
-    
-
-        
+    st.subheader("📊 Dashboard - Zerodha Account Overview")       
 
     if "kite" in st.session_state and st.session_state.kite is not None:
         kite = st.session_state.kite
