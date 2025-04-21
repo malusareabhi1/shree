@@ -345,12 +345,24 @@ elif selected == "Doctor Strategy":
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
         st.success("File uploaded successfully")
-        # Convert to datetime and localize/convert timezone
+
+        # Convert 'Date' to datetime if it's not already
         df['Date'] = pd.to_datetime(df['Date'])
-        df['Date'] = df['Date'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
         
-        # Filter only market hours
-        df = df[df['Datetime'].dt.time.between(pd.to_datetime('09:15:00').time(), pd.to_datetime('15:30:00').time())]
+        # Check if the 'Date' column is timezone-aware
+        if df['Date'].dt.tz is None:
+            # If naive (no timezone), localize to UTC and convert to Asia/Kolkata
+            df['Date'] = df['Date'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
+        else:
+            # If already timezone-aware, just convert to Asia/Kolkata
+            df['Date'] = df['Date'].dt.tz_convert('Asia/Kolkata')
+        
+        # Now you can filter the times for 9:15 AM to 3:30 PM market hours
+        df = df[df['Date'].dt.time.between(pd.to_datetime('09:15:00').time(), pd.to_datetime('15:30:00').time())]
+        
+        # Display the final DataFrame
+        print(df.head())
+       
 
         if "Close" not in df.columns:
             st.error("CSV must contain a 'Close' column")
