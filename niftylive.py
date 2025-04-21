@@ -2,7 +2,7 @@ import streamlit as st
 import yfinance as yf
 
 # 🛠️ This MUST be the first Streamlit command!
-st.set_page_config(page_title="📊 NIFTY 50 Live Chart", layout="wide")
+#st.set_page_config(page_title="📊 NIFTY 50 Live Chart", layout="wide")
 
 st.title("📈 NIFTY 50 Live Chart (1-min)")
 
