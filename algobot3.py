@@ -332,10 +332,10 @@ elif selected == "Get Stock Data":
 elif selected == "Test Strategy":
     st.title("⚙️ Test Trade Strategy")
 
-    ticker = st.sidebar.selectbox("Select NIFTY 50 Stock", ["RELIANCE.NS", "TCS.NS", "INFY.NS", "ICICIBANK.NS", "HDFCBANK.NS"])
-    start_date = st.sidebar.date_input("Start Date", datetime(2024, 1, 1))
-    end_date = st.sidebar.date_input("End Date", datetime.today())
-    interval = st.sidebar.selectbox("Interval", ["5m", "15m", "30m", "1h", "1d"])
+    ticker = st.selectbox("Select NIFTY 50 Stock", ["RELIANCE.NS", "TCS.NS", "INFY.NS", "ICICIBANK.NS", "HDFCBANK.NS"])
+    start_date = st.date_input("Start Date", datetime(2024, 1, 1))
+    end_date = st.date_input("End Date", datetime.today())
+    interval = st.selectbox("Interval", ["5m", "15m", "30m", "1h", "1d"])
 
     data = yf.download(ticker, start=start_date, end=end_date, interval=interval)
     if data.empty:
