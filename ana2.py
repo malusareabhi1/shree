@@ -6,7 +6,7 @@ import matplotlib.dates as mdates
 from datetime import datetime, timedelta
 
 # Define the stock symbol and timeframe
-symbol = 'DIS'
+symbol = 'INFY'
 end_date = datetime.today()
 start_date = end_date - timedelta(days=120)  # 4 months before today
 
