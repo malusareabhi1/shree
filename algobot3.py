@@ -329,7 +329,7 @@ elif selected == "Get Stock Data":
     
 
 
-elif selected == "Test Strategy":
+elif selected == "Doctor Strategy":
     st.title("⚙️ Test Trade Strategy")
 
     uploaded_file = st.file_uploader("Upload CSV file", type="csv")
