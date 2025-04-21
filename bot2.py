@@ -854,7 +854,63 @@ elif selected == "KITE API":
             st.error(f"Error generating login URL: {e}")
     else:
         st.info("Please enter your API Key and Secret to continue.")
-
+      
+       
+        import threading
+        
+        # Global data holder for NIFTY live prices
+        if 'live_prices' not in st.session_state:
+            st.session_state.live_prices = []
+        
+        st.subheader("📊 Live NIFTY Chart")
+        
+        nifty_token = 256265  # NIFTY 50 index token
+        
+        # Initialize KiteTicker
+        kws = KiteTicker(api_key, data["access_token"])
+        
+        def on_ticks(ws, ticks):
+            for tick in ticks:
+                price = tick['last_price']
+                timestamp = datetime.now()
+                st.session_state.live_prices.append((timestamp, price))
+                if len(st.session_state.live_prices) > 100:
+                    st.session_state.live_prices.pop(0)
+        
+        def on_connect(ws, response):
+            ws.subscribe([nifty_token])
+        
+        def on_close(ws, code, reason):
+            print("WebSocket closed:", reason)
+        
+        kws.on_ticks = on_ticks
+        kws.on_connect = on_connect
+        kws.on_close = on_close
+        
+        # Start websocket in thread
+        def run_websocket():
+            kws.connect(threaded=True)
+        
+        if 'ws_thread' not in st.session_state:
+            ws_thread = threading.Thread(target=run_websocket, daemon=True)
+            ws_thread.start()
+            st.session_state.ws_thread = ws_thread
+        
+        # Live chart plot
+        def show_live_chart():
+            if st.session_state.live_prices:
+                df = pd.DataFrame(st.session_state.live_prices, columns=['Time', 'Price'])
+                fig = go.Figure(data=[go.Scatter(x=df['Time'], y=df['Price'], mode='lines+markers')])
+                fig.update_layout(title="📈 NIFTY 50 Live Price", xaxis_title="Time", yaxis_title="Price", height=400)
+                st.plotly_chart(fig, use_container_width=True)
+        
+        # Auto-refresh every 5 seconds
+        st_autorefresh = st.empty()
+        for _ in range(200):
+            with st_autorefresh.container():
+                show_live_chart()
+            time.sleep(5)
+        #############################################################################################################################
 elif selected == "PaperTrade":
 
     st.subheader("📊 Backtest + Paper Trading Simulator")
