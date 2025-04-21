@@ -714,7 +714,6 @@ elif selected == "Swing Trade Strategy":
 
 
 elif selected == "Intraday Stock Finder":
-
     st.subheader("📊 Intraday Stock Finder (Simulated on NIFTY 50)")
 
     # --- Mock NIFTY 50 stock data for simulation ---
@@ -777,33 +776,34 @@ elif selected == "Intraday Stock Finder":
                         })
         return shortlisted
 
-        # --- Run scanner ---
-        mock_stocks = generate_mock_data()
-        result = scan_intraday_stocks(mock_stocks)
-        
-        # --- Display results ---
-        if result:
-            df = pd.DataFrame(result)
-            st.success(f"{len(df)} stocks shortlisted for intraday trading")
-            st.dataframe(df, use_container_width=True)
-        
-            # --- CSV Export ---
-            csv = df.to_csv(index=False).encode("utf-8")
-            st.download_button("⬇️ Download CSV", csv, "intraday_shortlist.csv", "text/csv")
-        
-            # --- Stock line chart selection ---
-            selected_symbol = st.selectbox("📈 Select stock to view mock intraday chart", df["symbol"].unique())
-        
-            if selected_symbol:
-                # Generate mock intraday line chart
-                times = pd.date_range("09:15", "15:30", freq="15min").strftime("%H:%M")
-                base_price = df[df["symbol"] == selected_symbol]["price"].values[0]
-                prices = [base_price * random.uniform(0.98, 1.02) for _ in times]
-        
-                st.line_chart(pd.DataFrame({"Time": times, "Price": prices}).set_index("Time"))
-        
-        else:
-            st.warning("No suitable intraday stocks found based on current filters.")
+    # --- Run scanner ---
+    mock_stocks = generate_mock_data()
+    result = scan_intraday_stocks(mock_stocks)
+
+    # --- Display results ---
+    if result:
+        df = pd.DataFrame(result)
+        st.success(f"{len(df)} stocks shortlisted for intraday trading")
+        st.dataframe(df, use_container_width=True)
+
+        # --- CSV Export ---
+        csv = df.to_csv(index=False).encode("utf-8")
+        st.download_button("⬇️ Download CSV", csv, "intraday_shortlist.csv", "text/csv")
+
+        # --- Stock line chart selection ---
+        selected_symbol = st.selectbox("📈 Select stock to view mock intraday chart", df["symbol"].unique())
+
+        if selected_symbol:
+            # Generate mock intraday line chart
+            times = pd.date_range("09:15", "15:30", freq="15min").strftime("%H:%M")
+            base_price = df[df["symbol"] == selected_symbol]["price"].values[0]
+            prices = [base_price * random.uniform(0.98, 1.02) for _ in times]
+
+            st.line_chart(pd.DataFrame({"Time": times, "Price": prices}).set_index("Time"))
+
+    else:
+        st.warning("No suitable intraday stocks found based on current filters.")
+
 
 elif selected == "Alpha Vantage API":
     st.subheader("📈 Stock Data from Alpha Vantage")
