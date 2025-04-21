@@ -110,9 +110,13 @@ if stock:
         st.write(f"**Technical Setup Observed:**")
         st.write(summary)
 
-        # Plot stock data
-        st.subheader("📉 Stock Price and Indicators")
-        st.line_chart(data[['Close', 'SMA50', 'SMA200']])
+        # Plot stock data with indicator check
+        plot_cols = [c for c in ['Close','SMA50','SMA200'] if c in data.columns]
+        if plot_cols:
+            st.subheader("📉 Stock Price and Indicators")
+            st.line_chart(data[plot_cols])
+        else:
+            st.warning("Not enough data to plot SMAs. Please ensure your date range is long enough for SMA calculations.")
 
     else:
         st.error(f"No data available for {stock.upper()}. Please try a different stock symbol.")
