@@ -27,7 +27,7 @@ with st.sidebar:
         "Intraday Stock Finder", "Trade Log", "Account Info", "Candle Chart", "Strategy Detail","Strategy2.0 Detail", "Project Detail", "KITE API", "API","Alpha Vantage API","Live Algo Trading"
     ],
     icons=[
-        "bar-chart", "search", "cpu", "cpu", "arrow-repeat",
+        "bar-chart", "search", "cpu", "cpu","cpu", "arrow-repeat",
         "search", "clipboard-data", "wallet2", "graph-up", "info-circle", "file-earmark","file-earmark", "code-slash", "code-slash", "code-slash","journal-text"
     ],
     menu_icon="cast",
@@ -322,6 +322,115 @@ elif selected == "Get Stock Data":
     
         except Exception as e:
             st.error(f"❌ Error fetching data: {e}")
+
+elif selected == "Doctor Strategy":
+    st.title("⚙️ Test Trade Strategy")
+
+    uploaded_file = st.file_uploader("Upload CSV file", type="csv")
+    capital = st.number_input("Capital Allocation (₹)", value=50000)
+
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file)
+        st.success("File uploaded successfully")
+
+        if "Close" not in df.columns:
+            st.error("CSV must contain a 'Close' column")
+        else:
+            # Example strategy: Buy if Close increases by 5 points, Sell if it decreases by 5 points
+            df['Signal'] = df['Close'].diff().apply(lambda x: 'BUY' if x > 5 else 'SELL' if x < -5 else None)
+            df.dropna(subset=['Signal'], inplace=True)
+
+            # Generate the trade log
+            trade_log = pd.DataFrame({
+                "Date": df['Date'],
+                "Stock": "TEST-STOCK",
+                "Action": df['Signal'],
+                "Price": df['Close'],
+                "Qty": 10,
+                "PnL": df['Close'].diff().fillna(0) * 10  # Example
+            })
+
+            # Calculate net PnL and other stats
+            net_pnl = trade_log["PnL"].sum()
+            win_trades = trade_log[trade_log["PnL"] > 0].shape[0]
+            lose_trades = trade_log[trade_log["PnL"] < 0].shape[0]
+            last_order = f"{trade_log.iloc[-1]['Action']} - TEST-STOCK - 10 shares @ {trade_log.iloc[-1]['Price']}"
+
+            # Store to session state for Account Info
+            st.session_state['net_pnl'] = float(net_pnl)
+            st.session_state['used_capital'] = capital
+            st.session_state['open_positions'] = {"TEST-STOCK": {"Qty": 10, "Avg Price": round(df['Close'].iloc[-1], 2)}}
+            st.session_state['last_order'] = last_order
+
+            # Results
+            st.metric("Net PnL", f"₹{net_pnl:.2f}")
+            st.metric("Winning Trades", win_trades)
+            st.metric("Losing Trades", lose_trades)
+            st.dataframe(trade_log)
+
+            # CSV download button
+            csv = trade_log.to_csv(index=False).encode("utf-8")
+            st.download_button("📥 Download Trade Log", data=csv, file_name="trade_log.csv", mime="text/csv")
+            st.session_state['trade_log_df'] = trade_log  # Store trade log in session
+
+            # Create a Candlestick chart
+            fig = go.Figure(data=[go.Candlestick(
+                x=df['Date'],
+                open=df['Open'],
+                high=df['High'],
+                low=df['Low'],
+                close=df['Close'],
+                increasing_line_color='green',
+                decreasing_line_color='red',
+            )])
+            
+
+            # Mark BUY and SELL signals on the chart
+            buy_signals = df[df['Signal'] == 'BUY']
+            sell_signals = df[df['Signal'] == 'SELL']
+
+            fig.add_trace(go.Scatter(
+                x=buy_signals['Date'],
+                y=buy_signals['Close'],
+                mode='markers',
+                name='Buy Signal',
+                marker=dict(symbol='triangle-up', color='green', size=12)
+            ))
+
+            fig.add_trace(go.Scatter(
+                x=sell_signals['Date'],
+                y=sell_signals['Close'],
+                mode='markers',
+                name='Sell Signal',
+                marker=dict(symbol='triangle-down', color='red', size=12)
+            ))
+
+            # Update the chart layout
+            fig.update_layout(
+                #title=f'{stock} Candlestick Chart with Trade Entries and Exits',
+                #title=f' Candlestick Chart with Trade Entries and Exits',
+                xaxis_title='Date',
+                yaxis_title='Price (₹)',
+                xaxis_rangeslider_visible=False,  # Hide the range slider
+                template='plotly_dark',  # Use a dark template
+                hovermode='x unified',  # Hover across x-axis to get details
+            )
+
+            # Display the interactive candlestick chart
+            st.plotly_chart(fig)
+            # Convert 'BUY'/'SELL' signals to numeric form for backtesting compatibility
+            df['Signal_Code'] = df['Signal'].map({'BUY': 1, 'SELL': -1})
+            
+            # Save the DataFrame with signal for backtest/papertrade usage
+            csv_with_signal = df[["Date", "Open", "High", "Low", "Close", "Signal_Code"]]
+            csv_data = csv_with_signal.rename(columns={"Signal_Code": "Signal"}).to_csv(index=False).encode("utf-8")
+            
+            st.download_button(
+                label="📥 Download CSV with Signals",
+                data=csv_data,
+                file_name="signal_output.csv",
+                mime="text/csv"
+            )
         
     
 
@@ -329,7 +438,7 @@ elif selected == "Get Stock Data":
     
 
 
-elif selected == "Doctor Strategy":
+elif selected == "Doctor1.0 Strategy":
     st.title("⚙️ Test Trade Strategy")
 
     uploaded_file = st.file_uploader("Upload CSV file", type="csv")
