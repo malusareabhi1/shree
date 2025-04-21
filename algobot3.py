@@ -1647,3 +1647,114 @@ elif selected == "Strategy2.0 Detail":
         
         IV alert (if below 16%, don’t trade)
                     """)
+
+elif selected == "Doctor3.0  Strategy":
+    st.title("⚙️ Test Doctor3.0 Strategy")
+
+    st.markdown("""
+    ### 📋 Doctor 3.0 स्ट्रॅटेजी प्लॅन:
+
+    ✅ **चार्ट सेटअप**: 5 मिनिटांचा कँडलस्टिक चार्ट + Bollinger Band (20 SMA). 
+
+    ✅ **20 SMA क्रॉसिंग:**
+    - कँडलने 20 SMA लाईन खालून वर क्रॉस करून क्लोज केली पाहिजे.
+    - नंतरची कँडल ही 20 SMA ला touch न करता वर क्लोज झाली पाहिजे.
+
+    ✅ **Reference Candle Setup:**
+    - क्रॉस करणारी कँडल = Reference Candle
+    - त्याच्या अगोदरची कँडल महत्त्वाची: तिचा High/Close दोन्हीपैकी जास्त किंमत मार्क करा.
+    - नंतरची कँडल ह्या किमतीला खालून वर ब्रेक करत असल्यास ट्रेड एंटर करा.
+
+    ✅ **Entry Condition:**
+    - Reference candle नंतरच्या कँडलने prior candle चा High/Close cross केलं पाहिजे.
+    - आणि IV > 16% असेल तर, त्या वेळी In the Money Call Option खरेदी करा.
+
+    ✅ **Risk Management:**
+    - Entry नंतर Stop Loss: Buy Price - 10%
+    - Profit Target: 5%
+    - Profit > 4% झाल्यावर Stop Loss ला Entry Price ला ट्रेल करा (No Loss Zone).
+    - Profit > 10% = SL @ 4%, Profit > 15% = SL @ 11%, Profit > 20% = Book full profit
+
+    ✅ **Time Based Exit:**
+    - Trade घेतल्यावर 10 मिनिटात काहीही हिट न झाल्यास, नफा/तोटा न पाहता एक्झिट करा.
+
+    ✅ **Trade Time:**
+    - सकाळी 9:30 ते दुपारी 3:00 पर्यंतच ट्रेड सुरू करा.
+    """)
+
+    uploaded_file = st.file_uploader("Upload CSV file with OHLCV data", type=["csv"])
+
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file)
+        df.columns = df.columns.str.strip()
+
+        if {'Open', 'High', 'Low', 'Close', 'Volume', 'Date'}.issubset(df.columns):
+            df['Date'] = pd.to_datetime(df['Date'])
+            df = df.sort_values("Date")
+            st.success("✅ Data loaded successfully!")
+            st.dataframe(df.tail())
+
+            # Calculate 20 SMA and Bollinger Bands
+            df['SMA20'] = df['Close'].rolling(window=20).mean()
+            df['Upper'] = df['SMA20'] + 2 * df['Close'].rolling(window=20).std()
+            df['Lower'] = df['SMA20'] - 2 * df['Close'].rolling(window=20).std()
+
+            # Detect breakout condition
+            breakout_signals = []
+            entry_price = None
+            sl_price = None
+            tp_price = None
+
+            for i in range(21, len(df) - 1):
+                prev = df.iloc[i - 1]
+                curr = df.iloc[i]
+                next_candle = df.iloc[i + 1]
+                iv = 18  # simulated implied volatility
+
+                if (prev['Close'] < prev['SMA20']) and (curr['Close'] > curr['SMA20']) and (curr['Low'] > curr['SMA20']):
+                    ref_price = max(prev['High'], prev['Close'])
+                    if next_candle['Close'] > ref_price and iv > 16:
+                        entry_price = next_candle['Close']
+                        sl_price = entry_price * 0.90
+                        tp_price = entry_price * 1.05
+                        breakout_signals.append({
+                            'Time': df.iloc[i + 1]['Date'],
+                            'Entry': entry_price,
+                            'SL': sl_price,
+                            'TP': tp_price,
+                            'IV': iv,
+                            'Result': None
+                        })
+
+            # Paper Trading Simulation
+            results = []
+            for signal in breakout_signals:
+                trade_open = False
+                entry = signal['Entry']
+                sl = signal['SL']
+                tp = signal['TP']
+                entry_time = signal['Time']
+                exit_time = entry_time + pd.Timedelta(minutes=10)
+
+                for idx, row in df.iterrows():
+                    if row['Date'] < entry_time:
+                        continue
+                    if row['Date'] > exit_time:
+                        results.append({**signal, 'Exit': row['Close'], 'Reason': 'Time Exit'})
+                        break
+                    if row['Low'] <= sl:
+                        results.append({**signal, 'Exit': sl, 'Reason': 'Stop Loss Hit'})
+                        break
+                    if row['High'] >= tp:
+                        results.append({**signal, 'Exit': tp, 'Reason': 'Profit Target Hit'})
+                        break
+
+            if results:
+                result_df = pd.DataFrame(results)
+                st.subheader("📊 Paper Trading Results")
+                st.dataframe(result_df)
+            else:
+                st.info("🚫 No trades detected.")
+
+        else:
+            st.error("CSV must contain the following columns: Date, Open, High, Low, Close, Volume")
