@@ -38,15 +38,26 @@ def calculate_bollinger_bands(data, period=20):
 
 # Function to generate action plan based on technical setup
 def generate_action_plan(data):
-    latest_close = data['Close'].iloc[-1]
-    sma50 = data['SMA50'].iloc[-1]
-    sma200 = data['SMA200'].iloc[-1]
-    rsi = data['RSI'].iloc[-1]
-    upper_band = data['Upper_Band'].iloc[-1]
-    lower_band = data['Lower_Band'].iloc[-1]
+    # Make sure we have enough rows for SMA200
+    if len(data) < 200:
+        return "Insufficient data", "Need at least 200 bars for 200‑period SMA"
+
+    # Drop any rows where our key indicators are NaN
+    sub = data[['Close','SMA50','SMA200','RSI','Upper_Band','Lower_Band']].dropna()
+    if sub.empty:
+        return "Insufficient data", "Indicators contain NaN—expand your date range"
+
+    # Now pull the very last row as pure Python floats
+    last = sub.iloc[-1]
+    latest_close = float(last['Close'])
+    sma50        = float(last['SMA50'])
+    sma200       = float(last['SMA200'])
+    rsi          = float(last['RSI'])
+    upper_band   = float(last['Upper_Band'])
+    lower_band   = float(last['Lower_Band'])
 
     action = "No action suggested."
-
+    # now these are safe scalar comparisons
     if latest_close > sma50 and latest_close > sma200:
         action = "Bullish: Consider buying or holding."
     elif latest_close < sma50 and latest_close < sma200:
@@ -60,8 +71,11 @@ def generate_action_plan(data):
     elif rsi < 30:
         action = "Oversold: Consider buying."
 
-    summary = f"RSI: {rsi:.2f}, Close: {latest_close}, 50-Day SMA: {sma50:.2f}, 200-Day SMA: {sma200:.2f}, Bollinger Bands: Upper - {upper_band:.2f}, Lower - {lower_band:.2f}"
-
+    summary = (
+        f"RSI: {rsi:.2f}, Close: {latest_close:.2f}, "
+        f"50‑Day SMA: {sma50:.2f}, 200‑Day SMA: {sma200:.2f}, "
+        f"Bollinger Bands: Upper − {upper_band:.2f}, Lower − {lower_band:.2f}"
+    )
     return action, summary
 
 # Streamlit layout
