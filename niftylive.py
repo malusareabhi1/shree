@@ -17,3 +17,4 @@ if st.button("🔄 Refresh Data"):
         st.line_chart(data["Close"])
     else:
         st.warning("⚠️ Failed to fetch data.")
+        
