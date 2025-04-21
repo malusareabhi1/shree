@@ -2,26 +2,39 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 import numpy as np
-import talib
 
 # Function to fetch stock data
 def fetch_data(stock, start, end):
     data = yf.download(stock, start=start, end=end)
     return data
 
-# Function to calculate technical indicators
-def calculate_indicators(data):
-    # Calculate RSI
-    data['RSI'] = talib.RSI(data['Close'], timeperiod=14)
+# Function to calculate the 14-day RSI
+def calculate_rsi(data, period=14):
+    delta = data['Close'].diff()
+    gain = (delta.where(delta > 0, 0)).fillna(0)
+    loss = (-delta.where(delta < 0, 0)).fillna(0)
+    
+    avg_gain = gain.rolling(window=period, min_periods=1).mean()
+    avg_loss = loss.rolling(window=period, min_periods=1).mean()
+    
+    rs = avg_gain / avg_loss
+    rsi = 100 - (100 / (1 + rs))
+    
+    return rsi
 
-    # Calculate 50 and 200 period SMA
-    data['SMA50'] = talib.SMA(data['Close'], timeperiod=50)
-    data['SMA200'] = talib.SMA(data['Close'], timeperiod=200)
+# Function to calculate the moving averages (SMA)
+def calculate_sma(data, period):
+    return data['Close'].rolling(window=period).mean()
 
-    # Calculate Bollinger Bands
-    data['upper_band'], data['middle_band'], data['lower_band'] = talib.BBANDS(data['Close'], timeperiod=20)
-
-    return data
+# Function to calculate Bollinger Bands
+def calculate_bollinger_bands(data, period=20):
+    rolling_mean = data['Close'].rolling(window=period).mean()
+    rolling_std = data['Close'].rolling(window=period).std()
+    
+    upper_band = rolling_mean + (rolling_std * 2)
+    lower_band = rolling_mean - (rolling_std * 2)
+    
+    return upper_band, rolling_mean, lower_band
 
 # Function to generate action plan based on technical setup
 def generate_action_plan(data):
@@ -29,8 +42,8 @@ def generate_action_plan(data):
     sma50 = data['SMA50'].iloc[-1]
     sma200 = data['SMA200'].iloc[-1]
     rsi = data['RSI'].iloc[-1]
-    upper_band = data['upper_band'].iloc[-1]
-    lower_band = data['lower_band'].iloc[-1]
+    upper_band = data['Upper_Band'].iloc[-1]
+    lower_band = data['Lower_Band'].iloc[-1]
 
     action = "No action suggested."
 
@@ -64,7 +77,11 @@ end_date = st.date_input("End Date", pd.to_datetime('2023-01-01'))
 if stock:
     data = fetch_data(stock, start_date, end_date)
     if not data.empty:
-        data = calculate_indicators(data)
+        # Calculate indicators
+        data['RSI'] = calculate_rsi(data)
+        data['SMA50'] = calculate_sma(data, 50)
+        data['SMA200'] = calculate_sma(data, 200)
+        data['Upper_Band'], data['Middle_Band'], data['Lower_Band'] = calculate_bollinger_bands(data)
 
         # Display the data and indicators
         st.subheader(f"Stock Data for {stock.upper()}")
