@@ -56,8 +56,8 @@ st.title("🩺 Doctor Strategy 1.0 - Live Algo Trading")
 st.write("Welcome to Doctor Strategy 1.0 Algo Bot")
 
 # Add Start and Stop buttons
-start_button = st.button("Start Algo Trading")
-stop_button = st.button("Stop Algo Trading")
+start_button = st.sidebar.button("Start Algo Trading")
+stop_button = st.sidebar.button("Stop Algo Trading")
 
 if start_button:
     st.session_state.is_trading_active = True
