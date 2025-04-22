@@ -10,14 +10,14 @@ import time
 TELEGRAM_TOKEN = "7503952210:AAE5TLirqlW3OFuEIq7SJ1Fe0wFUZuKjd3E"
 CHAT_ID = "1320205499"
 
-# Define Time Windows
+# Time Windows
 START_TIME = datetime.time(9, 30)
 END_TIME = datetime.time(14, 30)
 PRE_MARKET_START = datetime.time(9, 0)
 PRE_MARKET_END = datetime.time(9, 15)
 MARKET_CLOSE = datetime.time(15, 30)
 
-# Telegram Message Sender
+# Send Telegram Message
 def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {
@@ -30,23 +30,21 @@ def send_telegram_message(message):
         st.error(f"Telegram Error: {e}")
 
 # Initialize Session State
-if "sent_pre_market" not in st.session_state:
-    st.session_state.sent_pre_market = False
-if "sent_market_open" not in st.session_state:
-    st.session_state.sent_market_open = False
-if "sent_market_closed" not in st.session_state:
-    st.session_state.sent_market_closed = False
-if "sent_out_of_time" not in st.session_state:
-    st.session_state.sent_out_of_time = False
-if "is_trading_active" not in st.session_state:
-    st.session_state.is_trading_active = False
+for key in ["sent_pre_market", "sent_market_open", "sent_out_of_time", "is_trading_active"]:
+    if key not in st.session_state:
+        st.session_state[key] = False
 
-# Get current IST time
+# Get IST time
 ist = pytz.timezone("Asia/Kolkata")
 now = datetime.datetime.now(ist).time()
 today = datetime.datetime.now(ist).weekday()  # 0 = Monday
 
-st.write(f"Current Time (IST): {now}")
+st.write(f"⏰ Current Time (IST): {now}")
+
+# Exit logic if market is closed
+if now >= MARKET_CLOSE:
+    st.warning("Market is closed now. Shutting down...")
+    st.stop()
 
 # Only operate Mon–Fri
 if today < 5:
@@ -62,14 +60,7 @@ if today < 5:
             st.session_state.sent_market_open = True
         st.success("Market is open now to ALGOTRADE")
 
-    elif now >= MARKET_CLOSE:
-        if not st.session_state.sent_market_closed:
-            send_telegram_message("📉 Market is closed now")
-            st.session_state.sent_market_closed = True
-        st.warning("Market is closed now")
-        st.stop()  # Shut down the program after market close
-
-# Check if current time is outside strategy time window
+# Outside trading window message
 if now < START_TIME or now > END_TIME:
     if not st.session_state.sent_out_of_time:
         send_telegram_message("⛔ Outside trading time. Doctor Strategy will not take trades now.")
@@ -77,7 +68,7 @@ if now < START_TIME or now > END_TIME:
     st.warning("Outside trading time. No trades will be taken.")
     st.stop()
 
-# Main UI
+# --- UI ---
 st.title("🩺 Doctor Strategy 1.0 - Live Algo Trading")
 
 start_button = st.sidebar.button("Start Algo Trading")
@@ -92,6 +83,6 @@ if stop_button:
     st.warning("🔴 Trading stopped.")
 
 if st.session_state.is_trading_active:
-    st.write("Executing trades...")  # 🔄 Replace with actual logic
+    st.write("📈 Executing trades...")  # Add your live logic here
 else:
-    st.write("Trading is stopped. No trades are being executed.")
+    st.write("📴 Trading is stopped. No trades are being executed.")
