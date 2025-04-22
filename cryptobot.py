@@ -5,10 +5,7 @@ import pandas as pd
 from datetime import datetime
 
 # ========== Telegram Config ==========
-TELEGRAM_TOKEN = "7887944907:AAHyOPITLm8d2SzKPtnwxnLsm6s0LfPm6FI"
-#TELEGRAM_TOKEN = "7503952210:AAE5TLirqlW3OFuEIq7SJ1Fe0wFUZuKjd3E"
-#CHAT_ID = "1320205499"
-CHAT_ID = "1320205499"
+
 def send_telegram(msg):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {
