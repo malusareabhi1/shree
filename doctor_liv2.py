@@ -27,7 +27,7 @@ TRAILING_SL_STEP = 10  # Rs profit trail step
 kite = KiteConnect(api_key=API_KEY)
 kite.set_access_token(ACCESS_TOKEN)
 
-data = kite.generate_session(ACCESS_TOKEN, api_secret=api_secret)
+data = kite.generate_session(ACCESS_TOKEN, api_secret=API_SECRET)
 kite.set_access_token(data["access_token"])
 
 st.success("✅ Login successful!")
