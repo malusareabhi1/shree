@@ -42,7 +42,7 @@ if is_market_open():
         st.stop()
 
     live_placeholder = st.empty()
-    symbol = "NSE:NIFTY 50"
+    symbol = "NSE:NIFTY"
     capital = 50000
     qty = 10
 
