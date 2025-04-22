@@ -151,7 +151,7 @@ if run:
         iv = fetch_option_iv()
         st.write("IV")
         st.write(iv) # Current IV
-        if iv > 16:
+        if iv >=0 :  #if iv > 16:
             ltp = get_ltp(symbol)
             qty = int(capital_per_trade / ltp)
             sl_price = round(ltp - (ltp * stop_loss_percent / 100), 2)
