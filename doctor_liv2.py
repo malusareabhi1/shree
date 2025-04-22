@@ -122,6 +122,17 @@ def log_trade(entry_price, sl, qty, mode):
 # ======================
 
 st.title("🩺 Doctor Strategy 1.0 Live Trading")
+ist = pytz.timezone("Asia/Kolkata")
+
+now = datetime.datetime.now(ist)
+#now = datetime.datetime.now().strftime("%H:%M:%S")
+now = datetime.datetime.now(ist).time()  # This gives a time object
+# Check current time
+#now = datetime.datetime.now().time()
+today = datetime.datetime.today().weekday()  # Monday = 0, Sunday = 6
+st.write(now)
+# Only operate on weekdays (Mon-Fri)
+
 mode = st.sidebar.selectbox("Mode", ["Paper", "Live"])
 run = st.sidebar.button("▶️ Start")
 stop = st.sidebar.button("⏹️ Stop")
