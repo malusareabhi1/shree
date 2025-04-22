@@ -20,7 +20,7 @@ def get_coingecko_price(symbol="bitcoin"):
 st.title("🚀 Live Crypto Price")
 
 symbol = st.selectbox("Choose Crypto Symbol", ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT"])
-price = get_binance_price(symbol)
+price = get_coingecko_price(symbol)
 
 if price:
     st.metric(label=f"{symbol} Price", value=f"${price:,.2f}")
