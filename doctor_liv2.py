@@ -130,7 +130,7 @@ now = datetime.datetime.now(ist).time()  # This gives a time object
 # Check current time
 #now = datetime.datetime.now().time()
 today = datetime.datetime.today().weekday()  # Monday = 0, Sunday = 6
-st.write("Time=") 
+st.write("Time") 
 st.write(now)
 # Only operate on weekdays (Mon-Fri)
 
@@ -149,7 +149,7 @@ if run:
     now = datetime.datetime.now(ist).time()  # This gives a time object
     if trading_start <= now <= trading_end:
         iv = fetch_option_iv()
-        st.write("IV=")
+        st.write("IV")
         st.write(iv) # Current IV
         if iv > 16:
             ltp = get_ltp(symbol)
