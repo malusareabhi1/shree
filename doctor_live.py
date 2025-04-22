@@ -10,6 +10,13 @@ import os
 # ======================
 # CONFIGURATION
 # ======================
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+chat_id = os.getenv("TELEGRAM_CHAT_ID")  # optionally, use .env for chat_id too
+
 API_KEY = "your_zerodha_api_key"
 API_SECRET = "your_zerodha_api_secret"
 ACCESS_TOKEN = "your_access_token"  # Load from file or login flow
