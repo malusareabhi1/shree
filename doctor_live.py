@@ -121,7 +121,7 @@ def log_trade(entry_price, sl, qty, mode):
 # STREAMLIT UI
 # ======================
 
-st.title("🩺 Doctor Strategy 1.0 Live Trading")
+st.title("🩺 Doctor Strategy 1.0 Live ")
 mode = st.sidebar.selectbox("Mode", ["Paper", "Live"])
 run = st.sidebar.button("▶️ Start")
 
