@@ -5,8 +5,8 @@ import time
 st.set_page_config(page_title="Crypto Algo Trading", layout="centered")
 
 # ====== Telegram Setup ======
-bot_token = "YOUR_TELEGRAM_BOT_TOKEN"
-chat_id = "YOUR_CHAT_ID"
+bot_token = "7503952210:AAE5TLirqlW3OFuEIq7SJ1Fe0wFUZuKjd3E"
+chat_id = "1320205499"
 def send_telegram(msg):
     payload = {
         "chat_id": chat_id,
