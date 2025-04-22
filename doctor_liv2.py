@@ -124,7 +124,14 @@ def log_trade(entry_price, sl, qty, mode):
 st.title("🩺 Doctor Strategy 1.0 Live Trading")
 mode = st.sidebar.selectbox("Mode", ["Paper", "Live"])
 run = st.sidebar.button("▶️ Start")
+stop = st.sidebar.button("⏹️ Stop")
 
+if stop:
+    #st.write(f"Hello, {name}!")
+    st.stop() # Stop execution after displaying the greeting
+    # The following line will not be executed
+    st.success("Thank you for Trade .")
+    
 if run:
     now = datetime.datetime.now().time()
     if trading_start <= now <= trading_end:
