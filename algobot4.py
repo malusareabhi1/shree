@@ -1265,79 +1265,76 @@ elif selected == "PaperTrade":
         st.plotly_chart(fig, use_container_width=True)
 
 elif selected == "Live Algo Trading":
-    st.title("🤖 Live Algo Trading (Paper/Real Mode)")
+    st.title("🤖 Live Algo Trading (Paper Mode Only)")
 
-    # Select broker and mode
-    broker = st.selectbox("Choose Broker", ["Zerodha", "Fyers"], index=0)
-    mode = st.radio("Trading Mode", ["Paper Trading", "Live Trading"], horizontal=True)
+    # ========== Telegram Setup ==========
+    bot_token = "7503952210:AAE5TLirqlW3OFuEIq7SJ1Fe0wFUZuKjd3E"
+    chat_id = "1320205499"
+    def send_telegram_message(msg):
+        payload = {
+            "chat_id": chat_id,
+            "text": msg,
+            "parse_mode": "HTML"
+        }
+        requests.post(f"https://api.telegram.org/bot{bot_token}/sendMessage", data=payload)
 
-    # Login Inputs
-    if broker == "Zerodha":
-        api_key = st.text_input("🔐 Zerodha API Key", type="password")
-        access_token = st.text_input("🪪 Access Token", type="password")
+    # ========== Check Kite Session ==========
+    try:
+        profile = kite.profile()
+        st.success(f"✅ Connected: {profile['user_name']} ({profile['user_id']})")
+    except:
+        st.error("🔌 Not connected to Kite. Please login from the sidebar first.")
+        st.stop()
 
-    elif broker == "Fyers":
-        app_id = st.text_input("🔐 Fyers App ID", type="password")
-        access_token = st.text_input("🪪 Fyers Access Token", type="password")
-
-    symbol = st.text_input("📈 Enter Stock Symbol (e.g., NSE:INFY)")
+    # ========== User Inputs ==========
+    symbol = st.text_input("📈 Symbol (e.g., INFY)")
     capital = st.number_input("💰 Capital Allocation", value=50000)
-    qty = st.number_input("📦 Quantity per trade", value=10)
+    stop_loss_percent = st.slider("🔻 Stop Loss (%)", min_value=0.5, max_value=5.0, value=1.5)
+    trailing_step = st.slider("📉 Trailing SL Step (%)", min_value=0.5, max_value=5.0, value=1.0)
 
-    if st.button("🚀 Start Algo Bot"):
-        st.success("✅ Algo Bot Started...")
+    start_btn = st.button("🚀 Run Doctor Strategy")
 
-        # Simulated loop (use real-time feed here later)
-        placeholder = st.empty()
-        balance = capital
-        position = 0
-        trade_log = []
+    # ========== Strategy Execution ==========
+    if start_btn and symbol:
+        try:
+            ltp = kite.ltp(f"NSE:{symbol}")[f"NSE:{symbol}"]["last_price"]
+            qty = int(capital / ltp)
+            entry = ltp
+            sl = round(entry - (entry * stop_loss_percent / 100), 2)
+            trailing_sl = sl
+            in_position = True
 
-        # Sample streaming data — replace with WebSocket/API
-        for i in range(50):  # Simulate 50 ticks
-            # Simulate price
-            import random
-            price = 100 + random.uniform(-3, 3)
+            # Entry Alert
+            st.success(f"📥 Paper BUY executed at ₹{entry} | SL: ₹{sl}")
+            send_telegram_message(f"📥 <b>Paper BUY</b>\n<b>Symbol:</b> {symbol}\n<b>Price:</b> ₹{entry}\n<b>SL:</b> ₹{sl}\n<b>Qty:</b> {qty}")
 
-            # Strategy: Buy if price drops 2%, sell if it rises 2%
-            action = None
-            if position == 0 and random.random() < 0.3:
-                action = "BUY"
-                position = qty
-                balance -= qty * price
-            elif position > 0 and random.random() < 0.3:
-                action = "SELL"
-                position = 0
-                balance += qty * price
+            placeholder = st.empty()
+            while in_position:
+                time.sleep(10)
+                ltp = kite.ltp(f"NSE:{symbol}")[f"NSE:{symbol}"]["last_price"]
 
-            if action:
-                trade_log.append({
-                    "Price": round(price, 2),
-                    "Action": action,
-                    "Qty": qty,
-                    "Balance": round(balance, 2)
-                })
+                # Update trailing SL
+                if ltp > entry + (entry * trailing_step / 100):
+                    new_trailing_sl = round(entry + (ltp - entry - (entry * trailing_step / 100)), 2)
+                    if new_trailing_sl > trailing_sl:
+                        trailing_sl = new_trailing_sl
+                        st.info(f"🔁 Trailing SL Updated: ₹{trailing_sl}")
+                        send_telegram_message(f"🔁 <b>Trailing SL Updated</b>\n<b>New SL:</b> ₹{trailing_sl}")
 
-            # Display dashboard
-            with placeholder.container():
-                st.metric("📊 Current Price", f"₹{round(price, 2)}")
-                st.metric("💼 Balance", f"₹{round(balance, 2)}")
-                st.metric("📈 Position", f"{position} shares")
-                st.dataframe(pd.DataFrame(trade_log[-5:]))  # show last 5 trades
+                # SL hit
+                if ltp <= trailing_sl:
+                    st.error(f"📤 Paper SELL executed at ₹{ltp} (SL Hit)")
+                    send_telegram_message(f"📤 <b>Paper SELL</b>\n<b>Symbol:</b> {symbol}\n<b>Exit:</b> ₹{ltp}\n<b>Reason:</b> SL Hit")
+                    in_position = False
 
-            time.sleep(1)
+                # Live Metrics
+                with placeholder.container():
+                    st.metric("📊 Live Price", f"₹{ltp}")
+                    st.metric("📉 Trailing SL", f"₹{trailing_sl}")
+                    st.metric("📦 Quantity", qty)
 
-        st.success("✅ Live simulation complete!")
-        # 🔽 Export Trade Log as CSV
-        if trade_log:
-            df_trades = pd.DataFrame(trade_log)
-            csv_data = df_trades.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="📥 Download Trade Log",
-                data=csv_data,
-                file_name=f"{symbol.replace(':', '_')}_trade_log.csv",
-                mime='text/csv'
-            )
+        except Exception as e:
+            st.error(f"❌ Error: {e}")
 
 elif selected == "Test Doctor2 Strategy":
     st.title("🤖 Test Doctor2 Strategy")
