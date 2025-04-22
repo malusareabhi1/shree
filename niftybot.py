@@ -153,6 +153,55 @@ if uploaded_file is not None:
             hovermode="x unified"
         )
         st.plotly_chart(fig)
+                # 📈 Cumulative PnL Chart
+        trade_df['Cumulative Capital'] = trade_df['Capital'].ffill()
+        pnl_fig = go.Figure()
+        pnl_fig.add_trace(go.Scatter(
+            x=trade_df['Time'],
+            y=trade_df['Cumulative Capital'],
+            mode='lines+markers',
+            line=dict(color='gold', width=2),
+            name='Cumulative Capital'
+        ))
+        pnl_fig.update_layout(
+            title="📈 Cumulative Capital Over Time",
+            xaxis_title="Date",
+            yaxis_title="Capital (₹)",
+            template="plotly_dark"
+        )
+        st.plotly_chart(pnl_fig)
+
+        # 📋 Performance Summary Table
+        buy_trades = trade_df[trade_df['Action'] == 'BUY']
+        sell_trades = trade_df[trade_df['Action'] == 'SELL']
+
+        total_trades = len(sell_trades)
+        winning_trades = sell_trades[sell_trades['PnL'] > 0].shape[0]
+        losing_trades = sell_trades[sell_trades['PnL'] <= 0].shape[0]
+        win_rate = (winning_trades / total_trades * 100) if total_trades > 0 else 0
+        max_drawdown = trade_df['Cumulative Capital'].cummax() - trade_df['Cumulative Capital']
+        max_drawdown = max_drawdown.max() if not max_drawdown.empty else 0
+
+        st.subheader("📊 Performance Summary")
+        summary_df = pd.DataFrame({
+            "Metric": [
+                "Total Trades",
+                "Winning Trades",
+                "Losing Trades",
+                "Win Rate (%)",
+                "Max Drawdown (₹)"
+            ],
+            "Value": [
+                total_trades,
+                winning_trades,
+                losing_trades,
+                f"{win_rate:.2f}",
+                f"{max_drawdown:,.2f}"
+            ]
+        })
+
+        st.table(summary_df)
+
 
     else:
         st.warning("🚫 No trades were executed based on the given conditions.")
