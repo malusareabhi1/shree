@@ -1305,6 +1305,8 @@ elif selected == "Live Algo Trading":
 
     except Exception as e:
         st.error(f"❌ Failed to fetch profile: {e}")
+        st.error(f"❌ Error: {str(e)}")  # Capture full error message
+        send_telegram_message(f"❌ Error: {str(e)}")  # Optionally send the error to Telegram for logging
         st.stop()
 
 
