@@ -5,6 +5,13 @@ import pandas as pd
 from datetime import datetime
 
 # ========== Telegram Config ==========
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+chat_id = os.getenv("TELEGRAM_CHAT_ID")  # optionally, use .env for chat_id too
+
 
 def send_telegram(msg):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
