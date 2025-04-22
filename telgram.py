@@ -30,7 +30,7 @@ def send_telegram_message(message):
 # Check current time
 now = datetime.datetime.now().time()
 today = datetime.datetime.today().weekday()  # Monday = 0, Sunday = 6
-st.print(now)
+st.write(now)
 # Only operate on weekdays (Mon-Fri)
 if today < 5:
     if PRE_MARKET_START <= now < PRE_MARKET_END:
