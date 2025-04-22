@@ -131,7 +131,8 @@ import pytz
 
 ist = pytz.timezone("Asia/Kolkata")
 now_ist = datetime.datetime.now(ist)
-print("📈 Indian Share Market Time (IST):", now_ist.strftime("%Y-%m-%d %H:%M:%S"))
+#print("📈 Indian Share Market Time (IST):", now_ist.strftime("%Y-%m-%d %H:%M:%S"))
+st.write(f"Current time in India (IST): {now_ist.strftime('%Y-%m-%d %H:%M:%S')}")
 
 if run:
     now = datetime.datetime.now().time()
