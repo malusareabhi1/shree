@@ -36,7 +36,7 @@ ist = pytz.timezone("Asia/Kolkata")
 
 now = datetime.datetime.now(ist)
 #now = datetime.datetime.now().strftime("%H:%M:%S")
-now = datetime.datetime.now().time()  # This gives a time object
+now = datetime.datetime.now(ist).time()  # This gives a time object
 # Check current time
 #now = datetime.datetime.now().time()
 today = datetime.datetime.today().weekday()  # Monday = 0, Sunday = 6
