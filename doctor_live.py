@@ -139,8 +139,9 @@ if run:
     ist = pytz.timezone("Asia/Kolkata")
     
     # Get current IST datetime
+    now_ist = datetime.now(ist).time()  # Get current time in IST
     #now_ist = datetime.now(ist)
-    now_ist = datetime.datetime.now(ist)
+    #now_ist = datetime.datetime.now(ist)
     # Option A: Format with strftime for time only
     time_str = now_ist.strftime("%H:%M:%S")
     st.write(f"⏰ Current IST Time: {time_str}")
