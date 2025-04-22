@@ -256,6 +256,9 @@ elif selected == "Get Stock Data":
                 # Reset index to get 'Date' column
                 df.reset_index(inplace=True)
                 df.index = df.index.tz_localize('UTC').tz_convert('Asia/Kolkata')
+                # Filter only NSE working hours
+                df = df.between_time("09:15", "15:30")
+
                 # Ensure proper column names and date
                 if 'Datetime' in df.columns:
                     df.rename(columns={'Datetime': 'Date'}, inplace=True)
