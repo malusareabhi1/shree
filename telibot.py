@@ -54,6 +54,16 @@ if not is_market_open():
                 "PnL": df['Close'].diff().fillna(0) * 10
             })
 
+            # Send Telegram message for each trade
+            for _, row in trade_log.iterrows():
+                send_telegram(
+                    f"<b>{row['Action']} SIGNAL</b>\n"
+                    f"<b>Stock:</b> {row['Stock']}\n"
+                    f"<b>Price:</b> ₹{row['Price']}\n"
+                    f"<b>Qty:</b> {row['Qty']}\n"
+                    f"<b>Date:</b> {row['Date']}"
+                )
+
             net_pnl = trade_log["PnL"].sum()
             win_trades = trade_log[trade_log["PnL"] > 0].shape[0]
             lose_trades = trade_log[trade_log["PnL"] < 0].shape[0]
