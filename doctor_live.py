@@ -13,8 +13,7 @@ import os
 API_KEY = "your_zerodha_api_key"
 API_SECRET = "your_zerodha_api_secret"
 ACCESS_TOKEN = "your_access_token"  # Load from file or login flow
-BOT_TOKEN = "7503952210:AAE5TLirqlW3OFuEIq7SJ1Fe0wFUZuKjd3E"
-CHAT_ID = "1320205499"
+
 capital_per_trade = 10000
 stop_loss_percent = 5
 symbol = "^NSE"
