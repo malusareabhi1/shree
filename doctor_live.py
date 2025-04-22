@@ -1,12 +1,12 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
+#from datetime import datetime
 import datetime
 import time
 from kiteconnect import KiteConnect, KiteTicker
 import requests
 import os
-import pytz
+#import pytz
 # ======================
 # CONFIGURATION
 # ======================
@@ -126,13 +126,11 @@ st.title("🩺 Doctor Strategy 1.0 Live ")
 mode = st.sidebar.selectbox("Mode", ["Paper", "Live"])
 run = st.sidebar.button("▶️ Start")
 
-# Define IST timezone
-ist = pytz.timezone('Asia/Kolkata')
+import datetime
+import pytz
 
-# Get current IST time
-now_ist = datetime.now(ist)
-
-# Print current time in standard format
+ist = pytz.timezone("Asia/Kolkata")
+now_ist = datetime.datetime.now(ist)
 print("📈 Indian Share Market Time (IST):", now_ist.strftime("%Y-%m-%d %H:%M:%S"))
 
 if run:
