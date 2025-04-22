@@ -3,7 +3,7 @@ import pandas as pd
 import requests
 import datetime
 from kiteconnect import KiteConnect
-import pyz
+import pytz
 
 # Telegram and Trading Configurations
 TELEGRAM_TOKEN = "7503952210:AAE5TLirqlW3OFuEIq7SJ1Fe0wFUZuKjd3E"
