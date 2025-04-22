@@ -51,7 +51,7 @@ if uploaded_file is not None:
 
     for idx, row in df.iterrows():
         # Check if the market is open between 9:30 AM to 1:30 PM
-        if row.name.time() >= datetime.strptime("09:30:00", "%H:%M:%S").time() and row.name.time() <= datetime.strptime("14:30:00", "%H:%M:%S").time():
+        #if row.name.time() >= datetime.strptime("09:30:00", "%H:%M:%S").time() and row.name.time() <= datetime.strptime("14:30:00", "%H:%M:%S").time():
             
             if position_open:
                 time_in_trade += 1
@@ -120,8 +120,8 @@ if uploaded_file is not None:
                         })
                         st.write(f"Trade opened at {entry_price} due to conditions")
 
-        else:
-            st.warning("Market closed, no trades will be made outside 9:30 AM to 1:30 PM")
+        #else:
+            #st.warning("Market closed, no trades will be made outside 9:30 AM to 1:30 PM")
 
     # Step 5: Display Results
     st.write(f"Total Capital after Backtest: ₹{capital}")
