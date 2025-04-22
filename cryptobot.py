@@ -21,3 +21,9 @@ def get_coingecko_price(symbol="bitcoin"):
     except Exception as e:
         st.error(f"❌ Error fetching price: {e}")
         return None
+
+symbol = st.selectbox("Choose Crypto", ["bitcoin", "ethereum", "solana", "ripple"])
+price = get_coingecko_price(symbol)
+
+if price:
+    st.metric(label=f"{symbol.capitalize()} Price", value=f"${price:,.2f}")
