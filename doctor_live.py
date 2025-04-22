@@ -124,6 +124,9 @@ def log_trade(entry_price, sl, qty, mode):
 st.title("🩺 Doctor Strategy 1.0 Live ")
 mode = st.sidebar.selectbox("Mode", ["Paper", "Live"])
 run = st.sidebar.button("▶️ Start")
+
+ist_timezone = pytz.timezone("Asia/Kolkata")  # Kolkata represents IST
+ist_time = utc_time.replace(tzinfo=pytz.utc).astimezone(ist_timezone)
 # Get the current time
 current_time = datetime.datetime.now()
 
