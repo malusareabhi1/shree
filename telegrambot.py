@@ -47,25 +47,28 @@ if start and symbol:
             last = df.iloc[-1]
             prev = df.iloc[-2]
 
-            price = last['Close']
-            ema = last['EMA20']
-            volume = last['Volume']
-            vma = last['VMA20']
-
+            price = df['Close'].iloc[-1]
+            prev_close = df['Close'].iloc[-2]
+            
+            ema = df['EMA20'].iloc[-1]
+            prev_ema = df['EMA20'].iloc[-2]
+            
+            volume = df['Volume'].iloc[-1]
+            vma = df['VMA20'].iloc[-1]
+            
             # ========== Entry Logic ==========
             if not in_position:
-                crossed_above = prev['Close'] < prev['EMA20'] and price > ema
+                crossed_above = prev_close < prev_ema and price > ema
                 high_volume = volume > vma
-
+            
                 if crossed_above and high_volume:
                     entry_price = price
                     qty = int(capital / entry_price)
                     trailing_sl = round(entry_price * (1 - sl_percent / 100), 2)
                     in_position = True
-
+            
                     st.success(f"📥 BUY @ ₹{entry_price}")
                     send_telegram_message(f"📥 <b>BUY SIGNAL - Doctor Strategy</b>\n<b>Symbol:</b> {symbol}\n<b>Price:</b> ₹{entry_price}\n<b>SL:</b> ₹{trailing_sl}\n<b>Qty:</b> {qty}")
-
             # ========== In Trade ==========
             elif in_position:
                 # Trailing SL upward
