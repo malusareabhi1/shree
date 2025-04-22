@@ -16,3 +16,4 @@ ta
 pandas_ta
 streamlit-autorefresh
 python-dotenv
+nsepython 
