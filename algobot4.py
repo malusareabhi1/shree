@@ -1321,6 +1321,7 @@ elif selected == "Live Algo Trading":
     # ========== Strategy Execution ==========
     if start_btn and symbol:
         try:
+            st.write("Looking for trade")
             ltp = kite.ltp(f"NSE:{symbol}")[f"NSE:{symbol}"]["last_price"]
             qty = int(capital / ltp)
             entry = ltp
