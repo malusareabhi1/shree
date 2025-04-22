@@ -127,10 +127,11 @@ run = st.sidebar.button("▶️ Start")
 
 #utc_time = datetime.utcnow()  # Get current UTC time
 utc_time = datetime.datetime.utcnow()
+st.write(f"The current time is: {utc_time}")
 ist_timezone = pytz.timezone("Asia/Kolkata")  # Kolkata represents IST
 ist_time = utc_time.replace(tzinfo=pytz.utc).astimezone(ist_timezone)
 # Get the current time
-current_time = datetime.datetime.now()
+current_time = datetime.datetime.utcnow()
 
 # Format the time (example: YYYY-MM-DD HH:MM:SS)
 formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
