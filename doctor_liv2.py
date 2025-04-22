@@ -27,6 +27,15 @@ TRAILING_SL_STEP = 10  # Rs profit trail step
 kite = KiteConnect(api_key=API_KEY)
 kite.set_access_token(ACCESS_TOKEN)
 
+# Fetch and display session/profile details
+profile = kite.profile()
+    
+st.success("✅ Successfully connected to Kite!")
+st.markdown(f"**User ID:** `{profile['user_id']}`")
+st.markdown(f"**User Name:** `{profile['user_name']}`")
+st.markdown(f"**Email:** `{profile['email']}`")
+st.markdown(f"**Broker:** `{profile['broker']}`")
+
 if "trade_log" not in st.session_state:
     st.session_state.trade_log = []
     st.session_state.trade_status = "Idle"
