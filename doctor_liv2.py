@@ -9,9 +9,9 @@ import pytz
 # ======================
 # CONFIGURATION
 # ======================
-API_KEY = "your_zerodha_api_key"
-API_SECRET = "your_zerodha_api_secret"
-ACCESS_TOKEN = "your_access_token"  # Load from file or login flow
+API_KEY = "pew8wcspuu7eojoh"
+API_SECRET = "54cbz2punssxpbxp9fc1edciawu51x5o"
+ACCESS_TOKEN = "5eTC6CFs5b6MSptQxKa6qzhd0n0PNg5b"  # Load from file or login flow
 BOT_TOKEN = "7503952210:AAE5TLirqlW3OFuEIq7SJ1Fe0wFUZuKjd3E"
 CHAT_ID = "1320205499"
 capital_per_trade = 10000
