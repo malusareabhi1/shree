@@ -27,6 +27,9 @@ def send_telegram_message(message):
     except Exception as e:
         print(f"Telegram Error: {e}")
 
+
+ist = pytz.timezone("Asia/Kolkata")
+now_ist = datetime.datetime.now(ist)
 # Check current time
 now = datetime.datetime.now().time()
 today = datetime.datetime.today().weekday()  # Monday = 0, Sunday = 6
