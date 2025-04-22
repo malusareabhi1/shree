@@ -3,7 +3,6 @@ import pandas as pd
 import requests
 from datetime import datetime, time as dt_time
 import pytz
-import io
 
 # ===== Telegram Setup =====
 bot_token = "7503952210:AAE5TLirqlW3OFuEIq7SJ1Fe0wFUZuKjd3E"
@@ -26,7 +25,7 @@ def is_market_open():
     return dt_time(9, 15) <= now <= dt_time(15, 30)
 
 # ===== Strategy Simulation on CSV =====
-def run_strategy_on_csv(df, capital=50000, sl_pct=1.0):
+def run_strategy_on_df(df, symbol, capital=50000, sl_pct=1.0):
     df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
     df["VMA20"] = df["Volume"].rolling(window=20).mean()
     df.dropna(inplace=True)
@@ -38,6 +37,8 @@ def run_strategy_on_csv(df, capital=50000, sl_pct=1.0):
     sl = 0
     qty = 0
     pnl = 0
+
+    trade_log = []
 
     for i in range(1, len(df)):
         ts = df.index[i]
@@ -56,49 +57,65 @@ def run_strategy_on_csv(df, capital=50000, sl_pct=1.0):
             sl = round(entry * (1 - sl_pct / 100), 2)
             in_position = True
 
-            entry_msg = f"📥 BUY: ₹{price} | SL: ₹{sl} | Qty: {qty} @ {ts}"
-            entry_logs.append(entry_msg)
-            send_telegram(entry_msg)
+            msg = f"📥 BUY {symbol}: ₹{entry} | SL: ₹{sl} | Qty: {qty} @ {ts}"
+            send_telegram(msg)
+            entry_logs.append(msg)
+            trade_log.append([ts, symbol, "BUY", entry, qty, sl])
 
         # Exit
         elif in_position and price <= sl:
-            exit_msg = f"📤 SELL: ₹{price} (SL Hit) @ {ts}"
-            exit_logs.append(exit_msg)
+            exit_msg = f"📤 SELL {symbol}: ₹{price} (SL Hit) @ {ts}"
             send_telegram(exit_msg)
+            exit_logs.append(exit_msg)
+            trade_log.append([ts, symbol, "SELL", price, qty, sl])
 
             profit = (price - entry) * qty
             pnl += profit
             in_position = False
 
-    return entry_logs, exit_logs, pnl
+    return entry_logs, exit_logs, pnl, trade_log
 
 # ===== Streamlit App =====
 st.set_page_config("📉 Strategy Tester", layout="centered")
-st.title("📊 Doctor Strategy Backtest (CSV + Telegram Alerts)")
+st.title("📊 Doctor Strategy Backtest (Multiple CSVs + Alerts + PnL)")
 
 if not is_market_open():
-    st.warning("📴 Market is closed — running strategy on uploaded data.")
+    st.warning("📴 Market is closed — testing strategy on uploaded CSV data.")
 
-    uploaded_file = st.file_uploader("📂 Upload CSV (Datetime, Open, High, Low, Close, Volume)", type="csv")
+    uploaded_files = st.file_uploader("📂 Upload CSV files (1 per stock)", type="csv", accept_multiple_files=True)
+    capital = st.number_input("💰 Capital per Symbol", value=50000)
+    sl_percent = st.slider("🔻 SL %", 0.5, 5.0, value=1.5)
 
-    if uploaded_file:
-        try:
-            df = pd.read_csv(uploaded_file, parse_dates=["Datetime"])
+    if uploaded_files:
+        all_trade_logs = []
+        total_pnl = 0
+        pnl_summary = []
+
+        for file in uploaded_files:
+            symbol = file.name.replace(".csv", "")
+            df = pd.read_csv(file, parse_dates=["Datetime"])
             df.set_index("Datetime", inplace=True)
 
-            st.success("✅ Data loaded. Running strategy...")
+            st.write(f"📈 Processing: `{symbol}`")
 
-            entry_logs, exit_logs, pnl = run_strategy_on_csv(df)
+            entries, exits, pnl, log = run_strategy_on_df(df, symbol, capital, sl_percent)
+            all_trade_logs.extend(log)
+            pnl_summary.append({"Symbol": symbol, "PnL": pnl})
+            total_pnl += pnl
 
-            st.subheader("📥 Entries")
-            st.write(entry_logs or "No entries")
+            with st.expander(f"📥 {symbol} Entry/Exit Logs"):
+                st.write(entries + exits or "No trades.")
 
-            st.subheader("📤 Exits")
-            st.write(exit_logs or "No exits")
+        # ===== Save trade log to CSV =====
+        result_df = pd.DataFrame(all_trade_logs, columns=["Timestamp", "Symbol", "Action", "Price", "Qty", "SL"])
+        result_df.to_csv("backtest_log.csv", index=False)
+        st.success("✅ Strategy complete. Log saved as `backtest_log.csv`")
 
-            st.metric("💰 Net PnL", f"₹{pnl:.2f}")
+        # ===== Show PnL Summary =====
+        pnl_df = pd.DataFrame(pnl_summary)
+        st.subheader("💰 PnL Summary per Symbol")
+        st.dataframe(pnl_df)
+        st.metric("📊 Total PnL", f"₹{total_pnl:.2f}")
 
-        except Exception as e:
-            st.error(f"❌ Error reading file: {e}")
 else:
-    st.info("✅ Market is open. Use Live mode.")
+    st.info("✅ Market is open. Use Live Trading mode.")
