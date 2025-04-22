@@ -255,6 +255,7 @@ elif selected == "Get Stock Data":
             else:
                 # Reset index to get 'Date' column
                 df.reset_index(inplace=True)
+                df.index = df.index.tz_localize('UTC').tz_convert('Asia/Kolkata')
                 # Ensure proper column names and date
                 if 'Datetime' in df.columns:
                     df.rename(columns={'Datetime': 'Date'}, inplace=True)
