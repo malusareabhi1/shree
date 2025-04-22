@@ -137,8 +137,21 @@ now = datetime.datetime.now(ist).time()  # This gives a time object
 # Check current time
 #now = datetime.datetime.now().time()
 today = datetime.datetime.today().weekday()  # Monday = 0, Sunday = 6
-st.write(now)
+#st.write(now)
+#
+st.title("🕒 Local Time")
 
+# Placeholder to update time
+time_placeholder = st.empty()
+
+current_time = datetime.now().strftime("%H:%M:%S")
+print(current_time)
+while True:
+    current_time = datetime.now().strftime("%H:%M:%S")
+    time_placeholder.markdown(f"# {current_time}")
+    time.sleep(1)
+
+#
 if run:
         # Define IST timezone
     ist = pytz.timezone("Asia/Kolkata")
