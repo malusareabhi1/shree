@@ -74,7 +74,7 @@ if selected == "Dashboard":
     #ist_now = utc_now.replace(tzinfo=pytz.utc).astimezone(ist_timezone)
     
     # Display the time in Streamlit
-    st.write("Current time in IST:", ist_now.strftime("%Y-%m-%d %H:%M:%S %Z%z"))
+    #st.write("Current time in IST:", ist_now.strftime("%Y-%m-%d %H:%M:%S %Z%z"))
     if "kite" in st.session_state and st.session_state.kite is not None:
         kite = st.session_state.kite
 
