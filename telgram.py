@@ -5,10 +5,17 @@ from kiteconnect import KiteConnect
 import pytz
 import datetime
 import time
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")  # optionally, use .env for chat_id too
+
+
 
 # Telegram Config
-TELEGRAM_TOKEN = "7503952210:AAE5TLirqlW3OFuEIq7SJ1Fe0wFUZuKjd3E"
-CHAT_ID = "1320205499"
+
 
 # Time Windows
 START_TIME = datetime.time(9, 30)
