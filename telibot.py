@@ -4,6 +4,8 @@ import requests
 import plotly.graph_objects as go
 from datetime import datetime, time as dt_time
 import pytz
+import time
+from kiteconnect import KiteTicker
 
 # ===== Telegram Setup =====
 bot_token = "7503952210:AAE5TLirqlW3OFuEIq7SJ1Fe0wFUZuKjd3E"
@@ -27,9 +29,54 @@ def is_market_open():
 
 # ===== Streamlit App =====
 st.set_page_config("📉 Strategy Tester", layout="centered")
-st.title("📊 Doctor Strategy Backtest (Enhanced Mode)")
+st.title("📊 Doctor Strategy (Test + Live NSEI Mode)")
 
-if not is_market_open():
+if is_market_open():
+    st.success("📈 Market is Open — Running Live Strategy on ^NSEI")
+
+    from kiteconnect import KiteConnect
+    kite = st.session_state.get("kite")
+
+    if kite is None:
+        st.error("🔌 Kite session not found. Please login through 'KITE API' tab first.")
+        st.stop()
+
+    live_placeholder = st.empty()
+    symbol = "NSE:NIFTY 50"
+    capital = 50000
+    qty = 10
+
+    entry_price = None
+    trailing_sl = None
+
+    while is_market_open():
+        try:
+            ltp = kite.ltp([symbol])[symbol]['last_price']
+
+            if entry_price is None:
+                entry_price = ltp
+                trailing_sl = entry_price - 5
+                send_telegram(f"📥 <b>LIVE BUY SIGNAL</b>\n<b>Symbol:</b> ^NSEI\n<b>Price:</b> ₹{entry_price}\n<b>Qty:</b> {qty}")
+            elif ltp >= entry_price + 5:
+                trailing_sl = ltp - 5
+                send_telegram(f"🔁 <b>LIVE Trailing SL Moved</b>\n<b>New SL:</b> ₹{trailing_sl}")
+            elif ltp <= trailing_sl:
+                send_telegram(f"📤 <b>LIVE SELL SIGNAL</b>\n<b>Symbol:</b> ^NSEI\n<b>Exit:</b> ₹{ltp}\n<b>Reason:</b> SL Hit")
+                break
+
+            with live_placeholder.container():
+                st.metric("Live Price (^NSEI)", f"₹{ltp}")
+                st.metric("Entry Price", f"₹{entry_price}")
+                st.metric("Trailing SL", f"₹{trailing_sl}")
+                st.metric("Qty", qty)
+
+            time.sleep(10)
+
+        except Exception as e:
+            st.error(f"❌ Live Error: {e}")
+            break
+
+else:
     st.warning("📴 Market is closed — testing strategy on uploaded CSV data.")
 
     uploaded_file = st.file_uploader("📂 Upload CSV file", type="csv")
@@ -54,7 +101,6 @@ if not is_market_open():
                 "PnL": df['Close'].diff().fillna(0) * 10
             })
 
-            # Send Telegram message for each trade
             for _, row in trade_log.iterrows():
                 send_telegram(
                     f"<b>{row['Action']} SIGNAL</b>\n"
@@ -132,5 +178,3 @@ if not is_market_open():
                 file_name="signal_output.csv",
                 mime="text/csv"
             )
-else:
-    st.info("✅ Market is open. Use Live Trading mode.")
