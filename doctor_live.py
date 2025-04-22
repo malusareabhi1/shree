@@ -125,21 +125,14 @@ st.title("🩺 Doctor Strategy 1.0 Live ")
 mode = st.sidebar.selectbox("Mode", ["Paper", "Live"])
 run = st.sidebar.button("▶️ Start")
 
-#utc_time = datetime.utcnow()  # Get current UTC time
-utc_now = datetime.datetime.utcnow()
-st.write(f"The current time is: {utc_now}")
-ist_timezone = pytz.timezone("Asia/Kolkata")  # Kolkata represents IST
-ist_time = utc_time.replace(tzinfo=pytz.utc).astimezone(ist_timezone)
-# Get the current time
-ist_now = utc_now.replace(tzinfo=pytz.utc).astimezone(ist_timezone)
+# Define IST timezone
+ist = pytz.timezone('Asia/Kolkata')
 
-current_time = datetime.datetime.utcnow()
+# Get current IST time
+now_ist = datetime.now(ist)
 
-# Format the time (example: YYYY-MM-DD HH:MM:SS)
-formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-
-# Display the time in Streamlit
-st.write(f"The current time is: {formatted_time}")
+# Print current time in standard format
+print("📈 Indian Share Market Time (IST):", now_ist.strftime("%Y-%m-%d %H:%M:%S"))
 
 if run:
     now = datetime.datetime.now().time()
