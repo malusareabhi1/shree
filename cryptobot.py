@@ -1,25 +1,21 @@
 import requests
 import streamlit as st
 
-def get_binance_price(symbol="BTCUSDT"):
+def get_coingecko_price(symbol="bitcoin"):
     try:
-        url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol.upper()}"
+        url = f"https://api.coingecko.com/api/v3/simple/price?ids={symbol}&vs_currencies=usd"
         response = requests.get(url, timeout=5)
         data = response.json()
 
-        # Check if the response has 'price'
-        if 'price' not in data:
-            st.error(f"⚠️ Response doesn't contain 'price': {data}")
+        if symbol not in data or 'usd' not in data[symbol]:
+            st.error(f"⚠️ Response error: {data}")
             return None
 
-        return float(data['price'])
-    except requests.exceptions.RequestException as e:
-        st.error(f"❌ Request error: {e}")
-    except ValueError as e:
-        st.error(f"❌ Parsing error: {e}")
+        return float(data[symbol]['usd'])
+
     except Exception as e:
-        st.error(f"❌ Unknown error: {e}")
-    return None
+        st.error(f"❌ Error fetching price: {e}")
+        return None
 
 st.title("🚀 Live Crypto Price")
 
