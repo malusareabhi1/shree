@@ -130,7 +130,7 @@ now = datetime.datetime.now(ist).time()  # This gives a time object
 # Check current time
 #now = datetime.datetime.now().time()
 today = datetime.datetime.today().weekday()  # Monday = 0, Sunday = 6
- st.write("Time=") st.write(now)
+st.write("Time=") st.write(now)
 # Only operate on weekdays (Mon-Fri)
 
 mode = st.sidebar.selectbox("Mode", ["Paper", "Live"])
