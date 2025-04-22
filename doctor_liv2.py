@@ -2,16 +2,16 @@ import streamlit as st
 import pandas as pd
 import datetime
 import time
-from kiteconnect import KiteConnect, KiteTicker
+from kiteconnect import KiteConnect
 import requests
 import os
 import pytz
+
 # ======================
 # CONFIGURATION
 # ======================
 API_KEY = "pew8wcspuu7eojoh"
 API_SECRET = "54cbz2punssxpbxp9fc1edciawu51x5o"
-ACCESS_TOKEN = "qTxcsN807qqnQGdI7zYUuKYgw0HUy2rD"  # Load from file or login flow
 BOT_TOKEN = "7503952210:AAE5TLirqlW3OFuEIq7SJ1Fe0wFUZuKjd3E"
 CHAT_ID = "1320205499"
 capital_per_trade = 10000
@@ -19,28 +19,69 @@ stop_loss_percent = 5
 symbol = "^NSE"
 trading_start = datetime.time(9, 30)
 trading_end = datetime.time(14, 30)
-TRAILING_SL_STEP = 10  # Rs profit trail step
+TRAILING_SL_STEP = 10
 
 # ======================
-# INITIALIZE
+# KITE LOGIN HANDLING
 # ======================
+st.sidebar.title("\ud83d\udd10 Kite Login")
+
 kite = KiteConnect(api_key=API_KEY)
-kite.set_access_token(ACCESS_TOKEN)
+ACCESS_TOKEN_FILE = "access_token.txt"
 
-data = kite.generate_session(ACCESS_TOKEN, api_secret=API_SECRET)
-kite.set_access_token(data["access_token"])
+# Function to load saved token
+def load_saved_token():
+    if os.path.exists(ACCESS_TOKEN_FILE):
+        with open(ACCESS_TOKEN_FILE, "r") as f:
+            return f.read().strip()
+    return None
 
-st.success("✅ Login successful!")
-st.session_state.kite = kite
-# Fetch and display session/profile details
-profile = kite.profile()
-    
-st.success("✅ Successfully connected to Kite!")
-st.markdown(f"**User ID:** `{profile['user_id']}`")
-st.markdown(f"**User Name:** `{profile['user_name']}`")
-st.markdown(f"**Email:** `{profile['email']}`")
-st.markdown(f"**Broker:** `{profile['broker']}`")
+# Function to save new token
+def save_access_token(token):
+    with open(ACCESS_TOKEN_FILE, "w") as f:
+        f.write(token)
 
+# Login process
+access_token = load_saved_token()
+logged_in = False
+
+if access_token:
+    try:
+        kite.set_access_token(access_token)
+        profile = kite.profile()
+        st.success("\u2705 Successfully connected to Kite!")
+        st.markdown(f"**User ID:** `{profile['user_id']}`")
+        st.markdown(f"**User Name:** `{profile['user_name']}`")
+        st.markdown(f"**Email:** `{profile['email']}`")
+        st.markdown(f"**Broker:** `{profile['broker']}`")
+        logged_in = True
+    except Exception:
+        st.warning("\u26a0\ufe0f Saved token expired or invalid. Please login again.")
+        os.remove(ACCESS_TOKEN_FILE)
+
+if not logged_in:
+    login_url = kite.login_url()
+    st.sidebar.markdown(f"[\ud83d\udded Click here to login with Kite]({login_url})")
+    request_token = st.sidebar.text_input("Paste request_token from redirect URL:")
+
+    if st.sidebar.button("\ud83d\udd13 Generate Session"):
+        try:
+            data = kite.generate_session(request_token, api_secret=API_SECRET)
+            access_token = data["access_token"]
+            kite.set_access_token(access_token)
+            save_access_token(access_token)
+            profile = kite.profile()
+            st.success("\u2705 Successfully connected to Kite!")
+            st.markdown(f"**User ID:** `{profile['user_id']}`")
+            st.markdown(f"**User Name:** `{profile['user_name']}`")
+            st.markdown(f"**Email:** `{profile['email']}`")
+            st.markdown(f"**Broker:** `{profile['broker']}`")
+        except Exception as e:
+            st.error(f"\u274c Login failed: {str(e)}")
+
+# ======================
+# STATE INIT
+# ======================
 if "trade_log" not in st.session_state:
     st.session_state.trade_log = []
     st.session_state.trade_status = "Idle"
@@ -51,21 +92,14 @@ if "trade_log" not in st.session_state:
 # ======================
 # FUNCTIONS
 # ======================
-
 def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    payload = {
-        "chat_id": CHAT_ID,
-        "text": message,
-        "parse_mode": "HTML"
-    }
+    payload = {"chat_id": CHAT_ID, "text": message, "parse_mode": "HTML"}
     requests.post(url, data=payload)
 
 def fetch_option_iv(symbol="NIFTY", strike_type="CE"):
     url = f"https://www.nseindia.com/api/option-chain-indices?symbol={symbol}"
-    headers = {
-        "User-Agent": "Mozilla/5.0"
-    }
+    headers = {"User-Agent": "Mozilla/5.0"}
     try:
         response = requests.get(url, headers=headers).json()
         records = response["records"]["data"]
@@ -134,38 +168,29 @@ def log_trade(entry_price, sl, qty, mode):
 # ======================
 # STREAMLIT UI
 # ======================
-
-st.title("🩺 Doctor Strategy 1.0 Live Trading")
+st.title("\ud83e\uddf5 Doctor Strategy 1.0 Live Trading")
 ist = pytz.timezone("Asia/Kolkata")
-
-now = datetime.datetime.now(ist)
-#now = datetime.datetime.now().strftime("%H:%M:%S")
-now = datetime.datetime.now(ist).time()  # This gives a time object
-# Check current time
-#now = datetime.datetime.now().time()
-today = datetime.datetime.today().weekday()  # Monday = 0, Sunday = 6
+now = datetime.datetime.now(ist).time()
 st.write("Time") 
 st.write(now)
-# Only operate on weekdays (Mon-Fri)
+
+today = datetime.datetime.today().weekday()
 
 mode = st.sidebar.selectbox("Mode", ["Paper", "Live"])
-run = st.sidebar.button("▶️ Start")
-stop = st.sidebar.button("⏹️ Stop")
+run = st.sidebar.button("\u25b6\ufe0f Start")
+stop = st.sidebar.button("\u23f9\ufe0f Stop")
 
 if stop:
-    #st.write(f"Hello, {name}!")
-    st.stop() # Stop execution after displaying the greeting
-    # The following line will not be executed
+    st.stop()
     st.success("Thank you for Trade .")
-    
+
 if run:
-    #now = datetime.datetime.now().time()
-    now = datetime.datetime.now(ist).time()  # This gives a time object
+    now = datetime.datetime.now(ist).time()
     if trading_start <= now <= trading_end:
         iv = fetch_option_iv()
         st.write("IV")
-        st.write(iv) # Current IV
-        if iv >=0 :  #if iv > 16:
+        st.write(iv)
+        if iv >= 0:
             ltp = get_ltp(symbol)
             qty = int(capital_per_trade / ltp)
             sl_price = round(ltp - (ltp * stop_loss_percent / 100), 2)
@@ -190,11 +215,10 @@ if run:
 # ======================
 # LOGS
 # ======================
-
-st.subheader("📜 Trade Log")
+st.subheader("\ud83d\udcdc Trade Log")
 if st.session_state.trade_log:
     df = pd.DataFrame(st.session_state.trade_log)
     st.dataframe(df)
-    st.download_button("⬇️ Download CSV", data=df.to_csv(index=False), file_name="doctor_strategy_trade_log.csv")
+    st.download_button("\u2b07\ufe0f Download CSV", data=df.to_csv(index=False), file_name="doctor_strategy_trade_log.csv")
 else:
     st.info("No trades yet.")
