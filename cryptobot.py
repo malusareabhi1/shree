@@ -20,3 +20,11 @@ def get_binance_price(symbol="BTCUSDT"):
     except Exception as e:
         st.error(f"❌ Unknown error: {e}")
     return None
+
+st.title("🚀 Live Crypto Price")
+
+symbol = st.selectbox("Choose Crypto Symbol", ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT"])
+price = get_binance_price(symbol)
+
+if price:
+    st.metric(label=f"{symbol} Price", value=f"${price:,.2f}")
