@@ -1289,6 +1289,20 @@ elif selected == "Live Algo Trading":
     try:
         profile = kite.profile()
         st.success(f"✅ Connected to Zerodha: {profile['user_name']} ({profile['user_id']})")
+        # 💰 Funds (Margins)
+        margins = kite.margins()
+        equity_funds = margins['equity']['available']['cash']
+        st.metric("💰 Available Funds", f"₹{equity_funds:,.2f}")
+    
+        # 📦 Holdings Summary
+        holdings = kite.holdings()
+        holding_value = sum([h['last_price'] * h['quantity'] for h in holdings])
+        st.metric("📈 Holdings Value", f"₹{holding_value:,.2f}")
+    
+        # 📝 Orders
+        orders = kite.orders()
+        st.metric("📝 Total Orders", len(orders))
+
     except Exception as e:
         st.error(f"❌ Failed to fetch profile: {e}")
         st.stop()
