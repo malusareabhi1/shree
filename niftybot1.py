@@ -17,7 +17,9 @@ initial_capital = st.sidebar.number_input("Initial Capital (₹)", value=50000)
 qty = st.sidebar.number_input("Quantity per Trade", value=10)
 
 # Option to enable/disable time-based exit
+#enable_time_exit = st.sidebar.checkbox("Enable Time-Based Exit", value=True)
 enable_time_exit = st.sidebar.checkbox("Enable Time-Based Exit", value=True)
+exit_minutes = st.sidebar.number_input("Exit After X Minutes", min_value=1, max_value=60, value=10)
 
 # Step 2: CSV Upload
 uploaded_file = st.file_uploader("📂 Upload CSV file", type="csv")
@@ -60,7 +62,8 @@ if uploaded_file is not None:
                     exit_reason = "Profit Target Hit"
                 elif row['Close'] < trailing_stop and trailing_stop > 0:
                     exit_reason = "Trailing Stop Hit"
-                elif enable_time_exit and (idx - entry_time) > timedelta(minutes=10):
+                #elif enable_time_exit and (idx - entry_time) > timedelta(minutes=10):
+                elif enable_time_exit and (idx - entry_time) > timedelta(minutes=exit_minutes):
                     exit_reason = "Time-Based Exit"
                 else:
                     if row['Close'] > entry_price * (1 + trailing_stop_pct):
