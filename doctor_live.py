@@ -139,7 +139,7 @@ now = datetime.datetime.now(ist).time()  # This gives a time object
 today = datetime.datetime.today().weekday()  # Monday = 0, Sunday = 6
 #st.write(now)
 #
-st.title("🕒 Local Time")
+#st.title("🕒 Local Time")
 
 # Placeholder to update time
 #time_placeholder = st.empty()
