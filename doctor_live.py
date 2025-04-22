@@ -126,8 +126,8 @@ mode = st.sidebar.selectbox("Mode", ["Paper", "Live"])
 run = st.sidebar.button("▶️ Start")
 
 #utc_time = datetime.utcnow()  # Get current UTC time
-utc_time = datetime.datetime.utcnow()
-st.write(f"The current time is: {utc_time}")
+utc_now = datetime.datetime.utcnow()
+st.write(f"The current time is: {utc_now}")
 ist_timezone = pytz.timezone("Asia/Kolkata")  # Kolkata represents IST
 ist_time = utc_time.replace(tzinfo=pytz.utc).astimezone(ist_timezone)
 # Get the current time
