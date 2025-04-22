@@ -14,18 +14,22 @@ def send_telegram_message(msg):
         "text": msg,
         "parse_mode": "HTML"
     }
-    requests.post(f"https://api.telegram.org/bot{bot_token}/sendMessage", data=payload)
+    try:
+        requests.post(f"https://api.telegram.org/bot{bot_token}/sendMessage", data=payload)
+    except:
+        st.warning("⚠️ Failed to send Telegram message.")
 
 # ========== Streamlit UI ==========
-st.title("🧠 Doctor Strategy 1.0 - Paper Algo Trading")
+st.set_page_config(page_title="Doctor Strategy 1.0", layout="centered")
+st.title("🧠 Doctor Strategy 1.0 (Paper Trading + Telegram Alerts)")
 
-symbol = st.text_input("📈 Symbol (e.g., INFY.NS)", value="INFY.NS")
+symbol = st.text_input("📈 Stock Symbol (e.g., INFY.NS)", value="INFY.NS")
 capital = st.number_input("💰 Capital Allocation", value=50000)
-sl_percent = st.slider("🔻 Initial SL (%)", min_value=0.5, max_value=5.0, value=1.0)
-interval = st.selectbox("📊 Data Interval", options=["1m", "5m", "15m"], index=1)
-start = st.button("🚀 Start Doctor Strategy")
+sl_percent = st.slider("🔻 Initial SL (%)", 0.5, 5.0, value=1.0)
+interval = st.selectbox("🕒 Interval", ["1m", "5m", "15m"], index=1)
+run = st.button("🚀 Start Strategy")
 
-# ========== Core Logic ==========
+# ========== Strategy Logic ==========
 def fetch_data(symbol, interval):
     df = yf.download(tickers=symbol, interval=interval, period="1d", progress=False)
     df.dropna(inplace=True)
@@ -33,7 +37,7 @@ def fetch_data(symbol, interval):
     df['VMA20'] = df['Volume'].rolling(window=20).mean()
     return df
 
-if start and symbol:
+if run and symbol:
     st.success("📡 Running Doctor Strategy... Signals will be sent to Telegram.")
     placeholder = st.empty()
     in_position = False
@@ -44,57 +48,62 @@ if start and symbol:
     while True:
         try:
             df = fetch_data(symbol, interval)
-            last = df.iloc[-1]
-            prev = df.iloc[-2]
+            if len(df) < 21:
+                st.warning("📉 Not enough data yet. Waiting for more candles...")
+                time.sleep(60)
+                continue
 
-            price = df['Close'].iloc[-1]
-            prev_close = df['Close'].iloc[-2]
-            
-            ema = df['EMA20'].iloc[-1]
-            prev_ema = df['EMA20'].iloc[-2]
-            
-            volume = df['Volume'].iloc[-1]
-            vma = df['VMA20'].iloc[-1]
-            
-            # ========== Entry Logic ==========
+            # Extract latest values
+            price = df['Close'].iloc[-1].item()
+            prev_close = df['Close'].iloc[-2].item()
+
+            ema = df['EMA20'].iloc[-1].item()
+            prev_ema = df['EMA20'].iloc[-2].item()
+
+            volume = df['Volume'].iloc[-1].item()
+            vma = df['VMA20'].iloc[-1].item()
+
+            # === Entry ===
             if not in_position:
                 crossed_above = prev_close < prev_ema and price > ema
                 high_volume = volume > vma
-            
+
                 if crossed_above and high_volume:
                     entry_price = price
                     qty = int(capital / entry_price)
                     trailing_sl = round(entry_price * (1 - sl_percent / 100), 2)
                     in_position = True
-            
+
                     st.success(f"📥 BUY @ ₹{entry_price}")
-                    send_telegram_message(f"📥 <b>BUY SIGNAL - Doctor Strategy</b>\n<b>Symbol:</b> {symbol}\n<b>Price:</b> ₹{entry_price}\n<b>SL:</b> ₹{trailing_sl}\n<b>Qty:</b> {qty}")
-            # ========== In Trade ==========
+                    send_telegram_message(f"📥 <b>BUY SIGNAL</b>\n<b>Symbol:</b> {symbol}\n<b>Price:</b> ₹{entry_price}\n<b>SL:</b> ₹{trailing_sl}\n<b>Qty:</b> {qty}")
+
+            # === Exit / Update ===
             elif in_position:
-                # Trailing SL upward
+                # Update trailing SL
                 new_trailing_sl = round(price * (1 - sl_percent / 100), 2)
                 if new_trailing_sl > trailing_sl:
                     trailing_sl = new_trailing_sl
                     send_telegram_message(f"🔁 <b>Trailing SL Updated</b>\n<b>New SL:</b> ₹{trailing_sl}")
 
-                # Exit Condition
-                if price < trailing_sl:
+                # Exit on SL hit
+                if price <= trailing_sl:
                     st.error(f"📤 SELL @ ₹{price} (SL Hit)")
-                    send_telegram_message(f"📤 <b>SELL SIGNAL - SL Hit</b>\n<b>Symbol:</b> {symbol}\n<b>Exit:</b> ₹{price}")
+                    send_telegram_message(f"📤 <b>SELL SIGNAL</b>\n<b>Symbol:</b> {symbol}\n<b>Exit:</b> ₹{price}\n<b>Reason:</b> SL Hit")
                     in_position = False
                     entry_price = 0
                     trailing_sl = 0
 
-            # ========== Display ==========
+            # === UI ===
             with placeholder.container():
-                st.metric("📊 Live Price", f"₹{price:.2f}")
-                st.metric("📈 EMA20", f"₹{ema:.2f}")
-                st.metric("🔊 Volume", f"{volume:,.0f}")
+                st.metric("💹 Live Price", f"₹{price}")
+                st.metric("📈 EMA20", f"₹{ema}")
+                st.metric("🔊 Volume", f"{int(volume)}")
                 st.metric("📉 Trailing SL", f"₹{trailing_sl if in_position else '---'}")
+                st.metric("🧮 Position", "IN TRADE" if in_position else "WAITING")
 
-            time.sleep(60)  # Wait before next check
+            time.sleep(60)
 
         except Exception as e:
             st.error(f"❌ Error: {e}")
-            send_telegram_message(f"❌ Error: {e}")
+            send_telegram_message(f"❌ <b>Error</b>\n{e}")
             break
