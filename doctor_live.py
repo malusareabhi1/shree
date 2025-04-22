@@ -146,10 +146,10 @@ time_placeholder = st.empty()
 
 current_time = datetime.datetime.now(ist).strftime("%H:%M:%S")
 print(current_time)
-while True:
-    current_time = datetime.datetime.now(ist).strftime("%H:%M:%S")
-    time_placeholder.markdown(f"# {current_time}")
-    time.sleep(1)
+#while True:
+    #current_time = datetime.datetime.now(ist).strftime("%H:%M:%S")
+    #time_placeholder.markdown(f"# {current_time}")
+    #time.sleep(1)
 
 #
 if run:
