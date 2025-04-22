@@ -55,4 +55,25 @@ st.title("🩺 Doctor Strategy 1.0 - Live Algo Trading")
 # Placeholder for KiteConnect initialization and strategy logic
 st.write("Welcome to Doctor Strategy 1.0 Algo Bot")
 
-# The rest of your trading logic (KiteConnect, live IV fetch, SL logic, CSV log, etc.) goes here.
+# Add Start and Stop buttons
+start_button = st.button("Start Algo Trading")
+stop_button = st.button("Stop Algo Trading")
+
+if start_button:
+    st.session_state.is_trading_active = True
+    st.write("🟢 Trading started...")
+
+if stop_button:
+    st.session_state.is_trading_active = False
+    st.write("🔴 Trading stopped.")
+
+# Use the flag `is_trading_active` to control your trading logic
+if 'is_trading_active' not in st.session_state:
+    st.session_state.is_trading_active = False  # Default to not trading
+
+# Main trading logic loop (Placeholder)
+if st.session_state.is_trading_active:
+    # Replace with your actual trading logic, e.g. order placements, fetching data, etc.
+    st.write("Executing trades...")  # Example placeholder
+else:
+    st.write("Trading is stopped. No trades are being executed.")
