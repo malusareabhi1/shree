@@ -253,14 +253,13 @@ elif selected == "Get Stock Data":
             if df.empty:
                 st.warning("No data returned. Check symbol or market hours for intraday intervals.")
             else:
-                # Reset index to get 'Date' column
-               # df.reset_index(inplace=True)
-               # df.index = df.index.tz_localize('UTC').tz_convert('Asia/Kolkata')
-                # Convert index to datetime and localize to IST
+               # Ensure datetime index is in IST timezone
                 df.index = pd.to_datetime(df.index)
-                df.index = df.index.tz_localize("UTC").tz_convert("Asia/Kolkata")
-                # Filter only NSE working hours
-                df = df.between_time("09:15", "15:30")
+                if df.index.tz is None:
+                    df.index = df.index.tz_localize("UTC").tz_convert("Asia/Kolkata")
+                else:
+                    df.index = df.index.tz_convert("Asia/Kolkata")
+                    df = df.between_time("09:15", "15:30")
 
                 # Ensure proper column names and date
                 if 'Datetime' in df.columns:
