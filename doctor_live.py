@@ -124,6 +124,14 @@ def log_trade(entry_price, sl, qty, mode):
 st.title("🩺 Doctor Strategy 1.0 Live ")
 mode = st.sidebar.selectbox("Mode", ["Paper", "Live"])
 run = st.sidebar.button("▶️ Start")
+# Get the current time
+current_time = datetime.datetime.now()
+
+# Format the time (example: YYYY-MM-DD HH:MM:SS)
+formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+
+# Display the time in Streamlit
+st.write(f"The current time is: {formatted_time}")
 
 if run:
     now = datetime.datetime.now().time()
