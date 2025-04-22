@@ -1,26 +1,18 @@
-from nsepython import *
+import yfinance as yf
 import pandas as pd
-from datetime import datetime
 
-# Get intraday data for NIFTY
-df = indices_oi("NIFTY")
+# Define the symbol and date range
+symbol = "^NSEI"  # NIFTY50 index symbol on Yahoo Finance
+start_date = "2024-04-18"
+end_date = "2024-04-18"
 
-# Get historical data (5-minute intervals)
-symbol = "NIFTY"
-interval = "5minute"
-day = "2024-04-18"  # change as needed
+# Download data
+df = yf.download(tickers=symbol, interval="5m", start=start_date, end=end_date)
 
-data = equity_intraday_data(symbol, interval)
-
-# Convert to DataFrame
-df = pd.DataFrame(data)
-df['date'] = pd.to_datetime(df['date'])
-
-# Filter for a specific date and market hours
-df = df[df['date'].dt.date == pd.to_datetime(day).date()]
-df = df[(df['date'].dt.time >= pd.to_datetime("09:15:00").time()) &
-        (df['date'].dt.time <= pd.to_datetime("15:30:00").time())]
+# Filter only working hours (NSE: 09:15 - 15:30)
+df = df.between_time("09:15", "15:30")
 
 # Save to CSV
-df.to_csv("nifty_5min_data.csv", index=False)
-print("✅ Data saved to nifty_5min_data.csv")
+df.to_csv("nifty_5min_working_hours.csv")
+
+print("✅ Saved to nifty_5min_working_hours.csv")
