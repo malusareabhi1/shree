@@ -126,7 +126,7 @@ st.title("🩺 Doctor Strategy 1.0 Live ")
 mode = st.sidebar.selectbox("Mode", ["Paper", "Live"])
 run = st.sidebar.button("▶️ Start")
 
-import datetime
+from datetime import datetime, time
 import pytz
 
 ist = pytz.timezone("Asia/Kolkata")
@@ -139,12 +139,12 @@ if run:
     ist = pytz.timezone("Asia/Kolkata")
     
     # Get current IST datetime
-    now_ist = datetime.now(ist).time()  # Get current time in IST
+    now = datetime.now(ist).time()  # Get current time in IST
     #now_ist = datetime.now(ist)
     #now_ist = datetime.datetime.now(ist)
     # Option A: Format with strftime for time only
     #time_str = now_ist.strftime("%H:%M:%S")
-    st.write(f"⏰ Current IST Time: {now_ist}")
+    st.write(f"⏰ Current IST Time: {now}")
     #now = datetime.datetime.now().time()
     #now = datetime.datetime.now(ist)
     # Get current IST time
