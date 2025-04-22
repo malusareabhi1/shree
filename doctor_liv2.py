@@ -148,6 +148,7 @@ if run:
     now = datetime.datetime.now(ist).time()  # This gives a time object
     if trading_start <= now <= trading_end:
         iv = fetch_option_iv()
+        st.write(iv) # Current IV
         if iv > 16:
             ltp = get_ltp(symbol)
             qty = int(capital_per_trade / ltp)
