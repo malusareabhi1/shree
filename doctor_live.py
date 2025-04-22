@@ -126,20 +126,25 @@ st.title("🩺 Doctor Strategy 1.0 Live ")
 mode = st.sidebar.selectbox("Mode", ["Paper", "Live"])
 run = st.sidebar.button("▶️ Start")
 
-from datetime import datetime, time
+import datetime
 import pytz
 
 ist = pytz.timezone("Asia/Kolkata")
-now_ist = datetime.datetime.now(ist)
-#print("📈 Indian Share Market Time (IST):", now_ist.strftime("%Y-%m-%d %H:%M:%S"))
-st.write(f"Current time in India (IST): {now_ist.strftime('%Y-%m-%d %H:%M:%S')}")
+
+now = datetime.datetime.now(ist)
+#now = datetime.datetime.now().strftime("%H:%M:%S")
+now = datetime.datetime.now(ist).time()  # This gives a time object
+# Check current time
+#now = datetime.datetime.now().time()
+today = datetime.datetime.today().weekday()  # Monday = 0, Sunday = 6
+st.write(now)
 
 if run:
         # Define IST timezone
     ist = pytz.timezone("Asia/Kolkata")
     
     # Get current IST datetime
-    now = datetime.now(ist).time()  # Get current time in IST
+    now = datetime.datetime.now(ist).time()  # Get current time in IST
     #now_ist = datetime.now(ist)
     #now_ist = datetime.datetime.now(ist)
     # Option A: Format with strftime for time only
