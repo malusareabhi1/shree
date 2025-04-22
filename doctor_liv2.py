@@ -144,7 +144,8 @@ if stop:
     st.success("Thank you for Trade .")
     
 if run:
-    now = datetime.datetime.now().time()
+    #now = datetime.datetime.now().time()
+    now = datetime.datetime.now(ist).time()  # This gives a time object
     if trading_start <= now <= trading_end:
         iv = fetch_option_iv()
         if iv > 16:
