@@ -1279,12 +1279,20 @@ elif selected == "Live Algo Trading":
         requests.post(f"https://api.telegram.org/bot{bot_token}/sendMessage", data=payload)
 
     # ========== Check Kite Session ==========
+   # ========== Check Kite Session ==========
+    if "kite" not in st.session_state:
+        st.error("🔌 Kite session not found. Please login through 'KITE API' tab first.")
+        st.stop()
+
+    kite = st.session_state.kite
+
     try:
         profile = kite.profile()
-        st.success(f"✅ Connected: {profile['user_name']} ({profile['user_id']})")
-    except:
-        st.error("🔌 Not connected to Kite. Please login from the sidebar first.")
+        st.success(f"✅ Connected to Zerodha: {profile['user_name']} ({profile['user_id']})")
+    except Exception as e:
+        st.error(f"❌ Failed to fetch profile: {e}")
         st.stop()
+
 
     # ========== User Inputs ==========
     symbol = st.text_input("📈 Symbol (e.g., INFY)")
