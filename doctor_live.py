@@ -131,6 +131,8 @@ st.write(f"The current time is: {utc_time}")
 ist_timezone = pytz.timezone("Asia/Kolkata")  # Kolkata represents IST
 ist_time = utc_time.replace(tzinfo=pytz.utc).astimezone(ist_timezone)
 # Get the current time
+ist_now = utc_now.replace(tzinfo=pytz.utc).astimezone(ist_timezone)
+
 current_time = datetime.datetime.utcnow()
 
 # Format the time (example: YYYY-MM-DD HH:MM:SS)
