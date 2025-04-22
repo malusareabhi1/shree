@@ -11,7 +11,7 @@ import pytz
 # ======================
 API_KEY = "pew8wcspuu7eojoh"
 API_SECRET = "54cbz2punssxpbxp9fc1edciawu51x5o"
-ACCESS_TOKEN = "qR4nUH3JQ52ygqbP1LnBl3OqEkgn18wJ"  # Load from file or login flow
+ACCESS_TOKEN = "qTxcsN807qqnQGdI7zYUuKYgw0HUy2rD"  # Load from file or login flow
 BOT_TOKEN = "7503952210:AAE5TLirqlW3OFuEIq7SJ1Fe0wFUZuKjd3E"
 CHAT_ID = "1320205499"
 capital_per_trade = 10000
