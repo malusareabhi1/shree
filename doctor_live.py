@@ -144,10 +144,10 @@ st.title("🕒 Local Time")
 # Placeholder to update time
 time_placeholder = st.empty()
 
-current_time = datetime.datetime.now().strftime("%H:%M:%S")
+current_time = datetime.datetime.now(ist).strftime("%H:%M:%S")
 print(current_time)
 while True:
-    current_time = datetime.datetime.now().strftime("%H:%M:%S")
+    current_time = datetime.datetime.now(ist).strftime("%H:%M:%S")
     time_placeholder.markdown(f"# {current_time}")
     time.sleep(1)
 
