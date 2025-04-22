@@ -30,9 +30,10 @@ def send_telegram_message(message):
 
 
 ist = pytz.timezone("Asia/Kolkata")
-now_ist = datetime.datetime.now(ist)
+
+now = datetime.datetime.now(ist)
 # Check current time
-now = datetime.datetime.now().time()
+#now = datetime.datetime.now().time()
 today = datetime.datetime.today().weekday()  # Monday = 0, Sunday = 6
 st.write(now)
 # Only operate on weekdays (Mon-Fri)
