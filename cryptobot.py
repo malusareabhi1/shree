@@ -1,4 +1,5 @@
 import requests
+import streamlit as st
 
 def get_coingecko_price(symbol="bitcoin"):
     try:
