@@ -136,6 +136,7 @@ st.write(f"Current time in India (IST): {now_ist.strftime('%Y-%m-%d %H:%M:%S')}"
 
 if run:
     now = datetime.datetime.now().time()
+    now = datetime.datetime.now(ist)
     if trading_start <= now <= trading_end:
         iv = fetch_option_iv()
         if iv > 16:
