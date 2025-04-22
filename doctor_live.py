@@ -144,7 +144,7 @@ today = datetime.datetime.today().weekday()  # Monday = 0, Sunday = 6
 # Placeholder to update time
 #time_placeholder = st.empty()
 
-current_time = datetime.datetime.now(ist).strftime("%H:%M:%S")
+#current_time = datetime.datetime.now(ist).strftime("%H:%M:%S")
 #print(current_time)
 #while True:
     #current_time = datetime.datetime.now(ist).strftime("%H:%M:%S")
