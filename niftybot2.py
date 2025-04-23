@@ -4,12 +4,12 @@ import plotly.graph_objects as go
 import time
 from datetime import datetime
 import yfinance as yf
+import requests
 
 st.set_page_config(layout="wide")
 
 # === CONFIG ===
-REFRESH_INTERVAL = 30  # seconds
-LOG_CSV = "trade_logs.csv"
+REFRESH_INTERVAL = 30  # seconds\LOG_CSV = "trade_logs.csv"
 DEFAULT_CSV_PATH = "stock_data.csv"
 
 # === SIDEBAR ===
@@ -20,107 +20,113 @@ csv_file = st.sidebar.file_uploader("Upload CSV", type="csv")
 symbol = st.sidebar.text_input("Stock Symbol", value="RELIANCE.BO")
 
 # === Load Data ===
-def get_live_data(symbol="^NSEI", interval="5m"):
+def get_live_data(symbol="RELIANCE.BO", interval="5m"):
     try:
-        df = yf.download(tickers=symbol, interval=interval, period="1d")
-        df.reset_index(inplace=True)
-        df.rename(columns={"Datetime": "Datetime"}, inplace=True)
+        df = yf.download(tickers=symbol, interval=interval, period="1d", progress=False)
+        if df is None or df.empty:
+            return pd.DataFrame()
+        df = df.reset_index().rename(columns={"Datetime": "datetime"})
         return df
     except Exception as e:
         st.error(f"Error fetching live data: {e}")
         return pd.DataFrame()
 
+
 def load_csv_data(file=None):
-    if file:
-        return pd.read_csv(file)
-    else:
-        return pd.read_csv(DEFAULT_CSV_PATH)
+    try:
+        if file:
+            df = pd.read_csv(file)
+        else:
+            df = pd.read_csv(DEFAULT_CSV_PATH)
+        return df
+    except Exception as e:
+        st.error(f"Error loading CSV data: {e}")
+        return pd.DataFrame()
 
 # === Strategy Logic ===
 def apply_strategy(df):
     if df is None or df.empty:
-        st.error("DataFrame is empty or None.")
+        st.warning("DataFrame is empty. Skipping strategy.")
         return pd.DataFrame()
 
-    # Normalize columns
-    df.columns = [col.strip().upper() for col in df.columns]
+    # Normalize column names
+    df.columns = [col.strip().lower() for col in df.columns]
 
-    required_cols = {"CLOSE", "VOLUME"}
-    missing_cols = required_cols - set(df.columns)
-
-    if missing_cols:
-        st.error(f"Missing required columns: {missing_cols}")
+    required_cols = {"close", "volume"}
+    missing = required_cols - set(df.columns)
+    if missing:
+        st.error(f"Missing required columns: {missing}")
         return pd.DataFrame()
 
-    df["EMA20"] = df["CLOSE"].ewm(span=20).mean()
-    df["VOLUME_AVG"] = df["VOLUME"].rolling(window=20).mean()
-    df["SIGNAL"] = ""
+    df["ema20"] = df["close"].ewm(span=20, adjust=False).mean()
+    df["volume_avg"] = df["volume"].rolling(window=20).mean()
+    df["signal"] = ""
+
+    # Ensure datetime column exists
+    if "datetime" not in df.columns:
+        # Try to convert index to datetime
+        df["datetime"] = pd.to_datetime(df.index)
+    else:
+        df["datetime"] = pd.to_datetime(df["datetime"])
 
     for i in range(1, len(df)):
-        if df["CLOSE"][i] > df["EMA20"][i] and df["VOLUME"][i] > df["VOLUME_AVG"][i]:
-            df.at[i, "SIGNAL"] = "BUY"
-        elif df["CLOSE"][i] < df["EMA20"][i] and df["VOLUME"][i] > df["VOLUME_AVG"][i]:
-            df.at[i, "SIGNAL"] = "SELL"
+        if df["close"].iat[i] > df["ema20"].iat[i] and df["volume"].iat[i] > df["volume_avg"].iat[i]:
+            df.at[i, "signal"] = "BUY"
+        elif df["close"].iat[i] < df["ema20"].iat[i] and df["volume"].iat[i] > df["volume_avg"].iat[i]:
+            df.at[i, "signal"] = "SELL"
     return df
 
 # === Logger ===
 def log_signals(df):
-    logs = df[df["Signal"] != ""][["Datetime", "Close", "Signal"]]
+    if df is None or df.empty:
+        return
+    logs = df[df["signal"] != ""][['datetime', 'close', 'signal']]
     logs.to_csv(LOG_CSV, mode='a', index=False, header=not pd.io.common.file_exists(LOG_CSV))
 
 # === Chart ===
 def plot_chart(df):
+    if df is None or df.empty:
+        return
     fig = go.Figure()
     fig.add_trace(go.Candlestick(
-        x=df["Datetime"],
-        open=df["Open"],
-        high=df["High"],
-        low=df["Low"],
-        close=df["Close"],
-        name="Candles"
+        x=df["datetime"], open=df["open"], high=df["high"], low=df["low"], close=df["close"], name="Candles"
     ))
-    buy_signals = df[df["Signal"] == "BUY"]
-    sell_signals = df[df["Signal"] == "SELL"]
+    buy_signals = df[df["signal"] == "BUY"]
+    sell_signals = df[df["signal"] == "SELL"]
 
     fig.add_trace(go.Scatter(
-        x=buy_signals["Datetime"],
-        y=buy_signals["Close"],
-        mode="markers",
-        marker=dict(symbol="triangle-up", color="green", size=10),
-        name="BUY"
+        x=buy_signals["datetime"], y=buy_signals["close"], mode="markers",
+        marker=dict(symbol="triangle-up", color="green", size=10), name="BUY"
     ))
     fig.add_trace(go.Scatter(
-        x=sell_signals["Datetime"],
-        y=sell_signals["Close"],
-        mode="markers",
-        marker=dict(symbol="triangle-down", color="red", size=10),
-        name="SELL"
+        x=sell_signals["datetime"], y=sell_signals["close"], mode="markers",
+        marker=dict(symbol="triangle-down", color="red", size=10), name="SELL"
     ))
     st.plotly_chart(fig, use_container_width=True)
 
 # === Main Run ===
 st.title("📊 Doctor Strategy Live Dashboard")
-run_button = st.sidebar.button("Run Now")
+run = st.sidebar.button("Run Now")
 
-if run_button or mode == "Live":
+if run or mode == "Live":
     while True:
         with st.spinner("Fetching data..."):
             if mode == "Live":
-                df = get_live_data(symbol)
+                df = get_live_data(symbol, "5m")
             else:
                 df = load_csv_data(csv_file)
 
-            if df.empty:
-                st.warning("No data found.")
-                break
-
+            st.write("DataFrame info:", type(df), df.shape)
             df = apply_strategy(df)
-            st.subheader("Signal Table")
-            st.dataframe(df[df["Signal"] != ""][["Datetime", "Close", "Signal"]], use_container_width=True)
 
-            log_signals(df)
-            st.subheader("Candlestick Chart")
-            plot_chart(df)
+            st.subheader("Signal Table")
+            if not df.empty:
+                st.dataframe(df[df['signal'] != ''][['datetime', 'close', 'signal']], use_container_width=True)
+                log_signals(df)
+                st.subheader("Candlestick Chart")
+                plot_chart(df)
+            else:
+                st.warning("No data/signals to display.")
 
             if mode == "CSV":
                 break  # No loop for CSV mode
