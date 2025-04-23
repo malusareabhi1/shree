@@ -1335,15 +1335,7 @@ if now.hour == 15 and now.minute == 30:
         st.warning(market_close_msg)
         send_telegram(market_close_msg)
 
-
-    
-     
-
-    
-
-     
-    
-    # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
+ # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
     signal = "No Signal"
     if (prev["Close"] < prev["EMA20"]) and (latest["Close"] > prev["EMA20"]) and (latest["Volume"] > latest["VMA20"]):
         signal = "BUY"
@@ -2093,3 +2085,6 @@ elif selected == "New Nifty Strategy":
             st.warning("🚫 No trades were executed based on the given conditions.")
     else:
         st.warning("📴 Please upload a valid CSV file to backtest the strategy.")
+
+    
+   
