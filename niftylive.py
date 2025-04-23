@@ -9,7 +9,7 @@ st.title("📊 Nifty Live EMA20 Strategy Monitor")
 
 symbol = "^NSEI"  # NIFTY index ticker
 interval = "5m"   # 5-minute bars
-period = "2d"     # last 2 days of data
+period = "5d"     # last 2 days of data
 
 @st.cache_data(ttl=60)  # cache data for 60s
 def fetch_and_clean(ticker):
