@@ -1283,7 +1283,7 @@ elif selected == "Live Algo Trading":
             st.error(f"Telegram Error: {e}")
     
     # ─── PAGE CONFIG ──────────────────────────────────────────────────────────────
-    st.set_page_config(page_title="📈 Nifty EMA20 Breakout", layout="wide")
+    #st.set_page_config(page_title="📈 Nifty EMA20 Breakout", layout="wide")
     st.title("📊 Nifty 5-min EMA20 + Volume Breakout Monitor")
     
     # ─── STRATEGY TEST STARTED ─────────────────────────────────────────────────────
