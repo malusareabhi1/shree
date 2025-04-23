@@ -14,7 +14,12 @@ period = "2d"     # last 2 days of data
 @st.cache_data(ttl=60)  # cache data for 60s
 def fetch_and_clean(ticker):
     df = yf.download(ticker, interval=interval, period=period, progress=False)
-    
+    df.index = pd.to_datetime(df.index)
+                if df.index.tz is None:
+                    df.index = df.index.tz_localize("UTC").tz_convert("Asia/Kolkata")
+                else:
+                    df.index = df.index.tz_convert("Asia/Kolkata")
+                    df = df.between_time("09:15", "15:30")
     # -- FLATTEN COLUMNS: drop any second-level (the ticker) --
     # If your df.columns is a MultiIndex, this will grab only level-0 names.
     if isinstance(df.columns, pd.MultiIndex):
