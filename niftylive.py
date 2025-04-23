@@ -20,7 +20,7 @@ def send_telegram(msg):
 
 # Sidebar
 st.sidebar.title("NIFTY Live Strategy Monitor")
-symbol = st.sidebar.selectbox("Choose NIFTY Stock", ["RELIANCE.NS", "INFY.NS", "TCS.NS", "HDFCBANK.NS", "ICICIBANK.NS"])
+symbol = st.sidebar.selectbox("Choose NIFTY Stock", ["^NSEI","RELIANCE.NS", "INFY.NS", "TCS.NS", "HDFCBANK.NS", "ICICIBANK.NS"])
 capital = st.sidebar.number_input("Capital (₹)", value=50000)
 sl_percent = st.sidebar.slider("SL %", 0.5, 5.0, 1.5)
 
