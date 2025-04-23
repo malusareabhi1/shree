@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import time
 from datetime import datetime
-from nsepython import nse_eq
+import yfinance as yf
 
 st.set_page_config(layout="wide")
 
@@ -17,13 +17,18 @@ st.sidebar.title("📈 Strategy Dashboard")
 mode = st.sidebar.radio("Select Mode", ["Live", "CSV"])
 interval = st.sidebar.number_input("Refresh Interval (sec)", value=REFRESH_INTERVAL, min_value=5, step=5)
 csv_file = st.sidebar.file_uploader("Upload CSV", type="csv")
+symbol = st.sidebar.text_input("Stock Symbol", value="RELIANCE.BO")
 
 # === Load Data ===
-def get_live_data(symbol="RELIANCE", interval="5m"):
-    # Placeholder for real-time data logic
-    df = nse_eq(symbol)
-    # Simulate a DataFrame with 5m candles here
-    return pd.DataFrame()  # Replace with actual implementation
+def get_live_data(symbol="RELIANCE.BO", interval="5m"):
+    try:
+        df = yf.download(tickers=symbol, interval=interval, period="1d")
+        df.reset_index(inplace=True)
+        df.rename(columns={"Datetime": "Datetime"}, inplace=True)
+        return df
+    except Exception as e:
+        st.error(f"Error fetching live data: {e}")
+        return pd.DataFrame()
 
 def load_csv_data(file=None):
     if file:
@@ -87,7 +92,7 @@ if run_button or mode == "Live":
     while True:
         with st.spinner("Fetching data..."):
             if mode == "Live":
-                df = get_live_data()
+                df = get_live_data(symbol)
             else:
                 df = load_csv_data(csv_file)
 
