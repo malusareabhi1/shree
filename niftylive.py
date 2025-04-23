@@ -50,7 +50,9 @@ latest_ema = float(latest['EMA20'])
 latest_vol = float(latest['Volume'])
 latest_vma = float(latest['VMA20'])
 
-if prev['Close'] < prev['EMA20'] and latest['Close'] > latest['EMA20'] and latest['Volume'] > latest['VMA20']:
+#if prev['Close'] < prev['EMA20'] and latest['Close'] > latest['EMA20'] and latest['Volume'] > latest['VMA20']:
+if prev_close < prev_ema20 and latest_close > latest_ema20 and latest_volume > latest_vma20:
+    # execute strategy    
     signal = "BUY"
     entry = round(latest['Close'], 2)
     sl = round(entry * (1 - sl_percent / 100), 2)
