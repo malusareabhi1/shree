@@ -9,17 +9,17 @@ st.set_page_config("📊 New Nifty Strategy Backtest", layout="centered")
 st.title("📊 New Nifty Strategy - Backtest")
 
 # Sidebar for Strategy Parameters
-st.sidebar.header("🛠 Strategy Parameters")
-stop_loss_pct = st.sidebar.slider("Stop Loss %", 1, 20, 10) / 100
-profit_target_pct = st.sidebar.slider("Profit Target %", 1, 20, 5) / 100
-trailing_stop_pct = st.sidebar.slider("Trailing Stop %", 1, 10, 4) / 100
-initial_capital = st.sidebar.number_input("Initial Capital (₹)", value=50000)
-qty = st.sidebar.number_input("Quantity per Trade", value=10)
+st.header("🛠 Strategy Parameters")
+stop_loss_pct = st.slider("Stop Loss %", 1, 20, 10) / 100
+profit_target_pct = st.slider("Profit Target %", 1, 20, 5) / 100
+trailing_stop_pct = st.slider("Trailing Stop %", 1, 10, 4) / 100
+initial_capital = st.number_input("Initial Capital (₹)", value=50000)
+qty = st.number_input("Quantity per Trade", value=10)
 
 # Option to enable/disable time-based exit
-#enable_time_exit = st.sidebar.checkbox("Enable Time-Based Exit", value=True)
-enable_time_exit = st.sidebar.checkbox("Enable Time-Based Exit", value=True)
-exit_minutes = st.sidebar.number_input("Exit After X Minutes", min_value=1, max_value=60, value=10)
+#enable_time_exit = st.checkbox("Enable Time-Based Exit", value=True)
+enable_time_exit = st.checkbox("Enable Time-Based Exit", value=True)
+exit_minutes = st.number_input("Exit After X Minutes", min_value=1, max_value=60, value=10)
 
 # Step 2: CSV Upload
 uploaded_file = st.file_uploader("📂 Upload CSV file", type="csv")
