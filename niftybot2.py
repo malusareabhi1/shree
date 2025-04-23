@@ -38,24 +38,22 @@ def load_csv_data(file=None):
 
 # === Strategy Logic ===
 def apply_strategy(df):
-    # Normalize column names (e.g., 'close' -> 'Close')
-    df.columns = [col.title() for col in df.columns]
+    df.columns = [col.strip().upper() for col in df.columns]  # Normalize
 
-    required_cols = {"Open", "High", "Low", "Close", "Volume"}
-    missing_cols = required_cols - set(df.columns)
-    if missing_cols:
-        st.error(f"Missing required columns: {missing_cols}")
+    required_cols = {"CLOSE", "VOLUME"}
+    if not required_cols.issubset(df.columns):
+        st.error(f"Missing columns: {required_cols - set(df.columns)}")
         return pd.DataFrame()
 
-    df["Ema20"] = df["Close"].ewm(span=20).mean()
-    df["Volume_Avg"] = df["Volume"].rolling(window=20).mean()
-    df["Signal"] = ""
+    df["EMA20"] = df["CLOSE"].ewm(span=20).mean()
+    df["VOLUME_AVG"] = df["VOLUME"].rolling(window=20).mean()
+    df["SIGNAL"] = ""
 
     for i in range(1, len(df)):
-        if df["Close"][i] > df["Ema20"][i] and df["Volume"][i] > df["Volume_Avg"][i]:
-            df.at[i, "Signal"] = "BUY"
-        elif df["Close"][i] < df["Ema20"][i] and df["Volume"][i] > df["Volume_Avg"][i]:
-            df.at[i, "Signal"] = "SELL"
+        if df["CLOSE"][i] > df["EMA20"][i] and df["VOLUME"][i] > df["VOLUME_AVG"][i]:
+            df.at[i, "SIGNAL"] = "BUY"
+        elif df["CLOSE"][i] < df["EMA20"][i] and df["VOLUME"][i] > df["VOLUME_AVG"][i]:
+            df.at[i, "SIGNAL"] = "SELL"
     return df
 
 
