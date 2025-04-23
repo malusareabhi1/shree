@@ -1265,7 +1265,7 @@ elif selected == "PaperTrade":
         st.plotly_chart(fig, use_container_width=True)
 
 elif selected == "Live Algo Trading":
-    st.title("🤖 Live Algo Trading (Paper/Real Mode)")
+    st.title("🤖 Live Algo Trading (Paper/Real Mode) Hello ")
 
    
 
