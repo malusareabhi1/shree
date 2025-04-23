@@ -1338,8 +1338,7 @@ if now.hour == 15 and now.minute == 30:
 
 
     # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
-
-    signal = "No Signal"
+signal = "No Signal"
     if (prev["Close"] < prev["EMA20"]) and (latest["Close"] > prev["EMA20"]) and (latest["Volume"] > latest["VMA20"]):
         signal = "BUY"
         entry_price = round(latest["Close"], 2)
@@ -1351,6 +1350,8 @@ if now.hour == 15 and now.minute == 30:
             f"<b>Time:</b> {latest.name.strftime('%H:%M')}"
         )
         send_telegram(msg)
+
+    
     
     # ─── DISPLAY ──────────────────────────────────────────────────────────────────
     st.subheader("📊 Last 5 Candles")
