@@ -20,6 +20,8 @@ def fetch_and_clean(ticker):
         col[0] if col[1] == '' else f"{col[0]}_{col[1]}"
         for col in df.columns.to_flat_index()
     ]
+    # Debugging: Display the column names to check
+    st.write("Columns available in the data:", df.columns)
     # 3) Compute EMA20 on the cleaned 'Close' column
     df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
     return df
