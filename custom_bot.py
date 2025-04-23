@@ -66,22 +66,38 @@ st.markdown("""
 
 if selected == "New Nifty Strategy":
     st.title("⚙️ Test New Nifty Strategy")
-    # Step 1: Streamlit App Configuration
-    #st.set_page_config("📊 New Nifty Strategy Backtest", layout="centered")
-    #st.title("📊 New Nifty Strategy - Backtest")
+    # Sidebar: Strategy Parameters
+    st.sidebar.header("Trading Strategy Settings")
     
-    # Sidebar for Strategy Parameters
-    st.header("🛠 Strategy Parameters")
-    stop_loss_pct = st.slider("Stop Loss %", 1, 20, 10) / 100
-    profit_target_pct = st.slider("Profit Target %", 1, 20, 5) / 100
-    trailing_stop_pct = st.slider("Trailing Stop %", 1, 10, 4) / 100
-    initial_capital = st.number_input("Initial Capital (₹)", value=50000)
-    qty = st.number_input("Quantity per Trade", value=10)
+    # Chart type
+    chart_type = st.sidebar.selectbox("Select Chart Type", ["Candlestick", "Line", "OHLC"])
     
-    # Option to enable/disable time-based exit
-    #enable_time_exit = st.checkbox("Enable Time-Based Exit", value=True)
-    enable_time_exit = st.checkbox("Enable Time-Based Exit", value=True)
-    exit_minutes = st.number_input("Exit After X Minutes", min_value=1, max_value=60, value=10)
+    # Initial capital
+    initial_capital = st.sidebar.number_input("Initial Capital (₹)", min_value=1000, value=100000, step=1000)
+    
+    # Daily trade limit
+    daily_trade_limit = st.sidebar.number_input("Daily Trade Limit", min_value=1, value=5)
+    
+    # Trade time range
+    start_time = st.sidebar.time_input("Trade Start Time", value=datetime.time(9, 30))
+    stop_time = st.sidebar.time_input("Trade Stop Time", value=datetime.time(14, 30))
+    
+    # Lot quantity
+    lot_qty = st.sidebar.number_input("Lot Quantity", min_value=1, value=1)
+    
+    # Stock selection
+    stock = st.sidebar.selectbox("Select Stock", ["RELIANCE", "INFY", "HDFCBANK", "TCS", "ICICIBANK", "NIFTY", "BANKNIFTY"])
+    
+    # Frame interval
+    frame_interval = st.sidebar.selectbox("Select Time Frame", ["5m", "15m", "1h", "1d"])
+    
+    # Order type
+    order_type = st.sidebar.selectbox("Order Type", ["Market", "Limit"])
+    
+    # Display selected values (optional)
+    st.sidebar.markdown("---")
+    st.sidebar.markdown(f"**Selected Stock:** {stock}")
+    st.sidebar.markdown(f"**Order Type:** {order_type}")
     
     # Step 2: CSV Upload
     uploaded_file = st.file_uploader("📂 Upload CSV file", type="csv")
