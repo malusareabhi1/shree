@@ -1337,7 +1337,7 @@ if now.hour == 15 and now.minute == 30:
 
 
 
- # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
+    # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
 
     signal = "No Signal"
     if (prev["Close"] < prev["EMA20"]) and (latest["Close"] > prev["EMA20"]) and (latest["Volume"] > latest["VMA20"]):
