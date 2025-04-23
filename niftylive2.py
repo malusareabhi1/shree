@@ -89,7 +89,34 @@ col1, col2, col3 = st.columns(3)
 col1.metric("🔹 Close", f"₹{latest['Close']:.2f}")
 col2.metric("🔸 EMA20", f"₹{latest['EMA20']:.2f}")
 col3.metric("📌 Signal", signal)
+#---------------------------------------------------------------------------------------
+import plotly.graph_objects as go
 
+st.subheader("🕯️ Live 5-Min Candle Chart")
+
+fig = go.Figure(data=[go.Candlestick(
+    x=df.index,
+    open=df["Open"],
+    high=df["High"],
+    low=df["Low"],
+    close=df["Close"],
+    increasing_line_color="green",
+    decreasing_line_color="red",
+    name="Candles"
+)])
+
+fig.update_layout(
+    xaxis_rangeslider_visible=False,
+    xaxis_title="Time",
+    yaxis_title="Price",
+    template="plotly_dark",
+    height=500
+)
+
+st.plotly_chart(fig, use_container_width=True)
+
+
+#---------------------------------------------------------------------------------------
 st.subheader("📈 Price vs EMA20")
 st.line_chart(df[["Close", "EMA20"]])
 
