@@ -20,7 +20,7 @@ csv_file = st.sidebar.file_uploader("Upload CSV", type="csv")
 symbol = st.sidebar.text_input("Stock Symbol", value="RELIANCE.BO")
 
 # === Load Data ===
-def get_live_data(symbol="RELIANCE.BO", interval="5m"):
+def get_live_data(symbol="^NSEI", interval="5m"):
     try:
         df = yf.download(tickers=symbol, interval=interval, period="1d")
         df.reset_index(inplace=True)
