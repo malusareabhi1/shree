@@ -38,16 +38,26 @@ def load_csv_data(file=None):
 
 # === Strategy Logic ===
 def apply_strategy(df):
-    df["EMA20"] = df["Close"].ewm(span=20).mean()
+    # Normalize column names (e.g., 'close' -> 'Close')
+    df.columns = [col.title() for col in df.columns]
+
+    required_cols = {"Open", "High", "Low", "Close", "Volume"}
+    missing_cols = required_cols - set(df.columns)
+    if missing_cols:
+        st.error(f"Missing required columns: {missing_cols}")
+        return pd.DataFrame()
+
+    df["Ema20"] = df["Close"].ewm(span=20).mean()
     df["Volume_Avg"] = df["Volume"].rolling(window=20).mean()
     df["Signal"] = ""
 
     for i in range(1, len(df)):
-        if df["Close"][i] > df["EMA20"][i] and df["Volume"][i] > df["Volume_Avg"][i]:
+        if df["Close"][i] > df["Ema20"][i] and df["Volume"][i] > df["Volume_Avg"][i]:
             df.at[i, "Signal"] = "BUY"
-        elif df["Close"][i] < df["EMA20"][i] and df["Volume"][i] > df["Volume_Avg"][i]:
+        elif df["Close"][i] < df["Ema20"][i] and df["Volume"][i] > df["Volume_Avg"][i]:
             df.at[i, "Signal"] = "SELL"
     return df
+
 
 # === Logger ===
 def log_signals(df):
