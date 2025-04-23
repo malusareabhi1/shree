@@ -1335,8 +1335,11 @@ if now.hour == 15 and now.minute == 30:
         st.warning(market_close_msg)
         send_telegram(market_close_msg)
 
+
+
  # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
-signal = "No Signal"
+
+    signal = "No Signal"
     if (prev["Close"] < prev["EMA20"]) and (latest["Close"] > prev["EMA20"]) and (latest["Volume"] > latest["VMA20"]):
         signal = "BUY"
         entry_price = round(latest["Close"], 2)
