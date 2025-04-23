@@ -98,18 +98,31 @@ from datetime import datetime
 today = datetime.now().astimezone(df.index.tz).date()
 df_today = df[df.index.date == today]
 
-st.subheader("🕯️ Today's 5-Min Candle Chart")
+# Calculate 20 EMA
+df_today['EMA20'] = df_today['Close'].ewm(span=20, adjust=False).mean()
 
-fig = go.Figure(data=[go.Candlestick(
-    x=df_today.index,
-    open=df_today["Open"],
-    high=df_today["High"],
-    low=df_today["Low"],
-    close=df_today["Close"],
-    increasing_line_color="green",
-    decreasing_line_color="red",
-    name="Candles"
-)])
+st.subheader("🕯️ Today's 5-Min Candle Chart with 20 EMA")
+
+# Plot the candlestick chart with 20 EMA
+fig = go.Figure(data=[
+    go.Candlestick(
+        x=df_today.index,
+        open=df_today["Open"],
+        high=df_today["High"],
+        low=df_today["Low"],
+        close=df_today["Close"],
+        increasing_line_color="green",
+        decreasing_line_color="red",
+        name="Candles"
+    ),
+    go.Scatter(
+        x=df_today.index,
+        y=df_today['EMA20'],
+        mode='lines',
+        line=dict(color='blue', width=2),
+        name='20 EMA'
+    )
+])
 
 fig.update_layout(
     xaxis_rangeslider_visible=False,
