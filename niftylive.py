@@ -7,40 +7,38 @@ from datetime import datetime
 st.set_page_config(page_title="📈 Nifty Live EMA20", layout="wide")
 st.title("📊 Nifty Live EMA20 Strategy Monitor")
 
-symbol = "^NSEI"        # NIFTY index ticker
-interval = "5m"         # 5-minute bars
-period = "2d"           # last 2 days of data
+symbol = "^NSEI"  # NIFTY index ticker
+interval = "5m"   # 5-minute bars
+period = "2d"     # last 2 days of data
 
-@st.cache_data(ttl=60)  # cache for 60s to avoid hammering yfinance API
+@st.cache_data(ttl=60)  # cache data for 60s
 def fetch_and_clean(ticker):
-    # 1) Download
     df = yf.download(ticker, interval=interval, period=period, progress=False)
-    # 2) Flatten multiindex columns (in case of tickers)
-    df.columns = [
-        col[0] if col[1] == '' else f"{col[0]}_{col[1]}"
-        for col in df.columns.to_flat_index()
-    ]
-    # Debugging: Display the column names to check
-    st.write("Columns available in the data:", df.columns)
-    # 3) Compute EMA20 on the cleaned 'Close' column
+    
+    # -- FLATTEN COLUMNS: drop any second-level (the ticker) --
+    # If your df.columns is a MultiIndex, this will grab only level-0 names.
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+    
+    # Now df.columns are ['Open','High','Low','Close','Adj Close','Volume'], etc.
+    # Compute EMA20 on the 'Close' column
     df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
     return df
 
-# Fetch data
+# Fetch and display data
 data = fetch_and_clean(symbol)
 
-# Show last few rows
 st.subheader("Latest data snapshot")
 st.dataframe(data.tail(5))
 
-# Plot only if columns exist
+# Plot Close vs EMA20 if available
 if "Close" in data.columns and "EMA20" in data.columns:
     st.subheader("Close vs. EMA20")
     st.line_chart(data[["Close", "EMA20"]])
 else:
     st.error("Required columns missing! Got:\n" + ", ".join(data.columns))
 
-# Optional: show timestamp of latest bar
+# Show timestamp of latest bar
 latest_ts = data.index[-1].strftime("%Y-%m-%d %H:%M")
 st.markdown(f"**Latest Bar:** {latest_ts}")
 
