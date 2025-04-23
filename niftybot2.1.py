@@ -28,8 +28,8 @@ def get_live_data(symbol: str, interval_str: str = "5m") -> pd.DataFrame:
         # Rename the first column (whatever its name) to 'datetime'
         datetime_col = df.columns[0]
         df.rename(columns={datetime_col: 'datetime'}, inplace=True)
-        df = pd.DataFrame(df)
-        df.csv('data.csv');
+        #df = pd.DataFrame(df)
+        #df.csv('data.csv');
         return df
     except Exception as e:
         st.error(f"Error fetching live data: {e}")
