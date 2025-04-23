@@ -1,11 +1,17 @@
 import streamlit as st
 import requests
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+chat_id = os.getenv("TELEGRAM_CHAT_ID")  # optionally, use .env for chat_id too
 
 # --- Configuration ---
 st.title("📤 Telegram Bot Messenger")
 
-bot_token = st.text_input("Enter your Telegram Bot Token", type="password")
-chat_id = st.text_input("Enter your Telegram Chat ID")
+#bot_token = st.text_input("Enter your Telegram Bot Token", type="password")
+#chat_id = st.text_input("Enter your Telegram Chat ID")
 
 message = st.text_area("Enter the message to send")
 
