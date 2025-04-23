@@ -23,8 +23,15 @@ def get_live_data(symbol: str, interval_str: str = "5m") -> pd.DataFrame:
         df = yf.download(tickers=symbol, interval=interval_str, period="1d", progress=False)
         if df is None or df.empty:
             return pd.DataFrame()
-        df = df.reset_index().rename(columns={"Datetime": "datetime"})
+        # Reset index and rename first column to 'datetime'
+        df = df.reset_index()
+        # Identify the name of the datetime column (first column)
+        datetime_col = df.columns[0]
+        df = df.rename(columns={datetime_col: "datetime"})
         return df
+    except Exception as e:
+        st.error(f"Error fetching live data: {e}")
+        return pd.DataFrame()
     except Exception as e:
         st.error(f"Error fetching live data: {e}")
         return pd.DataFrame()
