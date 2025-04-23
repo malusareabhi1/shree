@@ -11,18 +11,16 @@ symbol = "^NSEI"        # NIFTY index ticker
 interval = "5m"         # 5-minute bars
 period = "2d"           # last 2 days of data
 
-@st.cache(ttl=60)  # cache for 60s so we don’t hammer yfinance
+@st.cache_data(ttl=60)  # cache for 60s to avoid hammering yfinance API
 def fetch_and_clean(ticker):
     # 1) Download
     df = yf.download(ticker, interval=interval, period=period, progress=False)
-    # 2) Flatten multiindex columns
-    #    E.g. ('Close','') → 'Close',   ('Volume','') → 'Volume'
+    # 2) Flatten multiindex columns (in case of tickers)
     df.columns = [
         col[0] if col[1] == '' else f"{col[0]}_{col[1]}"
         for col in df.columns.to_flat_index()
     ]
-    # 3) If you had multiple tickers you’d handle suffixes here.
-    # 4) Compute EMA20 on the cleaned 'Close' column
+    # 3) Compute EMA20 on the cleaned 'Close' column
     df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
     return df
 
