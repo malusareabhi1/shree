@@ -4,6 +4,13 @@ import yfinance as yf
 
 def fetch_data():
     data = yf.download('RELIANCE.NS', period='5d', interval='5m')
+    data.index = pd.to_datetime(data.index)
+    if data.index.tz is None:
+        data.index = data.index.tz_localize("UTC").tz_convert("Asia/Kolkata")
+    else:
+        data.index = data.index.tz_convert("Asia/Kolkata")
+        data = data.between_time("09:15", "15:30")
+               
     data['EMA20'] = data['Close'].ewm(span=20, adjust=False).mean()
     return data
 
