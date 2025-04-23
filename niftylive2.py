@@ -91,15 +91,21 @@ col2.metric("🔸 EMA20", f"₹{latest['EMA20']:.2f}")
 col3.metric("📌 Signal", signal)
 #---------------------------------------------------------------------------------------
 import plotly.graph_objects as go
+from datetime import datetime
 
-st.subheader("🕯️ Live 5-Min Candle Chart")
+# ─── filter for today's date ──────────────────────────────────────
+# assume df.index is timezone-aware in IST
+today = datetime.now().astimezone(df.index.tz).date()
+df_today = df[df.index.date == today]
+
+st.subheader("🕯️ Today's 5-Min Candle Chart")
 
 fig = go.Figure(data=[go.Candlestick(
-    x=df.index,
-    open=df["Open"],
-    high=df["High"],
-    low=df["Low"],
-    close=df["Close"],
+    x=df_today.index,
+    open=df_today["Open"],
+    high=df_today["High"],
+    low=df_today["Low"],
+    close=df_today["Close"],
     increasing_line_color="green",
     decreasing_line_color="red",
     name="Candles"
@@ -108,13 +114,12 @@ fig = go.Figure(data=[go.Candlestick(
 fig.update_layout(
     xaxis_rangeslider_visible=False,
     xaxis_title="Time",
-    yaxis_title="Price",
+    yaxis_title="Price (₹)",
     template="plotly_dark",
     height=500
 )
 
 st.plotly_chart(fig, use_container_width=True)
-
 
 #---------------------------------------------------------------------------------------
 st.subheader("📈 Price vs EMA20")
