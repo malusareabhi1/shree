@@ -93,7 +93,7 @@ if uploaded_file is not None:
                     trailing_stop = entry_price * (1 - trailing_stop_pct)
                     entry_time = idx
                     position_open = True
-                   trades.append({
+                    trades.append({
                         'Action': 'BUY',
                         'Price': entry_price,
                         'Time': idx,
