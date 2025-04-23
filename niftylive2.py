@@ -144,7 +144,7 @@ st.info(stop_msg)
 send_telegram(stop_msg)
 
 # ─── AUTO REFRESH ─────────────────────────────────────────────────────────────
-st.markdown("⏱️ Auto-refresh every 60 seconds")
+st.markdown("⏱️ Auto-refresh every 30 seconds")
 with st.spinner("⏳ Refreshing in 30 seconds..."):
     time.sleep(30)
     st.rerun()
