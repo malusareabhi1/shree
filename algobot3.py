@@ -2084,7 +2084,5 @@ elif selected == "New Nifty Strategy":
         else:
             st.warning("🚫 No trades were executed based on the given conditions.")
     else:
-        st.warning("📴 Please upload a valid CSV file to backtest the strategy.")
-
-    
+        st.warning("📴 Please upload a valid CSV file to backtest the strategy.")  
    
