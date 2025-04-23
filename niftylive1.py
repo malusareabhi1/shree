@@ -91,5 +91,6 @@ st.line_chart(data[["Close","EMA20"]])
 
 # ───── AUTO-REFRESH ───────────────────────────────────────────────────────
 st.markdown("⏱️ Auto-refresh every 60 seconds")
-time.sleep(60)
-st.experimental_rerun()
+with st.spinner("Auto-refreshing in 30s..."):
+    time.sleep(30)
+    st.rerun()
