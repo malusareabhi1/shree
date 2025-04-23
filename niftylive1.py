@@ -6,9 +6,19 @@ import time
 import requests
 from datetime import datetime
 
-# ───── CONFIG ───────────────────────────────────────────────────────────
+# ───── TELIGRAM CONFIG ───────────────────────────────────────────────────────────
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-CHAT_ID       = os.getenv("TELEGRAM_CHAT_ID")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")  # optionally, use .env for chat_id too
+
+bot_token= os.getenv("TELEGRAM_BOT_TOKEN")
+chat_id= os.getenv("TELEGRAM_CHAT_ID")  # optionally, use .env for chat_id too
+
+#TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+#CHAT_ID       = os.getenv("TELEGRAM_CHAT_ID")
 
 symbol   = "^NSEI"   # NIFTY index ticker
 interval = "5m"      # 5-minute bars
