@@ -66,57 +66,44 @@ st.markdown("""
 
 if selected == "New Nifty Strategy":
     st.title("⚙️ Test New Nifty Strategy")
-    # Sidebar: Strategy Parameters
     st.sidebar.header("Trading Strategy Settings")
-    
-    # Chart type
+
     chart_type = st.sidebar.selectbox("Select Chart Type", ["Candlestick", "Line", "OHLC"])
-    
-    # Initial capital
     initial_capital = st.sidebar.number_input("Initial Capital (₹)", min_value=1000, value=100000, step=1000)
-    
-    # Daily trade limit
     daily_trade_limit = st.sidebar.number_input("Daily Trade Limit", min_value=1, value=5)
-    
-    # Trade time range
     start_time = st.sidebar.time_input("Trade Start Time", value=datetime.time(9, 30))
     stop_time = st.sidebar.time_input("Trade Stop Time", value=datetime.time(14, 30))
-    
-    # Lot quantity
     lot_qty = st.sidebar.number_input("Lot Quantity", min_value=1, value=1)
-    
-    # Stock selection
     stock = st.sidebar.selectbox("Select Stock", ["RELIANCE", "INFY", "HDFCBANK", "TCS", "ICICIBANK", "NIFTY", "BANKNIFTY"])
-    
-    # Frame interval
     frame_interval = st.sidebar.selectbox("Select Time Frame", ["5m", "15m", "1h", "1d"])
-    
-    # Order type
     order_type = st.sidebar.selectbox("Order Type", ["Market", "Limit"])
     
-    # Display selected values (optional)
+    stop_loss_pct = st.sidebar.slider("Stop Loss (%)", min_value=0.5, max_value=10.0, value=1.0) / 100
+    profit_target_pct = st.sidebar.slider("Profit Target (%)", min_value=0.5, max_value=10.0, value=2.0) / 100
+    trailing_stop_pct = st.sidebar.slider("Trailing Stop Loss (%)", min_value=0.1, max_value=5.0, value=0.5) / 100
+
+    enable_time_exit = st.sidebar.checkbox("Enable Time-Based Exit", value=True)
+    exit_minutes = st.sidebar.slider("Exit After (Minutes)", min_value=1, max_value=60, value=10)
+
     st.sidebar.markdown("---")
     st.sidebar.markdown(f"**Selected Stock:** {stock}")
     st.sidebar.markdown(f"**Order Type:** {order_type}")
-    
-    # Step 2: CSV Upload
+
     uploaded_file = st.file_uploader("📂 Upload CSV file", type="csv")
     
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
-        st.write("✅ Data loaded successfully")
-    
-        # Step 3: Data Preprocessing
+        st.success("✅ Data loaded successfully")
+
         df['Date'] = pd.to_datetime(df['Date'])
         df.set_index('Date', inplace=True)
-    
+
         df['20_SMA'] = df['Close'].rolling(window=20).mean()
         df['Upper_Band'] = df['20_SMA'] + 2 * df['Close'].rolling(window=20).std()
         df['Lower_Band'] = df['20_SMA'] - 2 * df['Close'].rolling(window=20).std()
-    
+
         st.dataframe(df.tail())
-    
-        # Strategy Execution
+
         trades = []
         capital = initial_capital
         position_open = False
@@ -128,11 +115,12 @@ if selected == "New Nifty Strategy":
         reference_candle = None
         exit_reason = ""
         cumulative_pnl = []
-    
+        qty = lot_qty * 50  # assuming lot size of 50
+
         for idx, row in df.iterrows():
             current_time = idx.time()
-    
-            if datetime.strptime("09:30:00", "%H:%M:%S").time() <= current_time <= datetime.strptime("14:30:00", "%H:%M:%S").time():
+
+            if start_time <= current_time <= stop_time:
                 if position_open:
                     if row['Close'] <= stop_loss_price:
                         exit_reason = "Stop Loss Hit"
@@ -140,14 +128,13 @@ if selected == "New Nifty Strategy":
                         exit_reason = "Profit Target Hit"
                     elif row['Close'] < trailing_stop and trailing_stop > 0:
                         exit_reason = "Trailing Stop Hit"
-                    #elif enable_time_exit and (idx - entry_time) > timedelta(minutes=10):
                     elif enable_time_exit and (idx - entry_time) > timedelta(minutes=exit_minutes):
                         exit_reason = "Time-Based Exit"
                     else:
                         if row['Close'] > entry_price * (1 + trailing_stop_pct):
                             trailing_stop = row['Close'] * (1 - trailing_stop_pct)
-                        continue  # no exit yet
-    
+                        continue
+
                     pnl = qty * (row['Close'] - entry_price)
                     capital += pnl
                     cumulative_pnl.append(capital)
@@ -162,7 +149,7 @@ if selected == "New Nifty Strategy":
                     position_open = False
                     trailing_stop = 0
                     continue
-    
+
                 if row['Close'] > row['20_SMA'] and row['Close'] > row['Upper_Band']:
                     if reference_candle is not None and row['Close'] > reference_candle['Close']:
                         entry_price = row['Close']
@@ -182,16 +169,16 @@ if selected == "New Nifty Strategy":
                     reference_candle = row
             else:
                 continue
-    
+
         final_capital = cumulative_pnl[-1] if cumulative_pnl else capital
         st.write(f"💰 Final Capital: ₹{final_capital:,.2f}")
-    
+
         trade_df = pd.DataFrame(trades)
-    
+
         if not trade_df.empty:
             st.subheader("📋 Trade Log")
             st.dataframe(trade_df)
-    
+
             csv = trade_df.to_csv(index=False).encode('utf-8')
             st.download_button(
                 label="📥 Download Trade Log as CSV",
@@ -199,8 +186,7 @@ if selected == "New Nifty Strategy":
                 file_name='trade_log.csv',
                 mime='text/csv',
             )
-    
-            # 📉 Strategy Execution Chart
+
             fig = go.Figure(data=[go.Candlestick(
                 x=df.index,
                 open=df['Open'],
@@ -209,7 +195,7 @@ if selected == "New Nifty Strategy":
                 close=df['Close'],
                 name='Candlesticks'
             )])
-    
+
             for trade in trades:
                 color = 'green' if trade['Action'] == 'BUY' else 'red'
                 symbol = 'triangle-up' if trade['Action'] == 'BUY' else 'triangle-down'
@@ -220,7 +206,7 @@ if selected == "New Nifty Strategy":
                     marker=dict(symbol=symbol, color=color, size=10),
                     name=trade['Action']
                 ))
-    
+
             fig.update_layout(
                 title="📉 Strategy Execution Chart",
                 xaxis_title="Date",
@@ -229,8 +215,7 @@ if selected == "New Nifty Strategy":
                 hovermode="x unified"
             )
             st.plotly_chart(fig)
-    
-            # 📈 Cumulative PnL Chart
+
             trade_df['Cumulative Capital'] = trade_df['Capital'].ffill()
             pnl_fig = go.Figure()
             pnl_fig.add_trace(go.Scatter(
@@ -247,49 +232,3 @@ if selected == "New Nifty Strategy":
                 template="plotly_dark"
             )
             st.plotly_chart(pnl_fig)
-    
-            # 📊 Performance Summary
-            buy_trades = trade_df[trade_df['Action'] == 'BUY']
-            sell_trades = trade_df[trade_df['Action'] == 'SELL']
-    
-            total_trades = len(sell_trades)
-            winning_trades = sell_trades[sell_trades['PnL'] > 0].shape[0]
-            losing_trades = sell_trades[sell_trades['PnL'] <= 0].shape[0]
-            win_rate = (winning_trades / total_trades * 100) if total_trades > 0 else 0
-            max_drawdown = trade_df['Cumulative Capital'].cummax() - trade_df['Cumulative Capital']
-            max_drawdown = max_drawdown.max() if not max_drawdown.empty else 0
-    
-            # Count exit reasons
-            exit_reasons = sell_trades['Exit Reason'].value_counts().to_dict()
-            time_based_exits = exit_reasons.get("Time-Based Exit", 0)
-    
-            summary_df = pd.DataFrame({
-                "Metric": [
-                    "Total Trades",
-                    "Winning Trades",
-                    "Losing Trades",
-                    "Win Rate (%)",
-                    "Max Drawdown (₹)",
-                    "Time-Based Exits"
-                ],
-                "Value": [
-                    total_trades,
-                    winning_trades,
-                    losing_trades,
-                    f"{win_rate:.2f}",
-                    f"{max_drawdown:,.2f}",
-                    time_based_exits
-                ]
-            })
-    
-            st.subheader("📊 Performance Summary")
-            st.table(summary_df)
-    
-            st.subheader("📌 Exit Reason Breakdown")
-            exit_reason_df = pd.DataFrame(list(exit_reasons.items()), columns=["Exit Reason", "Count"])
-            st.table(exit_reason_df)
-    
-        else:
-            st.warning("🚫 No trades were executed based on the given conditions.")
-    else:
-        st.warning("📴 Please upload a valid CSV file to backtest the strategy.")
