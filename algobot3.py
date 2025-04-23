@@ -1795,8 +1795,8 @@ elif selected == "Doctor3.0 Strategy":
 elif selected == "New Nifty Strategy":
     st.title("⚙️ Test New Nifty Strategy")
     # Step 1: Streamlit App Configuration
-    st.set_page_config("📊 New Nifty Strategy Backtest", layout="centered")
-    st.title("📊 New Nifty Strategy - Backtest")
+    #st.set_page_config("📊 New Nifty Strategy Backtest", layout="centered")
+    #st.title("📊 New Nifty Strategy - Backtest")
     
     # Sidebar for Strategy Parameters
     st.header("🛠 Strategy Parameters")
