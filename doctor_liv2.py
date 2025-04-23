@@ -17,10 +17,7 @@ BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")  # optionally, use .env for chat_id too
 
 # ======================
-API_KEY = "pew8wcspuu7eojoh"
-API_SECRET = "54cbz2punssxpbxp9fc1edciawu51x5o"
-BOT_TOKEN = "7503952210:AAE5TLirqlW3OFuEIq7SJ1Fe0wFUZuKjd3E"
-CHAT_ID = "1320205499"
+
 capital_per_trade = 10000
 stop_loss_percent = 5
 symbol = "^NSE"
