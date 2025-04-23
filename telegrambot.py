@@ -4,11 +4,15 @@ import os
 import requests
 from datetime import datetime, time as dt_time
 import pytz
+from dotenv import load_dotenv
+import os
 
-# ========== Telegram Setup ==========
-bot_token = "7503952210:AAE5TLirqlW3OFuEIq7SJ1Fe0wFUZuKjd3E"
-chat_id = "1320205499"
+load_dotenv()
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")  # optionally, use .env for chat_id too
 
+bot_token= os.getenv("TELEGRAM_BOT_TOKEN")
+chat_id= os.getenv("TELEGRAM_CHAT_ID")  # optionally, use .env for chat_id too
 def send_telegram_message(msg):
     payload = {
         "chat_id": chat_id,
