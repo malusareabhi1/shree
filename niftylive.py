@@ -51,9 +51,10 @@ with st.spinner("Fetching live data..."):
     data = fetch_data()
     st.write(f"Latest Data Time: {data.index[-1]}")
     apply_strategy(data)
-    st.line_chart(data[['Close', 'EMA20']])
 
-# Refresh every 1 minute
-st.markdown("⏱️ Refreshing every 1 minute...")
-time.sleep(60)
-st.experimental_rerun()
+    # Safely plot only if columns exist
+    if 'Close' in data.columns and 'EMA20' in data.columns:
+        st.line_chart(data[['Close', 'EMA20']])
+    else:
+        st.warning("⚠️ 'Close' or 'EMA20' column missing.")
+        st.write("Available columns:", data.columns.tolist())
