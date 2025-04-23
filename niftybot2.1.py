@@ -23,56 +23,57 @@ def get_live_data(symbol: str, interval_str: str = "5m") -> pd.DataFrame:
         df = yf.download(tickers=symbol, interval=interval_str, period="1d", progress=False)
         if df is None or df.empty:
             return pd.DataFrame()
-        # Reset index and rename first column to 'datetime'
+        # Reset index to turn the DatetimeIndex into a column
         df = df.reset_index()
-        # Identify the name of the datetime column (first column)
+        # Rename the first column (whatever its name) to 'datetime'
         datetime_col = df.columns[0]
-        df = df.rename(columns={datetime_col: "datetime"})
+        df.rename(columns={datetime_col: 'datetime'}, inplace=True)
         return df
-    except Exception as e:
-        st.error(f"Error fetching live data: {e}")
-        return pd.DataFrame()
     except Exception as e:
         st.error(f"Error fetching live data: {e}")
         return pd.DataFrame()
 
 # === Strategy Logic ===
 def apply_strategy(df: pd.DataFrame) -> pd.DataFrame:
-    # Safety: ensure df is a DataFrame and not empty
     if df is None or df.empty:
         return pd.DataFrame()
 
-    # Normalize all column names to lowercase strings
+    # Normalize all column names to lowercase
     df.columns = [str(col).strip().lower() for col in df.columns]
 
+    # Ensure 'datetime' exists
+    if 'datetime' not in df.columns:
+        st.error("Column 'datetime' not found after rename.")
+        return pd.DataFrame()
+
     # Required columns
-    required_cols = {"datetime", "open", "high", "low", "close", "volume"}
+    required_cols = {'datetime', 'open', 'high', 'low', 'close', 'volume'}
     missing = required_cols - set(df.columns)
     if missing:
         st.error(f"Missing required columns: {missing}")
         return pd.DataFrame()
 
-    # Parse datetime
-    df["datetime"] = pd.to_datetime(df["datetime"])
+    # Parse datetime column
+    df['datetime'] = pd.to_datetime(df['datetime'])
 
     # Calculate indicators
-    df["ema20"] = df["close"].ewm(span=20, adjust=False).mean()
-    df["volume_avg"] = df["volume"].rolling(window=20).mean()
-    df["signal"] = ""
+    df['ema20'] = df['close'].ewm(span=20, adjust=False).mean()
+    df['volume_avg'] = df['volume'].rolling(window=20).mean()
+    df['signal'] = ''
 
-    # Generate signals based on EMA20 breakout
+    # Generate signals
     for i in range(1, len(df)):
-        if df["close"].iat[i] > df["ema20"].iat[i] and df["volume"].iat[i] > df["volume_avg"].iat[i]:
-            df.at[i, "signal"] = "BUY"
-        elif df["close"].iat[i] < df["ema20"].iat[i] and df["volume"].iat[i] > df["volume_avg"].iat[i]:
-            df.at[i, "signal"] = "SELL"
+        if df['close'].iat[i] > df['ema20'].iat[i] and df['volume'].iat[i] > df['volume_avg'].iat[i]:
+            df.at[i, 'signal'] = 'BUY'
+        elif df['close'].iat[i] < df['ema20'].iat[i] and df['volume'].iat[i] > df['volume_avg'].iat[i]:
+            df.at[i, 'signal'] = 'SELL'
     return df
 
 # === Logger ===
 def log_signals(df: pd.DataFrame):
     if df is None or df.empty:
         return
-    logs = df[df["signal"] != ""][['datetime', 'close', 'signal']]
+    logs = df[df['signal'] != ''][['datetime', 'close', 'signal']]
     if logs.empty:
         return
     header_flag = not os.path.exists(LOG_CSV)
@@ -85,34 +86,30 @@ def plot_chart(df: pd.DataFrame):
     fig = go.Figure()
     # Candlestick
     fig.add_trace(go.Candlestick(
-        x=df["datetime"],
-        open=df["open"], high=df["high"], low=df["low"], close=df["close"],
-        name="Candles"
+        x=df['datetime'], open=df['open'], high=df['high'], low=df['low'], close=df['close'], name='Candles'
     ))
     # EMA line
     fig.add_trace(go.Scatter(
-        x=df["datetime"], y=df["ema20"], mode='lines', name='EMA20', line=dict(color='blue'))
-    )
+        x=df['datetime'], y=df['ema20'], mode='lines', name='EMA20', line=dict(color='blue')
+    ))
     # Signal markers
-    buys = df[df["signal"] == "BUY"]
-    sells = df[df["signal"] == "SELL"]
+    buys = df[df['signal'] == 'BUY']
+    sells = df[df['signal'] == 'SELL']
     fig.add_trace(go.Scatter(
-        x=buys["datetime"], y=buys["close"], mode='markers',
-        marker=dict(symbol='triangle-up', color='green', size=10), name='BUY'
+        x=buys['datetime'], y=buys['close'], mode='markers', marker=dict(symbol='triangle-up', color='green', size=10), name='BUY'
     ))
     fig.add_trace(go.Scatter(
-        x=sells["datetime"], y=sells["close"], mode='markers',
-        marker=dict(symbol='triangle-down', color='red', size=10), name='SELL'
+        x=sells['datetime'], y=sells['close'], mode='markers', marker=dict(symbol='triangle-down', color='red', size=10), name='SELL'
     ))
     fig.update_layout(xaxis_rangeslider_visible=False, template='plotly_dark')
     st.plotly_chart(fig, use_container_width=True)
 
 # === Main Loop ===
 st.title("📊 Doctor Strategy Live Dashboard")
+
 while True:
     with st.spinner("Fetching live data..."):
         df_live = get_live_data(symbol, "5m")
-        # Display shape info only
         st.write(f"DataFrame shape: {df_live.shape}")
         df_signals = apply_strategy(df_live)
 
