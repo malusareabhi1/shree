@@ -64,7 +64,7 @@ st.markdown("""
 
 
 
-elif selected == "New Nifty Strategy":
+if selected == "New Nifty Strategy":
     st.title("⚙️ Test New Nifty Strategy")
     # Step 1: Streamlit App Configuration
     #st.set_page_config("📊 New Nifty Strategy Backtest", layout="centered")
