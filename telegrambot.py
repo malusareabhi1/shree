@@ -108,3 +108,60 @@ if not is_market_open():
 
 else:
     st.success("✅ Market is open. Please use Live Algo Trading mode.")
+  
+    st.header("🟢 Live Algo Trading Mode")
+    uploaded_files = st.file_uploader("📂 Upload Live CSV (Auto-refresh every minute suggested)", type="csv", accept_multiple_files=True)
+    capital = st.number_input("💰 Capital Allocation", value=50000)
+    sl_percent = st.slider("🔻 SL %", 0.5, 5.0, value=1.5)
+    
+    if uploaded_files:
+        st.info("📡 Monitoring Live Signals...")
+
+        status_dict = {}  # to avoid duplicate alerts in session
+
+        for file in uploaded_files:
+            symbol = file.name.replace(".csv", "")
+            df = pd.read_csv(file, parse_dates=['Datetime'], index_col='Datetime')
+            df.dropna(inplace=True)
+
+            if symbol not in status_dict:
+                status_dict[symbol] = {"in_position": False, "entry": 0, "sl": 0, "qty": 0}
+
+            # latest candle only
+            latest = df.iloc[-1]
+            prev = df.iloc[-2]
+            ema20 = df['Close'].ewm(span=20, adjust=False).mean().iloc[-1]
+            vma20 = df['Volume'].rolling(20).mean().iloc[-1]
+
+            price = latest['Close']
+            volume = latest['Volume']
+            timestamp = df.index[-1]
+
+            status = status_dict[symbol]
+
+            if not status["in_position"]:
+                if prev['Close'] < ema20 and price > ema20 and volume > vma20:
+                    entry = price
+                    sl = round(entry * (1 - sl_percent / 100), 2)
+                    qty = int(capital / entry)
+
+                    status.update({"in_position": True, "entry": entry, "sl": sl, "qty": qty})
+
+                    msg = f"📥 <b>LIVE BUY</b>\n<b>Symbol:</b> {symbol}\n<b>Price:</b> ₹{entry}\n<b>SL:</b> ₹{sl}\n<b>Qty:</b> {qty}\n<b>Time:</b> {timestamp}"
+                    send_telegram_message(msg)
+                    st.success(f"📈 LIVE BUY Signal for {symbol} at ₹{entry}")
+
+            else:
+                if price <= status["sl"]:
+                    msg = f"📤 <b>LIVE SELL</b>\n<b>Symbol:</b> {symbol}\n<b>Exit:</b> ₹{price}\n<b>Reason:</b> SL Hit\n<b>Time:</b> {timestamp}"
+                    send_telegram_message(msg)
+                    st.error(f"📉 LIVE SELL for {symbol} at ₹{price}")
+                    status_dict[symbol] = {"in_position": False, "entry": 0, "sl": 0, "qty": 0}
+
+                else:
+                    new_sl = round(price * (1 - sl_percent / 100), 2)
+                    if new_sl > status["sl"]:
+                        status["sl"] = new_sl
+                        send_telegram_message(f"🔁 <b>Trailing SL Updated</b> for {symbol} to ₹{new_sl}")
+                        st.info(f"🔁 SL Trailed for {symbol}: ₹{new_sl}")
+
