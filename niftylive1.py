@@ -26,18 +26,26 @@ def send_telegram(msg: str):
 # ───── DATA FETCH & CLEAN ────────────────────────────────────────────────
 @st.cache_data(ttl=60)
 def fetch_data(ticker: str) -> pd.DataFrame:
-    df = yf.download(ticker, interval=interval, period=period, progress=False)
+    df = yf.download(ticker, interval="5m", period="5d", progress=False)
     df.index = pd.to_datetime(df.index)
-    # localize to IST
-    df.index = df.index.tz_localize("UTC").tz_convert("Asia/Kolkata")
-    # restrict to market hours
+
+    # — Only localize if tz-naive; otherwise just convert —
+    if df.index.tz is None:
+        df = df.tz_localize("UTC").tz_convert("Asia/Kolkata")
+    else:
+        df = df.tz_convert("Asia/Kolkata")
+    
+    # Restrict to market hours
     df = df.between_time("09:15", "15:30")
-    # flatten multi‐level cols
+
+    # Flatten MultiIndex columns if present
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
-    # indicators
-    df["EMA20"]  = df["Close"].ewm(span=20, adjust=False).mean()
-    df["VMA20"]  = df["Volume"].rolling(20).mean()
+
+    # Indicators
+    df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
+    df["VMA20"] = df["Volume"].rolling(20).mean()
+
     return df
 
 # ───── STREAMLIT UI ───────────────────────────────────────────────────────
