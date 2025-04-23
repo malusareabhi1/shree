@@ -9,6 +9,13 @@ import pytz
 
 # ======================
 # CONFIGURATION
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")  # optionally, use .env for chat_id too
+
 # ======================
 API_KEY = "pew8wcspuu7eojoh"
 API_SECRET = "54cbz2punssxpbxp9fc1edciawu51x5o"
