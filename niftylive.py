@@ -22,7 +22,7 @@ def main():
 
     # DEBUG: Show full column names and sample data
     st.write("✅ Data Columns:", data.columns.tolist())
-   # st.dataframe(data.tail())
+    st.dataframe(data.tail())
    # st.write(data.columns.tolist())
 
     # Check if both columns exist
