@@ -88,6 +88,8 @@ if selected == "New Nifty Strategy":
     st.sidebar.markdown("---")
     st.sidebar.markdown(f"**Selected Stock:** {stock}")
     st.sidebar.markdown(f"**Order Type:** {order_type}")
+    # Add an Action button
+    run_strategy = st.button("🚀 Run Strategy")
 
     uploaded_file = st.file_uploader("📂 Upload CSV file", type="csv")
     
