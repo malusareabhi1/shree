@@ -1323,7 +1323,7 @@ elif selected == "Live Algo Trading":
         st.success(market_msg)
         send_telegram(market_msg)
 
-    if now.hour == 14 and now.minute == 30:
+     if now.hour == 14 and now.minute == 30:
         market_close_msg = "📉 Doctor Stratergy will  not take Trade after 02:30"
         st.warning(market_close_msg)
         send_telegram(market_close_msg)
