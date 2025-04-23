@@ -43,6 +43,13 @@ signal = None
 entry = None
 sl = None
 
+prev_close = float(prev['Close'])
+prev_ema = float(prev['EMA20'])
+latest_close = float(latest['Close'])
+latest_ema = float(latest['EMA20'])
+latest_vol = float(latest['Volume'])
+latest_vma = float(latest['VMA20'])
+
 if prev['Close'] < prev['EMA20'] and latest['Close'] > latest['EMA20'] and latest['Volume'] > latest['VMA20']:
     signal = "BUY"
     entry = round(latest['Close'], 2)
