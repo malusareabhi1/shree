@@ -1,60 +1,27 @@
 import streamlit as st
-import yfinance as yf
 import pandas as pd
-import datetime
-import time
+import yfinance as yf
 
-st.set_page_config(page_title="Nifty Live Strategy Monitor", layout="wide")
-
-# Title and Status
-st.title("📊 Nifty Live Algo Strategy")
-st.markdown("Monitoring real-time breakout signals based on EMA20 and Volume")
-
-# Parameters
-symbol = "^NSEI"  # Nifty Index
-interval = "5m"
-period = "2d"
-
-# Fetch Live Data
 def fetch_data():
-    df = yf.download(tickers=symbol, interval=interval, period=period, progress=False)
-    df.dropna(inplace=True)
-    df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
-    df['VMA20'] = df['Volume'].rolling(window=20).mean()
-    return df
+    data = yf.download('RELIANCE.NS', period='5d', interval='5m')
+    data['EMA20'] = data['Close'].ewm(span=20, adjust=False).mean()
+    return data
 
-# Apply Strategy Logic
-def apply_strategy(df):
-    if len(df) < 2:
-        st.warning("📉 Not enough data to evaluate strategy.")
-        return
+def main():
+    st.title("🔍 Nifty Live Strategy")
+    st.subheader("5-min EMA20 Strategy")
 
-    prev = df.iloc[-2]
-    latest = df.iloc[-1]
-
-    # Extract values
-    prev_close = float(prev['Close'])
-    prev_ema20 = float(prev['EMA20'])
-    latest_close = float(latest['Close'])
-    latest_ema20 = float(latest['EMA20'])
-    latest_volume = float(latest['Volume'])
-    latest_vma20 = float(latest['VMA20'])
-
-    # Apply breakout strategy
-    if prev_close < prev_ema20 and latest_close > latest_ema20 and latest_volume > latest_vma20:
-        st.success("✅ Entry Signal: Bullish Breakout Detected")
-    else:
-        st.info("🕒 No entry signal at the moment.")
-
-# Main App
-with st.spinner("Fetching live data..."):
     data = fetch_data()
-    st.write(f"Latest Data Time: {data.index[-1]}")
-    apply_strategy(data)
 
-    # Safely plot only if columns exist
+    # DEBUG: Show full column names and sample data
+    st.write("✅ Data Columns:", data.columns.tolist())
+    st.dataframe(data.tail())
+
+    # Check if both columns exist
     if 'Close' in data.columns and 'EMA20' in data.columns:
         st.line_chart(data[['Close', 'EMA20']])
     else:
-        st.warning("⚠️ 'Close' or 'EMA20' column missing.")
-        st.write("Available columns:", data.columns.tolist())
+        st.error("❌ Columns 'Close' or 'EMA20' not found in data!")
+
+if __name__ == "__main__":
+    main()
