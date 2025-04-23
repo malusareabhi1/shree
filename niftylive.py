@@ -1,35 +1,50 @@
 import streamlit as st
-import pandas as pd
 import yfinance as yf
+import pandas as pd
+import time
+from datetime import datetime
 
-def fetch_data():
-    data = yf.download('RELIANCE.NS', period='5d', interval='5m')
-    data.index = pd.to_datetime(data.index)
-    if data.index.tz is None:
-        data.index = data.index.tz_localize("UTC").tz_convert("Asia/Kolkata")
-    else:
-        data.index = data.index.tz_convert("Asia/Kolkata")
-        data = data.between_time("09:15", "15:30")
-               
-    data['EMA20'] = data['Close'].ewm(span=20, adjust=False).mean()
-    return data
+st.set_page_config(page_title="📈 Nifty Live EMA20", layout="wide")
+st.title("📊 Nifty Live EMA20 Strategy Monitor")
 
-def main():
-    st.title("🔍 Nifty Live Strategy")
-    st.subheader("5-min EMA20 Strategy")
+symbol = "^NSEI"        # NIFTY index ticker
+interval = "5m"         # 5-minute bars
+period = "2d"           # last 2 days of data
 
-    data = fetch_data()
+@st.cache(ttl=60)  # cache for 60s so we don’t hammer yfinance
+def fetch_and_clean(ticker):
+    # 1) Download
+    df = yf.download(ticker, interval=interval, period=period, progress=False)
+    # 2) Flatten multiindex columns
+    #    E.g. ('Close','') → 'Close',   ('Volume','') → 'Volume'
+    df.columns = [
+        col[0] if col[1] == '' else f"{col[0]}_{col[1]}"
+        for col in df.columns.to_flat_index()
+    ]
+    # 3) If you had multiple tickers you’d handle suffixes here.
+    # 4) Compute EMA20 on the cleaned 'Close' column
+    df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
+    return df
 
-    # DEBUG: Show full column names and sample data
-    st.write("✅ Data Columns:", data.columns.tolist())
-    st.dataframe(data.tail())
-   # st.write(data.columns.tolist())
+# Fetch data
+data = fetch_and_clean(symbol)
 
-    # Check if both columns exist
-    if 'Close' in data.columns and 'EMA20' in data.columns:
-        st.line_chart(data[['Close', 'EMA20']])
-    else:
-        st.error("❌ Columns 'Close' or 'EMA20' not found in data!")
+# Show last few rows
+st.subheader("Latest data snapshot")
+st.dataframe(data.tail(5))
 
-if __name__ == "__main__":
-    main()
+# Plot only if columns exist
+if "Close" in data.columns and "EMA20" in data.columns:
+    st.subheader("Close vs. EMA20")
+    st.line_chart(data[["Close", "EMA20"]])
+else:
+    st.error("Required columns missing! Got:\n" + ", ".join(data.columns))
+
+# Optional: show timestamp of latest bar
+latest_ts = data.index[-1].strftime("%Y-%m-%d %H:%M")
+st.markdown(f"**Latest Bar:** {latest_ts}")
+
+# Auto-refresh every 60 seconds
+with st.spinner("Auto-refreshing in 60s..."):
+    time.sleep(60)
+    st.experimental_rerun()
