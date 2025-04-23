@@ -38,11 +38,18 @@ def load_csv_data(file=None):
 
 # === Strategy Logic ===
 def apply_strategy(df):
-    df.columns = [col.strip().upper() for col in df.columns]  # Normalize
+    if df is None or df.empty:
+        st.error("DataFrame is empty or None.")
+        return pd.DataFrame()
+
+    # Normalize columns
+    df.columns = [col.strip().upper() for col in df.columns]
 
     required_cols = {"CLOSE", "VOLUME"}
-    if not required_cols.issubset(df.columns):
-        st.error(f"Missing columns: {required_cols - set(df.columns)}")
+    missing_cols = required_cols - set(df.columns)
+
+    if missing_cols:
+        st.error(f"Missing required columns: {missing_cols}")
         return pd.DataFrame()
 
     df["EMA20"] = df["CLOSE"].ewm(span=20).mean()
@@ -55,7 +62,6 @@ def apply_strategy(df):
         elif df["CLOSE"][i] < df["EMA20"][i] and df["VOLUME"][i] > df["VOLUME_AVG"][i]:
             df.at[i, "SIGNAL"] = "SELL"
     return df
-
 
 # === Logger ===
 def log_signals(df):
