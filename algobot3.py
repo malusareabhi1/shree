@@ -385,6 +385,11 @@ elif selected == "Doctor Strategy":
             net_pnl = trade_log["PnL"].sum()
             win_trades = trade_log[trade_log["PnL"] > 0].shape[0]
             lose_trades = trade_log[trade_log["PnL"] < 0].shape[0]
+            if not trade_log.empty:
+                last_order = f"{trade_log.iloc[-1]['Action']} - TEST-STOCK - 10 shares @ {trade_log.iloc[-1]['Price']}"
+            else:
+                last_order = "No trades executed yet."
+
             last_order = f"{trade_log.iloc[-1]['Action']} - TEST-STOCK - 10 shares @ {trade_log.iloc[-1]['Price']}"
 
             # Store to session state for Account Info
