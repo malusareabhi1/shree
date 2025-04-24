@@ -467,7 +467,7 @@ elif selected == "Doctor Strategy":
                                 trade['Exit_Price'] = current_profit_target
                                
                                 trade['PnL'] = current_profit_target - entry_price
-                                 trade['PnL_After_Brokerage'] = trade['PnL'] - trade['Brokerage']
+                                trade['PnL_After_Brokerage'] = trade['PnL'] - trade['Brokerage']
                                 trade['Exit_Reason'] = 'Profit Booking'  # Add exit reason
                                 profit_booked = True
                                 break
