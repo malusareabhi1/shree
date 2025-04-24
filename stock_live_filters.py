@@ -51,11 +51,72 @@ def send_telegram(msg: str):
     except Exception as e:
         st.error(f"Telegram Error: {e}")
 
+import plotly.graph_objects as go
+
+def plot_candlestick_chart(df, stock):
+    df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
+    df['BB_Middle'] = df['Close'].rolling(window=20).mean()
+    df['BB_Std'] = df['Close'].rolling(window=20).std()
+    df['BB_Upper'] = df['BB_Middle'] + 2 * df['BB_Std']
+    df['BB_Lower'] = df['BB_Middle'] - 2 * df['BB_Std']
+
+    fig = go.Figure()
+
+    # Candlesticks
+    fig.add_trace(go.Candlestick(
+        x=df.index,
+        open=df['Open'],
+        high=df['High'],
+        low=df['Low'],
+        close=df['Close'],
+        name='Candlesticks'
+    ))
+
+    # EMA20
+    fig.add_trace(go.Scatter(
+        x=df.index,
+        y=df['EMA20'],
+        mode='lines',
+        line=dict(color='blue', width=1.5),
+        name='EMA20'
+    ))
+
+    # Bollinger Bands
+    fig.add_trace(go.Scatter(
+        x=df.index,
+        y=df['BB_Upper'],
+        line=dict(color='green', width=1),
+        name='Bollinger Upper',
+    ))
+    fig.add_trace(go.Scatter(
+        x=df.index,
+        y=df['BB_Middle'],
+        line=dict(color='orange', width=1),
+        name='Bollinger Middle',
+    ))
+    fig.add_trace(go.Scatter(
+        x=df.index,
+        y=df['BB_Lower'],
+        line=dict(color='red', width=1),
+        name='Bollinger Lower',
+    ))
+
+    fig.update_layout(
+        title=f"{stock} Candlestick Chart with EMA20 & Bollinger Bands",
+        xaxis_title="Date",
+        yaxis_title="Price (₹)",
+        xaxis_rangeslider_visible=False,
+        height=600,
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+
 
 
 #import datetime
 #import streamlit as st
-
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 if run_strategy:
     st.subheader(f"📥 Loading {stock} - {frame_interval} data for last 2 days...")
 
@@ -86,8 +147,13 @@ if run_strategy:
             st.dataframe(df.tail())  # Show last few rows
 
             # You can now call your strategy, chart, or signal logic here
+        plot_candlestick_chart(df, stock)
 
     except Exception as e:
         st.error(f"❌ Error while loading data: {e}")
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 
 
