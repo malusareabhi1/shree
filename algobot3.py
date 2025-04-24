@@ -537,8 +537,8 @@ elif selected == "Doctor Strategy":
                     # Add the trades to the DataFrame
                     trade_log = pd.DataFrame(trades)
             
-              # Display the trade log
-              st.dataframe(trade_log)
+                      # Display the trade log
+                    st.dataframe(trade_log)
 
 
                     
