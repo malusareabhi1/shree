@@ -43,7 +43,15 @@ if run:
         df.dropna(inplace=True)
 
         # Signal: EMA20 Crossover
-        df['Signal'] = (df['Close'] > df['EMA20']) & (df['Close'].shift(1) <= df['EMA20'].shift(1))
+        #df['Signal'] = (df['Close'] > df['EMA20']) & (df['Close'].shift(1) <= df['EMA20'].shift(1))
+        # Ensure required column exists
+        if 'Close' in df.columns:
+            df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
+            df.dropna(subset=['EMA20'], inplace=True)
+            df['Signal'] = (df['Close'] > df['EMA20']) & (df['Close'].shift(1) <= df['EMA20'].shift(1))
+            st.success("Signal column added successfully.")
+        else:
+            st.error("Close column not found in DataFrame. Check your CSV or data loading logic.")
 
         # Backtest logic
         trades = []
