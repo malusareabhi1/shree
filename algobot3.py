@@ -488,8 +488,12 @@ elif selected == "Doctor Strategy":
 
                         # Step 9: Time-Based Exit (after 10 minutes)
                         if not trade.get('Exit_Time'):
-                           # Convert entry_time to datetime if not already
+                           # # Convert entry_time to datetime if not already
                             entry_time = pd.to_datetime(trade['Entry_Time'])
+                            
+                            # Ensure entry_time is in the same timezone as df['Date']
+                            entry_time = entry_time.tz_localize('Asia/Kolkata', ambiguous='NaT') if entry_time.tzinfo is None else entry_time
+                            df['Date'] = df['Date'].dt.tz_localize('Asia/Kolkata', ambiguous='NaT') if df['Date'].dt.tzinfo is None else df['Date']
                             
                             # Use searchsorted() to find the closest index for entry_time in df['Date']
                             entry_idx = df['Date'].searchsorted(entry_time)
