@@ -80,7 +80,12 @@ if run_strategy:
 # Plot chart
 st.subheader(f"{stock} - {frame_interval} Chart")
 st.subheader("🕯️  5-Min Candle Chart with 20 EMA")
-df_today=df
+#df_today=df
+today = datetime.now().astimezone(df.index.tz).date()
+df_today = df[df.index.date == today]
+    
+    # Calculate 20 EMA
+df_today['EMA20'] = df_today['Close'].ewm(span=20, adjust=False).mean()
     
     # Plot the candlestick chart with 20 EMA
 fig = go.Figure(data=[
