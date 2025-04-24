@@ -78,7 +78,7 @@ def plot_candle_only(df, title="Candlestick Chart"):
     fig.show()
 
 
- def fetch_data(ticker: str) -> pd.DataFrame:
+  def fetch_data(ticker: str) -> pd.DataFrame:
         df = yf.download(ticker, interval="5m", period="5d", progress=False)
         df.index = pd.to_datetime(df.index)
     
