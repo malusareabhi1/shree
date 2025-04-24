@@ -536,6 +536,7 @@ elif selected == "Doctor Strategy":
                                     trade['Exit_Time'] = current_time
                                     trade['Exit_Price'] = df.at[idx, 'Close']
                                     trade['PnL'] = df.at[idx, 'Close'] - entry_price
+                                     trade['PnL_After_Brokerage'] = trade['PnL'] - trade['Brokerage']
                                     trade['Exit_Reason'] = 'Time-Based Exit'  # Exit reason
                                     break
                     # 2️⃣ If you didn't compute PnL_After_Brokerage per-trade, do it now:
