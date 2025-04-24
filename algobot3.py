@@ -366,7 +366,8 @@ elif selected == "Doctor Strategy":
             st.error("CSV must contain a 'Close' column")
         else:
             # Step 1: Time Frame (5-minute chart)
-            #df = df.resample('5T', on='Date').agg({'Open': 'first', 'High': 'max', 'Low': 'min', 'Close': 'last'})
+            if df['Date'].diff().dt.total_seconds().median() < 300:
+                df = df.resample('5T', on='Date').agg({'Open': 'first', 'High': 'max', 'Low': 'min', 'Close': 'last'})
             df.dropna(inplace=True)
             #df.set_index('Date', inplace=True)
 
