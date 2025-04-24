@@ -437,9 +437,15 @@ elif selected == "Doctor Strategy":
                         
                         # Find closest index to entry_time
                         #entry_idx = df['Date'].searchsorted(entry_time)
-                        entry_time = pd.to_datetime(trade['Entry_Time']).tz_convert('Asia/Kolkata') if pd.to_datetime(trade['Entry_Time']).tzinfo else pd.to_datetime(trade['Entry_Time']).tz_localize('Asia/Kolkata')
+                        entry_time = align_timezone(trade['Entry_Time'])
 
+                        # Safely find the closest index
+                        entry_idx = df['Date'].searchsorted(entry_time)
                         
+                        if entry_idx >= len(df):
+                            continue  # Skip if entry time is beyond available data
+                        
+                        # Now proceed
                         for idx in range(entry_idx + 1, len(df)):
                             current_time = df.at[idx, 'Date']
                             close_price = df.at[idx, 'Close']
