@@ -99,8 +99,7 @@ fig = go.Figure(data=[
             name='20 EMA'
         )
     ])
-    
- fig.update_layout(
+fig.update_layout(
          xaxis_rangeslider_visible=False,
          xaxis_title="Time",
          yaxis_title="Price (₹)",
