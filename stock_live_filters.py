@@ -52,49 +52,6 @@ def send_telegram(msg: str):
     except Exception as e:
         st.error(f"Telegram Error: {e}")
 
-import plotly.graph_objects as go
-
-def plot_candle_only(df, title="Candlestick Chart"):
-    fig = go.Figure(data=[go.Candlestick(
-        x=df['Datetime'],
-        open=df['Open'],
-        high=df['High'],
-        low=df['Low'],
-        close=df['Close'],
-        name='Price',
-        increasing_line_color='green',
-        decreasing_line_color='red'
-    )])
-
-    fig.update_layout(
-        title=title,
-        xaxis_title="Date",
-        yaxis_title="Price",
-        xaxis_rangeslider_visible=False,
-        template="plotly_dark",  # Use dark theme, you can change it
-        height=700
-    )
-
-    fig.show()
-
-
-   def fetch_data(ticker: str) -> pd.DataFrame:
-        df = yf.download(ticker, interval="5m", period="5d", progress=False)
-        df.index = pd.to_datetime(df.index)
-    
-        if df.index.tz is None:
-            df = df.tz_localize("UTC").tz_convert("Asia/Kolkata")
-        else:
-            df = df.tz_convert("Asia/Kolkata")
-    
-        df = df.between_time("09:15", "15:30")
-    
-        if isinstance(df.columns, pd.MultiIndex):
-            df.columns = df.columns.get_level_values(0)
-    
-        df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
-        df["VMA20"] = df["Volume"].rolling(20).mean()
-        return df
 
 
 
