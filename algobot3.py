@@ -542,7 +542,13 @@ elif selected == "Doctor Strategy":
             
                     # CSV download button for trades
                     csv = trade_log.to_csv(index=False).encode("utf-8")
-                    st.download_button("📥 Download Trade Log", data=csv, file_name="trade_log.csv", mime="text/csv")
+                   st.download_button(
+                        label=f"📥 Download Trade Log {i}",
+                        data=csv,
+                        file_name=f"trade_log_{i}.csv",
+                        mime="text/csv",
+                        key=f"download_button_{i}"
+                    )
 
             # Display chart with trade signals (optional)
             # Calculate the 20-period Simple Moving Average (SMA)
