@@ -38,7 +38,7 @@ if run:
     df = yf.download(stock, start=start_date, end=end_date, interval=interval)
 
     if 'Close' in df.columns and not df['Close'].isnull().all():
-    df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
+        df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
 
     if 'EMA20' in df.columns and not df['EMA20'].isnull().all():
         df.dropna(subset=['EMA20'], inplace=True)
