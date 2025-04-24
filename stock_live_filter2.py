@@ -40,7 +40,7 @@ if run:
         st.warning("No data found. Please select a valid stock or time frame.")
     else:
         df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
-        df.dropna(inplace=True)
+        #df.dropna(inplace=True)
         # Ensure 'Close' column exists first
         if 'Close' in df.columns:
             df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
