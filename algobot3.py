@@ -342,6 +342,12 @@ elif selected == "Doctor Strategy":
     uploaded_file = st.file_uploader("Upload CSV file", type="csv")
     capital = st.number_input("Capital Allocation (₹)", value=50000)
 
+    # Helper to ensure timezone consistency
+    def align_timezone(dt):
+        if dt.tzinfo is None:
+            return pd.to_datetime(dt).tz_localize("UTC").tz_convert("Asia/Kolkata")
+        return dt.tz_convert("Asia/Kolkata")
+
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
         st.success("File uploaded successfully")
