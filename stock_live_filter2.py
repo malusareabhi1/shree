@@ -54,42 +54,43 @@ else:
     st.error("Missing 'Close' column. Cannot calculate EMA.")
 
      # Generate Signal
-        df['Signal'] = (df['Close'] > df['EMA20']) & (df['Close'].shift(1) <= df['EMA20'].shift(1))
-        st.success("Signal column added successfully.")
+    df['Signal'] = (df['Close'] > df['EMA20']) & (df['Close'].shift(1) <= df['EMA20'].shift(1))
+    st.success("Signal column added successfully.")
 
         # === Backtesting ===
-        trades = []
-        capital_remaining = capital
-        equity_curve = [capital]
-        daily_trades = 0
+    trades = []
+    capital_remaining = capital
+    equity_curve = [capital]
+    daily_trades = 0
 
-        for i in range(1, len(df)):
-            if df['Signal'].iloc[i] and daily_trades < daily_limit:
-                entry_time = df.index[i]
-                entry_price = df['Close'].iloc[i]
-                stop_price = entry_price * (1 - stop_loss / 100)
-                target_price = entry_price * (1 + profit_target / 100)
+    for i in range(1, len(df)):
+        if df['Signal'].iloc[i] and daily_trades < daily_limit:
+            entry_time = df.index[i]
+            entry_price = df['Close'].iloc[i]
+            stop_price = entry_price * (1 - stop_loss / 100)
+            target_price = entry_price * (1 + profit_target / 100)
 
-                exit_index = min(i + 3, len(df) - 1)
-                exit_price = df['Close'].iloc[exit_index]
-                exit_time = df.index[exit_index]
+            exit_index = min(i + 3, len(df) - 1)
+            exit_price = df['Close'].iloc[exit_index]
+            exit_time = df.index[exit_index]
 
-                if exit_price <= stop_price:
-                    exit_price = stop_price
-                elif exit_price >= target_price:
-                    exit_price = target_price
+            if exit_price <= stop_price:
+                 exit_price = stop_price
+            elif exit_price >= target_price:
+                exit_price = target_price
 
-                profit = (exit_price - entry_price) * lot_qty
-                capital_remaining += profit
-                equity_curve.append(capital_remaining)
-                trades.append({
-                    "Entry Time": entry_time,
-                    "Entry Price": round(entry_price, 2),
-                    "Exit Time": exit_time,
-                    "Exit Price": round(exit_price, 2),
-                    "Profit (₹)": round(profit, 2)
-                })
-                daily_trades += 1
+            profit = (exit_price - entry_price) * lot_qty
+            capital_remaining += profit
+            equity_curve.append(capital_remaining)
+            trades.append({
+                "Entry Time": entry_time,
+                "Entry Price": round(entry_price, 2),
+                "Exit Time": exit_time,
+                "Exit Price": round(exit_price, 2),
+                "Profit (₹)": round(profit, 2)
+            })
+            daily_trades += 1
+            
 
         # === Display ===
         st.markdown("### 🔍 Raw Data & Signal")
