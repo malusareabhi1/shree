@@ -360,6 +360,7 @@ elif selected == "Doctor Strategy":
 
         # Display the final DataFrame
         st.write(df.head())
+        st.write(df.columns)  # Display the columns in the uploaded file
 
         if "Close" not in df.columns:
             st.error("CSV must contain a 'Close' column")
