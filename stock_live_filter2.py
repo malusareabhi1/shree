@@ -5,7 +5,6 @@ import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
 st.set_page_config(layout="wide")
-
 st.sidebar.title("📊 Trading Strategy Dashboard")
 
 # Sidebar Inputs
@@ -27,14 +26,12 @@ trailing_sl = st.sidebar.slider("Trailing Stop Loss (%)", 0.1, 5.0, 0.5)
 time_exit = st.sidebar.checkbox("Enable Time-Based Exit")
 exit_minutes = st.sidebar.slider("Exit After (Minutes)", 1, 60, 10)
 
-# Run button
 run = st.sidebar.button("▶️ Run Strategy")
 
 # Main layout
 st.title(f"{stock} - {interval} Chart")
 
 if run:
-    # Fetch past 2 days of data
     end_date = datetime.now()
     start_date = end_date - timedelta(days=2)
 
@@ -45,14 +42,52 @@ if run:
         df.dropna(inplace=True)
         df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
 
-        # Show raw data
+        # Signal: EMA20 Crossover
+        df['Signal'] = (df['Close'] > df['EMA20']) & (df['Close'].shift(1) <= df['EMA20'].shift(1))
+
+        # Backtest logic
+        trades = []
+        capital_remaining = capital
+        equity_curve = [capital]
+        daily_trades = 0
+
+        for i in range(1, len(df)):
+            if df['Signal'].iloc[i] and daily_trades < daily_limit:
+                entry_time = df.index[i]
+                entry_price = df['Close'].iloc[i]
+                stop_price = entry_price * (1 - stop_loss / 100)
+                target_price = entry_price * (1 + profit_target / 100)
+
+                # Mock exit after a few bars or target hit
+                exit_index = min(i + 3, len(df) - 1)
+                exit_price = df['Close'].iloc[exit_index]
+                exit_time = df.index[exit_index]
+
+                if exit_price <= stop_price:
+                    exit_price = stop_price
+                elif exit_price >= target_price:
+                    exit_price = target_price
+
+                profit = (exit_price - entry_price) * lot_qty
+                capital_remaining += profit
+                equity_curve.append(capital_remaining)
+                trades.append({
+                    "Entry Time": entry_time,
+                    "Entry Price": round(entry_price, 2),
+                    "Exit Time": exit_time,
+                    "Exit Price": round(exit_price, 2),
+                    "Profit (₹)": round(profit, 2)
+                })
+                daily_trades += 1
+
+        # Show data and signals
+        st.markdown("### 🔍 Raw Data & Signal")
         st.dataframe(df.tail(20))
 
-        # Chart Title
-        st.markdown(f"### 📉 {interval} Candle Chart with 20 EMA")
+        st.markdown("### 📉 Chart with Signals")
 
+        fig = go.Figure()
         if chart_type == "Candlestick":
-            fig = go.Figure()
             fig.add_trace(go.Candlestick(
                 x=df.index,
                 open=df['Open'],
@@ -61,30 +96,30 @@ if run:
                 close=df['Close'],
                 name="Candles"
             ))
-            fig.add_trace(go.Scatter(
-                x=df.index,
-                y=df['EMA20'],
-                line=dict(color='orange', width=1),
-                name='EMA 20'
-            ))
         else:
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(
-                x=df.index,
-                y=df['Close'],
-                line=dict(color='blue'),
-                name='Close Price'
-            ))
-            fig.add_trace(go.Scatter(
-                x=df.index,
-                y=df['EMA20'],
-                line=dict(color='orange', width=1),
-                name='EMA 20'
-            ))
+            fig.add_trace(go.Scatter(x=df.index, y=df['Close'], name='Close', line=dict(color='blue')))
 
-        fig.update_layout(
-            xaxis_rangeslider_visible=False,
-            template="plotly_dark",
-            height=600
-        )
+        fig.add_trace(go.Scatter(x=df.index, y=df['EMA20'], name='EMA20', line=dict(color='orange')))
+        
+        signal_points = df[df['Signal']]
+        fig.add_trace(go.Scatter(
+            x=signal_points.index,
+            y=signal_points['Close'],
+            mode='markers',
+            name='Buy Signal',
+            marker=dict(color='green', symbol='triangle-up', size=10)
+        ))
+
+        fig.update_layout(template="plotly_dark", height=600, xaxis_rangeslider_visible=False)
         st.plotly_chart(fig, use_container_width=True)
+
+        # Trade Log
+        st.markdown("### 💼 Trade Log")
+        if trades:
+            st.dataframe(pd.DataFrame(trades))
+        else:
+            st.info("No trades generated in the selected time frame.")
+
+        # Equity Curve
+        st.markdown("### 📈 Equity Curve")
+        st.line_chart(equity_curve)
