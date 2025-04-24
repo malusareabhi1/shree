@@ -53,10 +53,7 @@ if 'Close' in df.columns and not df['Close'].isnull().all():
 else:
     st.error("Missing 'Close' column. Cannot calculate EMA.")
 
-
-
-
-        # Generate Signal
+     # Generate Signal
         df['Signal'] = (df['Close'] > df['EMA20']) & (df['Close'].shift(1) <= df['EMA20'].shift(1))
         st.success("Signal column added successfully.")
 
@@ -135,3 +132,9 @@ else:
 
         st.markdown("### 📈 Equity Curve")
         st.line_chart(equity_curve)
+
+
+
+
+
+       
