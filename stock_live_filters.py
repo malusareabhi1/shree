@@ -127,6 +127,8 @@ if run_strategy:
             st.success(f"✅ Loaded {len(df)} rows of data.")
             st.dataframe(df.tail())  # Show last few rows
             st.write(df.columns)
+            st.write(df.index)
+            st.write(type(df.index))    
             #st.write(df.head()) 
             # Flatten column names
             # Flatten column names
