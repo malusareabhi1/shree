@@ -42,8 +42,8 @@ if run:
         df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
         #df.dropna(inplace=True)
         # Ensure 'Close' column exists first
-        if 'Close' in df.columns:
-            df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
+        #if 'Close' in df.columns:
+            #df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
             
             if 'EMA20' in df.columns:
                 df = df.dropna(subset=['EMA20'])  # Safe dropna
