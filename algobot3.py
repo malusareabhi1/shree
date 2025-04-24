@@ -432,7 +432,13 @@ elif selected == "Doctor Strategy":
                         trailing_stop_loss_triggered = False
                         profit_booked = False
 
-                        for idx in range(df[df['Date'] == entry_time].index[0] + 1, len(df)):
+                        # Make sure Date is in the index and sorted
+                        df = df.sort_values('Date').reset_index(drop=True)
+                        
+                        # Find closest index to entry_time
+                        entry_idx = df['Date'].searchsorted(entry_time)
+                        
+                        for idx in range(entry_idx + 1, len(df)):
                             current_time = df.at[idx, 'Date']
                             close_price = df.at[idx, 'Close']
 
