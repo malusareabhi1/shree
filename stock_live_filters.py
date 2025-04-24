@@ -179,3 +179,38 @@ with st.spinner("⏳ Refreshing in 30 seconds..."):
 #import datetime
 #import streamlit as st
 
+if run_strategy:
+    st.subheader(f"📥 Loading {stock} - {frame_interval} data for last 2 days...")
+
+    # Mapping Streamlit frame_interval to yfinance interval
+    interval_map = {
+        "5m": "5m",
+        "15m": "15m",
+        "1h": "60m",
+        "1d": "1d"
+    }
+    yf_interval = interval_map.get(frame_interval, "5m")
+
+    try:
+        # Fetch last 2 days of selected intraday frame
+        df = yf.download(
+            tickers=stock,
+            period="2d",
+            interval=yf_interval,
+            progress=False
+        )
+
+        if df.empty:
+            st.error("⚠️ No data found. Please try another stock or timeframe.")
+        else:
+            df = df.dropna().copy()
+            df.index = df.index.tz_localize(None)  # Remove timezone for compatibility
+            st.success(f"✅ Loaded {len(df)} rows of data.")
+            st.dataframe(df.tail())  # Show last few rows
+
+            # You can now call your strategy, chart, or signal logic here
+
+    except Exception as e:
+        st.error(f"❌ Error while loading data: {e}")
+
+
