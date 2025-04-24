@@ -78,6 +78,24 @@ def plot_candle_only(df, title="Candlestick Chart"):
     fig.show()
 
 
+ def fetch_data(ticker: str) -> pd.DataFrame:
+        df = yf.download(ticker, interval="5m", period="5d", progress=False)
+        df.index = pd.to_datetime(df.index)
+    
+        if df.index.tz is None:
+            df = df.tz_localize("UTC").tz_convert("Asia/Kolkata")
+        else:
+            df = df.tz_convert("Asia/Kolkata")
+    
+        df = df.between_time("09:15", "15:30")
+    
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+    
+        df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
+        df["VMA20"] = df["Volume"].rolling(20).mean()
+        return df
+
 
 
 #import datetime
@@ -97,23 +115,7 @@ if run_strategy:
 
     try:
         # Fetch last 2 days of selected intraday frame
-        df = yf.download(
-            tickers=stock,
-            period="2d",
-            interval=yf_interval,
-            progress=False
-        )
-            #df.index = pd.to_datetime(df.index)
-        # Ensure the index is a proper datetime index
-        df.index = pd.to_datetime(df.index)
-        if df.index.tz is None:
-            df = df.tz_localize("UTC").tz_convert("Asia/Kolkata")
-        else:
-            df = df.tz_convert("Asia/Kolkata")
-    
-        df = df.between_time("09:15", "15:30")
-        #df = df.reset_index()  # Moves datetime index into a regular column
-        #df.rename(columns={'Datetime': 'datetime'}, inplace=True)    
+          df = fetch_data(symbol)
 
 
 
