@@ -411,7 +411,10 @@ elif selected == "Doctor Strategy":
             # For trailing stop loss and profit booking logic
             trades = []
             for idx in range(1, len(df)):
-                if df['Signal'].iloc[idx] == 'BUY':
+                #if df['Signal'].iloc[idx] == 'BUY':
+                if idx < len(df) and df['Signal'].iloc[idx] == 'BUY':
+                    # your code logic here
+
                     entry_price = df['Close'].iloc[idx]
                     stop_loss = entry_price * 0.90
                     profit_target = entry_price * 1.05
