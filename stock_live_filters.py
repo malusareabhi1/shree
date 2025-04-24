@@ -58,17 +58,7 @@ def send_telegram(msg: str):
 #import datetime
 #import streamlit as st
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-if run_strategy:
-    st.subheader(f"📥 Loading {stock} - {frame_interval} data for last 2 days...")
 
-    # Mapping Streamlit frame_interval to yfinance interval
-    interval_map = {
-        "5m": "5m",
-        "15m": "15m",
-        "1h": "60m",
-        "1d": "1d"
-    }
-    yf_interval = interval_map.get(frame_interval, "5m")
 
    
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
