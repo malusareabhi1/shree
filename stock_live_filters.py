@@ -75,6 +75,38 @@ if run_strategy:
         except Exception as e:
             st.error(f"Data fetch error: {e}")
 
+            # Plot chart
+            st.subheader(f"{stock} - {frame_interval} Chart")
+
+            if chart_type == "Candlestick":
+                fig = go.Figure(data=[go.Candlestick(
+                    x=df.index,
+                    open=df['Open'],
+                    high=df['High'],
+                    low=df['Low'],
+                    close=df['Close'],
+                    increasing_line_color='green',
+                    decreasing_line_color='red'
+                )])
+                fig.update_layout(xaxis_rangeslider_visible=False)
+
+            elif chart_type == "Line":
+                fig = go.Figure()
+                fig.add_trace(go.Scatter(x=df.index, y=df['Close'], mode='lines', name='Close'))
+
+            elif chart_type == "OHLC":
+                fig = go.Figure(data=[go.Ohlc(
+                    x=df.index,
+                    open=df['Open'],
+                    high=df['High'],
+                    low=df['Low'],
+                    close=df['Close']
+                )])
+                fig.update_layout(xaxis_rangeslider_visible=False)
+
+            st.plotly_chart(fig, use_container_width=True)
+
+
 
    
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
