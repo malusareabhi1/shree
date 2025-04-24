@@ -48,8 +48,8 @@ if run:
         st.success("Signal column added successfully.")
     else:
         st.error("EMA20 could not be calculated. Possibly due to missing or invalid Close data.")
-    else:
-        st.error("'Close' column missing or invalid. Cannot calculate EMA.")
+else:
+    st.error("'Close' column missing or invalid. Cannot calculate EMA.")
 
 
 
