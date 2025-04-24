@@ -27,7 +27,7 @@ st.set_page_config(layout="wide", page_title="Trade Strategy Dashboard")
 # Sidebar navigation
 with st.sidebar:
     selected = option_menu(
-    menu_title="ALGO BOT Trade ",
+    menu_title="ALGO BOT  ",
     options=[
         "Dashboard", "Get Stock Data", "Doctor Strategy","Doctor1.0 Strategy","Doctor2.0 Strategy","Doctor3.0 Strategy", "Swing Trade Strategy","New Nifty Strategy",
         "Intraday Stock Finder", "Trade Log", "Account Info", "Candle Chart", "Strategy Detail","Strategy2.0 Detail", "Project Detail", "KITE API", "API","Alpha Vantage API","Live Algo Trading"
