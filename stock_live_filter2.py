@@ -38,17 +38,14 @@ if run:
     df = yf.download(stock, start=start_date, end=end_date, interval=interval)
 
     if df.empty or 'Close' not in df.columns:
-        st.error("No data found or 'Close' column missing. Please check the stock symbol or interval.")
+        st.error("No data found or 'Close' column missing. Please check stock symbol or interval.")
     else:
-        # Calculate EMA20 only if 'Close' is present
+        # Calculate EMA20 only if 'Close' column exists
         df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
-        
-        # Drop rows with NaN in EMA20 (first 19 rows will be NaN)
-        df.dropna(subset=['EMA20'], inplace=True)
+        df.dropna(subset=['EMA20'], inplace=True)  # Only drop NaNs if 'EMA20' exists
 
-        # Create signal column
+        # Generate Signal
         df['Signal'] = (df['Close'] > df['EMA20']) & (df['Close'].shift(1) <= df['EMA20'].shift(1))
-
         st.success("Signal column added successfully.")
 
         # === Backtesting ===
