@@ -542,18 +542,20 @@ elif selected == "Doctor Strategy":
 
                     # Sample multiple trade logs
                     multiple_trade_logs = [trade_log_df1, trade_log_df2, trade_log_df3]
-            
-                    # CSV download button for trades
-                    for i, df in enumerate(multiple_trade_logs):
-                        csv = df.to_csv(index=False)
-                        st.download_button(
-                            label=f"📥 Download Trade Log {i+1}",
-                            data=csv,
-                            file_name=f"trade_log_{i+1}.csv",
-                            mime="text/csv",
-                            key=f"download_button_{i+1}"
-                        )
 
+            # CSV download button for trades
+            for i, df in enumerate(multiple_trade_logs):
+                csv = df.to_csv(index=False)
+                 st.download_button(
+                    label=f"📥 Download Trade Log {i+1}",
+                    data=csv,
+                    file_name=f"trade_log_{i+1}.csv",
+                    mime="text/csv",
+                    key=f"download_button_{i+1}"
+                )
+
+            
+                    
             # Display chart with trade signals (optional)
             # Calculate the 20-period Simple Moving Average (SMA)
             df['20_SMA'] = df['Close'].rolling(window=20).mean()
