@@ -592,6 +592,8 @@ elif selected == "Doctor Strategy":
             
             st.plotly_chart(fig)
             # Display the trade log
+             # Display the chart
+            st.subheader("Trade Log ")
             st.dataframe(trade_log)
 
   
