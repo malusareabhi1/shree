@@ -74,7 +74,7 @@ if run_strategy:
 
         except Exception as e:
             st.error(f"Data fetch error: {e}")
-st.write(df.index())
+#st.write(df.index())
 # Plot chart
 st.subheader(f"{stock} - {frame_interval} Chart")
 
