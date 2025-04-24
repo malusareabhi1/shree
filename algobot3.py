@@ -425,6 +425,7 @@ elif selected == "Doctor Strategy":
                         'Profit_Target': profit_target,
                         'Exit_Time': None,
                         'Exit_Price': None,
+                        'Brokerage'     : 20    # ₹20 per trade
                         'PnL': None,
                         'Exit_Reason': None  # Add the Exit_Reason field
                     }
@@ -464,6 +465,7 @@ elif selected == "Doctor Strategy":
                             if close_price >= current_profit_target and not profit_booked:
                                 trade['Exit_Time'] = current_time
                                 trade['Exit_Price'] = current_profit_target
+                                trade['PnL_After_Brokerage'] = trade['PnL'] - trade['Brokerage']
                                 trade['PnL'] = current_profit_target - entry_price
                                 trade['Exit_Reason'] = 'Profit Booking'  # Add exit reason
                                 profit_booked = True
@@ -536,6 +538,8 @@ elif selected == "Doctor Strategy":
             
                     # Add the trades to the DataFrame
                     trade_log = pd.DataFrame(trades)
+                    total_net_pnl = df_trades['PnL_After_Brokerage'].sum()
+                    st.markdown(f"**Total Net P&L after Brokerage:** ₹{total_net_pnl:.2f}")
             
                      
 
