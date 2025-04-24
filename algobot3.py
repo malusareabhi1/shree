@@ -595,6 +595,13 @@ elif selected == "Doctor Strategy":
              # Display the chart
             st.subheader("Trade Log ")
             st.dataframe(trade_log)
+
+            # Create a DataFrame
+            trade_log_df = pd.DataFrame(trade_log_data)
+            
+            # Ensure the CSV string is generated correctly
+            csv = trade_log_df.to_csv(index=False)  # `csv` should hold the CSV data as a string
+            print(csv)  # This will print the CSV content in the console for debugging
             
             # Download Button
             st.download_button(
