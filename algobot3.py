@@ -488,16 +488,25 @@ elif selected == "Doctor Strategy":
 
                         # Step 9: Time-Based Exit (after 10 minutes)
                         if not trade.get('Exit_Time'):
-                            # Ensure 'Date' column is in datetime format
+                            # Ensure 'Date' column is in datetime format, force errors to NaT if conversion fails
                             df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
-                           # # Convert entry_time to datetime if not already
-                            entry_time = pd.to_datetime(trade['Entry_Time'])
                             
-                            # Ensure entry_time is in the same timezone as df['Date']
-                            entry_time = entry_time.tz_localize('Asia/Kolkata', ambiguous='NaT') if entry_time.tzinfo is None else entry_time
-                            df['Date'] = df['Date'].dt.tz_localize('Asia/Kolkata', ambiguous='NaT') if df['Date'].dt.tzinfo is None else df['Date']
+                            # Ensure 'entry_time' is also in datetime format, force errors to NaT if conversion fails
+                            entry_time = pd.to_datetime(trade['Entry_Time'], errors='coerce')
                             
-                            # Use searchsorted() to find the closest index for entry_time in df['Date']
+                            # Check if the 'Date' column has any NaT (invalid) values and handle accordingly
+                            if df['Date'].isnull().any():
+                                print("Warning: Some 'Date' values are invalid (NaT). They will be excluded.")
+                                df = df.dropna(subset=['Date'])
+                            
+                            # Localize to 'Asia/Kolkata' timezone only if the column is naive (no timezone)
+                            df['Date'] = df['Date'].apply(lambda x: x.tz_localize('Asia/Kolkata', ambiguous='NaT') if x.tzinfo is None else x)
+                            
+                            # Ensure entry_time is timezone-aware, localize it if it's naive
+                            if entry_time.tzinfo is None:
+                                entry_time = entry_time.tz_localize('Asia/Kolkata', ambiguous='NaT')
+                            
+                            # Now both df['Date'] and entry_time are timezone-aware, so we can safely use searchsorted()
                             entry_idx = df['Date'].searchsorted(entry_time)
                             
                             # Ensure we don't go out of bounds
@@ -505,6 +514,7 @@ elif selected == "Doctor Strategy":
                                 closest_entry = df.iloc[entry_idx]
                             else:
                                 closest_entry = df.iloc[-1]  # If it's out of bounds, take the last available
+
                             
                             # Now proceed with the trade logic
                             for idx in range(entry_idx + 1, len(df)):
