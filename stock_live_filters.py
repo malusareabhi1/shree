@@ -115,7 +115,7 @@ if run_strategy:
 
     try:
         # Fetch last 2 days of selected intraday frame
-          df = fetch_data(stock)
+         
 
 
 
