@@ -110,8 +110,8 @@ if run_strategy:
             df = df.tz_convert("Asia/Kolkata")
     
         df = df.between_time("09:15", "15:30")
-        df = df.reset_index()  # Moves datetime index into a regular column
-        df.rename(columns={'Datetime': 'datetime'}, inplace=True)    
+        #df = df.reset_index()  # Moves datetime index into a regular column
+        #df.rename(columns={'Datetime': 'datetime'}, inplace=True)    
 
 
 
