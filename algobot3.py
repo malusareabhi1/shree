@@ -617,6 +617,58 @@ elif selected == "Doctor Strategy":
                 mime="text/csv",
                 key="download_button"
             )
+            # ── assume you already have: trade_log_df = pd.DataFrame(trades) ──
+
+            # 1️⃣ Compute summary stats
+            total_trades = len(trade_log_df)
+            wins        = trade_log_df[trade_log_df['PnL_After_Brokerage'] > 0]
+            losses      = trade_log_df[trade_log_df['PnL_After_Brokerage'] < 0]
+            
+            num_wins    = len(wins)
+            num_losses  = len(losses)
+            win_rate    = (num_wins / total_trades * 100) if total_trades else 0
+            
+            gross_profit = wins['PnL_After_Brokerage'].sum()
+            gross_loss   = losses['PnL_After_Brokerage'].sum()  # negative number
+            profit_factor = (gross_profit / abs(gross_loss)) if gross_loss < 0 else float("inf")
+            
+            avg_win   = wins['PnL_After_Brokerage'].mean()  if num_wins   else 0
+            avg_loss  = losses['PnL_After_Brokerage'].mean() if num_losses else 0
+            
+            # Expectancy per trade
+            expectancy = (win_rate/100) * avg_win + (1 - win_rate/100) * avg_loss
+            
+            # 2️⃣ Display in Streamlit
+            st.markdown("## 📊 Performance Summary")
+            c1, c2, c3 = st.columns(3)
+            c1.metric("Total Trades", total_trades)
+            c2.metric("Winning Trades", num_wins, f"{win_rate:.1f}%")
+            c3.metric("Losing Trades", num_losses)
+            
+            c4, c5, c6 = st.columns(3)
+            c4.metric("Gross Profit", f"₹{gross_profit:.2f}")
+            c5.metric("Gross Loss",   f"₹{gross_loss:.2f}")
+            c6.metric("Profit Factor", f"{profit_factor:.2f}")
+            
+            c7, c8, c9 = st.columns(3)
+            c7.metric("Avg. Win",   f"₹{avg_win:.2f}")
+            c8.metric("Avg. Loss",  f"₹{avg_loss:.2f}")
+            c9.metric("Expectancy", f"₹{expectancy:.2f}")
+            
+            # 3️⃣ (Optional) Equity curve
+            st.markdown("### 📈 Equity Curve")
+            st.line_chart(trade_log_df['PnL_After_Brokerage'].cumsum())
+            
+            # 4️⃣ Download full log
+            csv = trade_log_df.to_csv(index=False)
+            st.download_button(
+                "📥 Download Trade Log",
+                data=csv,
+                file_name="trade_log_with_summary.csv",
+                mime="text/csv",
+                key="download_with_summary"
+            )
+
 
   
     
