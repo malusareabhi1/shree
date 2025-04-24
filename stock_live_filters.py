@@ -103,7 +103,8 @@ if run_strategy:
             progress=False
         )
             #df.index = pd.to_datetime(df.index)
-        
+        # Ensure the index is a proper datetime index
+        df.index = pd.to_datetime(df.index)
         if df.index.tz is None:
             df = df.tz_localize("UTC").tz_convert("Asia/Kolkata")
         else:
