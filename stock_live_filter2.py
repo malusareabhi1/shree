@@ -41,6 +41,18 @@ if run:
     else:
         df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
         df.dropna(inplace=True)
+        # Ensure 'Close' column exists first
+        if 'Close' in df.columns:
+            df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
+            
+            if 'EMA20' in df.columns:
+                df = df.dropna(subset=['EMA20'])  # Safe dropna
+                df['Signal'] = (df['Close'] > df['EMA20']) & (df['Close'].shift(1) <= df['EMA20'].shift(1))
+                st.success("Signal column added.")
+            else:
+                st.error("'EMA20' column not created.")
+        else:
+            st.error("'Close' column is missing in the DataFrame. Check your CSV or data source.")
 
         # Signal: EMA20 Crossover
         #df['Signal'] = (df['Close'] > df['EMA20']) & (df['Close'].shift(1) <= df['EMA20'].shift(1))
