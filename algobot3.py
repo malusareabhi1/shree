@@ -344,9 +344,11 @@ elif selected == "Doctor Strategy":
 
     # Helper to ensure timezone consistency
     def align_timezone(dt):
+        dt = pd.to_datetime(dt)  # Make sure it's a datetime object
         if dt.tzinfo is None:
-            return pd.to_datetime(dt).tz_localize("UTC").tz_convert("Asia/Kolkata")
+            return dt.tz_localize("UTC").tz_convert("Asia/Kolkata")
         return dt.tz_convert("Asia/Kolkata")
+
 
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
