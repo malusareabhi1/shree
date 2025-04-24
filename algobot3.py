@@ -542,7 +542,7 @@ elif selected == "Doctor Strategy":
             
                     # CSV download button for trades
                     csv = trade_log.to_csv(index=False).encode("utf-8")
-                   st.download_button(
+                    st.download_button(
                         label=f"📥 Download Trade Log {i}",
                         data=csv,
                         file_name=f"trade_log_{i}.csv",
