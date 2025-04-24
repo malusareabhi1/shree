@@ -407,7 +407,8 @@ elif selected == "Doctor Strategy":
                     stop_loss = entry_price * 0.90
                     profit_target = entry_price * 1.05
                     trade = {
-                        'Entry_Time': df['Date'].iloc[idx],
+                        #'Entry_Time': df['Date'].iloc[idx],
+                        'Entry_Time': df.index[idx]
                         'Entry_Price': entry_price,
                         'Stop_Loss': stop_loss,
                         'Profit_Target': profit_target,
