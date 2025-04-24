@@ -408,18 +408,16 @@ elif selected == "Doctor Strategy":
             df['Initial_Stop_Loss'] = df['Close'] * 0.90
             df['Profit_Target'] = df['Close'] * 1.05
 
-            # For trailing stop loss and profit booking logic
+           # For trailing stop loss and profit booking logic
             trades = []
             for idx in range(1, len(df)):
-                #if df['Signal'].iloc[idx] == 'BUY':
                 if idx < len(df) and df['Signal'].iloc[idx] == 'BUY':
-                    # your code logic here
-
+                    # Your code logic here
+            
                     entry_price = df['Close'].iloc[idx]
                     stop_loss = entry_price * 0.90
                     profit_target = entry_price * 1.05
                     trade = {
-                        #'Entry_Time': df['Date'].iloc[idx],
                         'Entry_Time': df.index[idx],
                         'Entry_Price': entry_price,
                         'Stop_Loss': stop_loss,
@@ -427,11 +425,12 @@ elif selected == "Doctor Strategy":
                         'Exit_Time': None,
                         'Exit_Price': None,
                         'PnL': None,
+                        'Exit_Reason': None  # Add the Exit_Reason field
                     }
-
+            
                     # Track the trade for 10-minute exit and trailing logic
                     trades.append(trade)
-
+            
                     # Logic for trailing stop loss and profit booking
                     for trade in trades:
                         entry_time = trade['Entry_Time']
@@ -442,36 +441,38 @@ elif selected == "Doctor Strategy":
                         current_profit_target = profit_target
                         trailing_stop_loss_triggered = False
                         profit_booked = False
-
+            
                         # Make sure Date is in the index and sorted
                         df = df.sort_values('Date').reset_index(drop=True)
-                        
+            
                         # Find closest index to entry_time
-                        #entry_idx = df['Date'].searchsorted(entry_time)
                         entry_time = align_timezone(trade['Entry_Time'])
-
+            
                         # Safely find the closest index
                         entry_idx = df['Date'].searchsorted(entry_time)
-                        
+            
                         if entry_idx >= len(df):
                             continue  # Skip if entry time is beyond available data
-                        
+            
                         # Now proceed
                         for idx in range(entry_idx + 1, len(df)):
                             current_time = df.at[idx, 'Date']
                             close_price = df.at[idx, 'Close']
-
+            
+                            # Check for profit booking
                             if close_price >= current_profit_target and not profit_booked:
                                 trade['Exit_Time'] = current_time
                                 trade['Exit_Price'] = current_profit_target
                                 trade['PnL'] = current_profit_target - entry_price
+                                trade['Exit_Reason'] = 'Profit Booking'  # Add exit reason
                                 profit_booked = True
                                 break
-
+            
+                            # Check for trailing stop loss
                             if close_price >= entry_price * 1.04 and not trailing_stop_loss_triggered:
                                 current_stop_loss = entry_price
                                 trailing_stop_loss_triggered = True
-
+            
                             if trailing_stop_loss_triggered:
                                 if close_price >= entry_price * 1.10:
                                     current_stop_loss = entry_price * 1.04
@@ -481,45 +482,47 @@ elif selected == "Doctor Strategy":
                                     trade['Exit_Time'] = current_time
                                     trade['Exit_Price'] = close_price
                                     trade['PnL'] = close_price - entry_price
+                                    trade['Exit_Reason'] = 'Profit Target Reached'  # Exit reason
                                     break
-
+            
+                            # Check for stop loss hit
                             if df.at[idx, 'Low'] <= current_stop_loss:
                                 trade['Exit_Time'] = current_time
                                 trade['Exit_Price'] = current_stop_loss
                                 trade['PnL'] = current_stop_loss - entry_price
+                                trade['Exit_Reason'] = 'Stop Loss Hit'  # Exit reason
                                 break
-
+            
                         # Step 9: Time-Based Exit (after 10 minutes)
                         if not trade.get('Exit_Time'):
                             # Ensure 'Date' column is in datetime format, force errors to NaT if conversion fails
                             df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
-                            
+            
                             # Ensure 'entry_time' is also in datetime format, force errors to NaT if conversion fails
                             entry_time = pd.to_datetime(trade['Entry_Time'], errors='coerce')
-                            
+            
                             # Check if the 'Date' column has any NaT (invalid) values and handle accordingly
                             if df['Date'].isnull().any():
                                 print("Warning: Some 'Date' values are invalid (NaT). They will be excluded.")
                                 df = df.dropna(subset=['Date'])
-                            
+            
                             # Localize to 'Asia/Kolkata' timezone only if the column is naive (no timezone)
                             df['Date'] = df['Date'].apply(lambda x: x.tz_localize('Asia/Kolkata', ambiguous='NaT') if x.tzinfo is None else x)
-                            
+            
                             # Ensure entry_time is timezone-aware, localize it if it's naive
                             if entry_time.tzinfo is None:
                                 entry_time = entry_time.tz_localize('Asia/Kolkata', ambiguous='NaT')
-                            
+            
                             # Now both df['Date'] and entry_time are timezone-aware, so we can safely use searchsorted()
                             entry_idx = df['Date'].searchsorted(entry_time)
-                            
+            
                             # Ensure we don't go out of bounds
                             if entry_idx < len(df):
                                 closest_entry = df.iloc[entry_idx]
                             else:
                                 closest_entry = df.iloc[-1]  # If it's out of bounds, take the last available
-
-                            
-                            # Now proceed with the trade logic
+            
+                            # Time-based exit logic (after 10 minutes)
                             for idx in range(entry_idx + 1, len(df)):
                                 current_time = df.at[idx, 'Date']
                                 close_price = df.at[idx, 'Close']
@@ -527,27 +530,18 @@ elif selected == "Doctor Strategy":
                                     trade['Exit_Time'] = current_time
                                     trade['Exit_Price'] = df.at[idx, 'Close']
                                     trade['PnL'] = df.at[idx, 'Close'] - entry_price
+                                    trade['Exit_Reason'] = 'Time-Based Exit'  # Exit reason
                                     break
-
-                        # Step 10: Trading Hours Check
-                        entry_time = pd.to_datetime(trade['Entry_Time'])
-                        trading_start_time = pd.to_datetime(entry_time.date().strftime('%Y-%m-%d') + ' 09:30:00')
-                        trading_end_time = pd.to_datetime(entry_time.date().strftime('%Y-%m-%d') + ' 13:30:00')
-
-                        if entry_time < trading_start_time or entry_time > trading_end_time:
-                            trade['Exit_Time'] = entry_time
-                            trade['Exit_Price'] = "N/A"
-                            trade['PnL'] = "N/A"
-                            trade['Status'] = "Trade Not Allowed"
-                            continue  # Skip further processing
-
-            # Display the trades
-            trade_log = pd.DataFrame(trades)
-            st.dataframe(trade_log)
-
-            # CSV download button for trades
-            csv = trade_log.to_csv(index=False).encode("utf-8")
-            st.download_button("📥 Download Trade Log", data=csv, file_name="trade_log.csv", mime="text/csv")
+            
+                    # Add the trades to the DataFrame
+                    trade_log = pd.DataFrame(trades)
+            
+                    # Display the trade log
+                    st.dataframe(trade_log)
+            
+                    # CSV download button for trades
+                    csv = trade_log.to_csv(index=False).encode("utf-8")
+                    st.download_button("📥 Download Trade Log", data=csv, file_name="trade_log.csv", mime="text/csv")
 
             # Display chart with trade signals (optional)
             # Calculate the 20-period Simple Moving Average (SMA)
