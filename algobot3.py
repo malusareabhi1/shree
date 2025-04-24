@@ -495,7 +495,7 @@ elif selected == "Doctor Strategy":
                                 trade['Exit_Time'] = current_time
                                 trade['Exit_Price'] = current_stop_loss
                                 trade['PnL'] = current_stop_loss - entry_price
-                                 trade['PnL_After_Brokerage'] = trade['PnL'] - trade['Brokerage']
+                                trade['PnL_After_Brokerage'] = trade['PnL'] - trade['Brokerage']
                                 trade['Exit_Reason'] = 'Stop Loss Hit'  # Exit reason
                                 break
             
