@@ -75,8 +75,9 @@ if run_strategy:
         except Exception as e:
             st.error(f"Data fetch error: {e}")
 st.write(df.index())
-            # Plot chart
-            st.subheader(f"{stock} - {frame_interval} Chart")
+# Plot chart
+st.subheader(f"{stock} - {frame_interval} Chart")
+
 
             if chart_type == "Candlestick":
                 fig = go.Figure(data=[go.Candlestick(
@@ -105,6 +106,7 @@ st.write(df.index())
                 fig.update_layout(xaxis_rangeslider_visible=False)
 
             st.plotly_chart(fig, use_container_width=True)
+            
 
 
 
