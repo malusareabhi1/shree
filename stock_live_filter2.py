@@ -42,7 +42,14 @@ if run:
     else:
         # Calculate EMA20 only if 'Close' column exists
         df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
-        df.dropna(subset=['EMA20'], inplace=True)  # Only drop NaNs if 'EMA20' exists
+        #df.dropna(subset=['EMA20'], inplace=True)  # Only drop NaNs if 'EMA20' exists
+        if 'Close' in df.columns:
+            df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
+            if 'EMA20' in df.columns:
+                df.dropna(subset=['EMA20'], inplace=True)
+        else:
+            st.error("'Close' column not found in the data. Check the stock symbol or interval.")
+
 
         # Generate Signal
         df['Signal'] = (df['Close'] > df['EMA20']) & (df['Close'].shift(1) <= df['EMA20'].shift(1))
