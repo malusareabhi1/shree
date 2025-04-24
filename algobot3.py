@@ -547,6 +547,10 @@ elif selected == "Doctor Strategy":
             st.download_button("📥 Download Trade Log", data=csv, file_name="trade_log.csv", mime="text/csv")
 
             # Display chart with trade signals (optional)
+            # Calculate the 20-period Simple Moving Average (SMA)
+            df['20_SMA'] = df['Close'].rolling(window=20).mean()
+            
+            # Create the candlestick chart
             fig = go.Figure(data=[go.Candlestick(
                 x=df['Date'],
                 open=df['Open'],
@@ -556,7 +560,8 @@ elif selected == "Doctor Strategy":
                 increasing_line_color='green',
                 decreasing_line_color='red',
             )])
-
+            
+            # Add buy signals
             buy_signals = df[df['Signal'] == 'BUY']
             fig.add_trace(go.Scatter(
                 x=buy_signals['Date'],
@@ -565,8 +570,19 @@ elif selected == "Doctor Strategy":
                 name='Buy Signal',
                 marker=dict(symbol='triangle-up', color='green', size=12)
             ))
+            
+            # Add 20-period SMA to the chart
+            fig.add_trace(go.Scatter(
+                x=df['Date'],
+                y=df['20_SMA'],
+                mode='lines',
+                name='20 SMA',
+                line=dict(color='blue', width=2)
+            ))
+            
+            # Display the chart
             st.subheader("Daily Chart")
-
+            
             fig.update_layout(
                 xaxis_title='Date',
                 yaxis_title='Price (₹)',
@@ -574,6 +590,7 @@ elif selected == "Doctor Strategy":
                 template='plotly_dark',
                 hovermode='x unified',
             )
+            
             st.plotly_chart(fig)
 
   
