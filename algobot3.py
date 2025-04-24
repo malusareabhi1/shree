@@ -542,13 +542,13 @@ elif selected == "Doctor Strategy":
             
                     # CSV download button for trades
                     for i, df in enumerate(multiple_trade_logs):
-                        csv = trade_log.to_csv(index=False).encode("utf-8")
+                        csv = df.to_csv(index=False)
                         st.download_button(
-                            label=f"📥 Download Trade Log {i}",
+                            label=f"📥 Download Trade Log {i+1}",
                             data=csv,
-                            file_name=f"trade_log_{i}.csv",
+                            file_name=f"trade_log_{i+1}.csv",
                             mime="text/csv",
-                            key=f"download_button_{i}"
+                            key=f"download_button_{i+1}"
                         )
 
             # Display chart with trade signals (optional)
