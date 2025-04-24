@@ -368,6 +368,7 @@ elif selected == "Doctor Strategy":
             # Step 1: Time Frame (5-minute chart)
             df = df.resample('5T', on='Date').agg({'Open': 'first', 'High': 'max', 'Low': 'min', 'Close': 'last'})
             df.dropna(inplace=True)
+            df.set_index('Date', inplace=True)
 
             # Step 2: Center Line (20 SMA) and Bollinger Bands
             df['SMA_20'] = df['Close'].rolling(window=20).mean()
