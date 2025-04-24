@@ -541,6 +541,7 @@ elif selected == "Doctor Strategy":
                     st.dataframe(trade_log)
             
                     # CSV download button for trades
+                    for i, df in enumerate(multiple_trade_logs):
                     csv = trade_log.to_csv(index=False).encode("utf-8")
                     st.download_button(
                         label=f"📥 Download Trade Log {i}",
