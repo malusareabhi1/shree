@@ -488,9 +488,22 @@ elif selected == "Doctor Strategy":
 
                         # Step 9: Time-Based Exit (after 10 minutes)
                         if not trade.get('Exit_Time'):
+                           # Convert entry_time to datetime if not already
                             entry_time = pd.to_datetime(trade['Entry_Time'])
-                            for idx in range(df[df['Date'] == entry_time].index[0] + 1, len(df)):
+                            
+                            # Use searchsorted() to find the closest index for entry_time in df['Date']
+                            entry_idx = df['Date'].searchsorted(entry_time)
+                            
+                            # Ensure we don't go out of bounds
+                            if entry_idx < len(df):
+                                closest_entry = df.iloc[entry_idx]
+                            else:
+                                closest_entry = df.iloc[-1]  # If it's out of bounds, take the last available
+                            
+                            # Now proceed with the trade logic
+                            for idx in range(entry_idx + 1, len(df)):
                                 current_time = df.at[idx, 'Date']
+                                close_price = df.at[idx, 'Close']
                                 if (current_time - entry_time).seconds >= 600:  # 600 seconds = 10 minutes
                                     trade['Exit_Time'] = current_time
                                     trade['Exit_Price'] = df.at[idx, 'Close']
