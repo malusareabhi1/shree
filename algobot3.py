@@ -536,8 +536,8 @@ elif selected == "Doctor Strategy":
                                     trade['Exit_Reason'] = 'Time-Based Exit'  # Exit reason
                                     break
                     # 2️⃣ If you didn't compute PnL_After_Brokerage per-trade, do it now:
-                    if 'PnL_After_Brokerage' not in trades.columns:
-                        trades['PnL_After_Brokerage'] = trades['PnL'] - trades['Brokerage']
+                    if 'PnL_After_Brokerage' not in trade.columns:
+                        trade['PnL_After_Brokerage'] = trade['PnL'] - trade['Brokerage']
                     # Add the trades to the DataFrame
                     trade_log = pd.DataFrame(trades)
                     total_net_pnl = df_trades['PnL_After_Brokerage'].sum()
