@@ -103,8 +103,7 @@ if run_strategy:
             progress=False
         )
             #df.index = pd.to_datetime(df.index)
-        print(df.columns)
-        print(df.head())    
+        
         if df.index.tz is None:
             df = df.tz_localize("UTC").tz_convert("Asia/Kolkata")
         else:
@@ -125,6 +124,8 @@ if run_strategy:
             df.index = df.index.tz_localize(None)  # Remove timezone for compatibility
             st.success(f"✅ Loaded {len(df)} rows of data.")
             st.dataframe(df.tail())  # Show last few rows
+            print(df.columns)
+            print(df.head())        
 
             
        
