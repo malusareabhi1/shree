@@ -122,43 +122,6 @@ if run_strategy:
             
         
 
-        if df.empty:
-            st.error("⚠️ No data found. Please try another stock or timeframe.")
-        else:
-            df = df.between_time("09:15", "15:30")   
-            df = df.dropna().copy()
-            df.index = df.index.tz_localize(None)  # Remove timezone for compatibility
-            st.success(f"✅ Loaded {len(df)} rows of data.")
-            st.dataframe(df.tail())  # Show last few rows
-            st.write(df.columns)
-            #st.write(df.index)
-            #st.write(type(df.index))    
-            #st.write(df.head()) 
-            # Flatten column names
-            # Flatten column names
-            df.columns = [col[0] if isinstance(col, tuple) else col for col in df.columns]
-
-            # Rename for Plotly
-            df.rename(columns={
-                    'Datetime': 'datetime',
-                    'Open': 'open',
-                    'High': 'high',
-                    'Low': 'low',
-                    'Close': 'close',
-                    'Volume': 'volume'
-            }, inplace=True)
-                
-            st.write(df.columns)
-            # Convert datetime if needed
-            df['datetime'] = pd.to_datetime(df['datetime'])
-    
-
-            
-       
-
-            # You can now call your strategy, chart, or signal logic here
-        plot_candle_only(df)
-
     except Exception as e:
         st.error(f"❌ Error while loading data: {e}")
 
