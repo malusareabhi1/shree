@@ -39,8 +39,8 @@ if run:
     if df.empty:
         st.warning("No data found. Please select a valid stock or time frame.")
     else:
-        df.dropna(inplace=True)
         df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
+        df.dropna(inplace=True)
 
         # Signal: EMA20 Crossover
         df['Signal'] = (df['Close'] > df['EMA20']) & (df['Close'].shift(1) <= df['EMA20'].shift(1))
