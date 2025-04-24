@@ -36,36 +36,22 @@ if run:
     start_date = end_date - timedelta(days=2)
 
     df = yf.download(stock, start=start_date, end=end_date, interval=interval)
-    if df.empty:
-        st.warning("No data found. Please select a valid stock or time frame.")
+
+    if df.empty or 'Close' not in df.columns:
+        st.error("No data found or 'Close' column missing. Please check the stock symbol or interval.")
     else:
+        # Calculate EMA20 only if 'Close' is present
         df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
-        #df.dropna(inplace=True)
-        # Ensure 'Close' column exists first
-        #if 'Close' in df.columns:
-            #df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
-            
-            if 'EMA20' in df.columns:
-                df = df.dropna(subset=['EMA20'])  # Safe dropna
-                df['Signal'] = (df['Close'] > df['EMA20']) & (df['Close'].shift(1) <= df['EMA20'].shift(1))
-                st.success("Signal column added.")
-            else:
-                st.error("'EMA20' column not created.")
-        else:
-            st.error("'Close' column is missing in the DataFrame. Check your CSV or data source.")
+        
+        # Drop rows with NaN in EMA20 (first 19 rows will be NaN)
+        df.dropna(subset=['EMA20'], inplace=True)
 
-        # Signal: EMA20 Crossover
-        #df['Signal'] = (df['Close'] > df['EMA20']) & (df['Close'].shift(1) <= df['EMA20'].shift(1))
-        # Ensure required column exists
-        if 'Close' in df.columns:
-            df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
-            df.dropna(subset=['EMA20'], inplace=True)
-            df['Signal'] = (df['Close'] > df['EMA20']) & (df['Close'].shift(1) <= df['EMA20'].shift(1))
-            st.success("Signal column added successfully.")
-        else:
-            st.error("Close column not found in DataFrame. Check your CSV or data loading logic.")
+        # Create signal column
+        df['Signal'] = (df['Close'] > df['EMA20']) & (df['Close'].shift(1) <= df['EMA20'].shift(1))
 
-        # Backtest logic
+        st.success("Signal column added successfully.")
+
+        # === Backtesting ===
         trades = []
         capital_remaining = capital
         equity_curve = [capital]
@@ -78,7 +64,6 @@ if run:
                 stop_price = entry_price * (1 - stop_loss / 100)
                 target_price = entry_price * (1 + profit_target / 100)
 
-                # Mock exit after a few bars or target hit
                 exit_index = min(i + 3, len(df) - 1)
                 exit_price = df['Close'].iloc[exit_index]
                 exit_time = df.index[exit_index]
@@ -100,13 +85,13 @@ if run:
                 })
                 daily_trades += 1
 
-        # Show data and signals
+        # === Display ===
         st.markdown("### 🔍 Raw Data & Signal")
         st.dataframe(df.tail(20))
 
         st.markdown("### 📉 Chart with Signals")
-
         fig = go.Figure()
+
         if chart_type == "Candlestick":
             fig.add_trace(go.Candlestick(
                 x=df.index,
@@ -120,7 +105,7 @@ if run:
             fig.add_trace(go.Scatter(x=df.index, y=df['Close'], name='Close', line=dict(color='blue')))
 
         fig.add_trace(go.Scatter(x=df.index, y=df['EMA20'], name='EMA20', line=dict(color='orange')))
-        
+
         signal_points = df[df['Signal']]
         fig.add_trace(go.Scatter(
             x=signal_points.index,
@@ -133,13 +118,11 @@ if run:
         fig.update_layout(template="plotly_dark", height=600, xaxis_rangeslider_visible=False)
         st.plotly_chart(fig, use_container_width=True)
 
-        # Trade Log
         st.markdown("### 💼 Trade Log")
         if trades:
             st.dataframe(pd.DataFrame(trades))
         else:
             st.info("No trades generated in the selected time frame.")
 
-        # Equity Curve
         st.markdown("### 📈 Equity Curve")
         st.line_chart(equity_curve)
