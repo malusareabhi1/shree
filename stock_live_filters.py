@@ -124,8 +124,25 @@ if run_strategy:
             df.index = df.index.tz_localize(None)  # Remove timezone for compatibility
             st.success(f"✅ Loaded {len(df)} rows of data.")
             st.dataframe(df.tail())  # Show last few rows
-            st.write(df.columns)
-            st.write(df.head())        
+            #st.write(df.columns)
+            #st.write(df.head()) 
+            # Flatten column names
+            # Flatten column names
+            df.columns = [col[0] if isinstance(col, tuple) else col for col in df.columns]
+
+            # Rename for Plotly
+            df.rename(columns={
+                    'Datetime': 'datetime',
+                    'Open': 'open',
+                    'High': 'high',
+                    'Low': 'low',
+                    'Close': 'close',
+                    'Volume': 'volume'
+            }, inplace=True)
+
+            # Convert datetime if needed
+            df['datetime'] = pd.to_datetime(df['datetime'])
+    
 
             
        
