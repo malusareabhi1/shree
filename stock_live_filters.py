@@ -6,6 +6,9 @@ import time
 import requests
 import datetime
 from dotenv import load_dotenv
+# ─── PAGE CONFIG ──────────────────────────────────────────────────────────────
+st.set_page_config(page_title="📈 Nifty EMA20 Breakout", layout="wide")
+st.title("📊 Nifty 5-min EMA20 + Volume Breakout Monitor")
 
 # ─── LOAD ENVIRONMENT VARIABLES ───────────────────────────────────────────────
 load_dotenv()
@@ -40,9 +43,6 @@ def send_telegram(msg: str):
     except Exception as e:
         st.error(f"Telegram Error: {e}")
 
-# ─── PAGE CONFIG ──────────────────────────────────────────────────────────────
-st.set_page_config(page_title="📈 Nifty EMA20 Breakout", layout="wide")
-st.title("📊 Nifty 5-min EMA20 + Volume Breakout Monitor")
 
 # ─── STRATEGY TEST STARTED ─────────────────────────────────────────────────────
 start_msg = "🟢 Strategy Test Started"
