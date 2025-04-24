@@ -539,6 +539,9 @@ elif selected == "Doctor Strategy":
             
                     # Display the trade log
                     st.dataframe(trade_log)
+
+                    # Sample multiple trade logs
+                    multiple_trade_logs = [trade_log_df1, trade_log_df2, trade_log_df3]
             
                     # CSV download button for trades
                     for i, df in enumerate(multiple_trade_logs):
