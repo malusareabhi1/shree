@@ -600,10 +600,10 @@ elif selected == "Doctor Strategy":
             # Display the trade log
              # Display the chart
             st.subheader("Trade Log ")
-            st.dataframe(trade_log)
+            st.dataframe(trade)
 
             # Create a DataFrame
-            trade_log_df = pd.DataFrame(trade_log)
+            trade_log_df = pd.DataFrame(trade)
             
             # Ensure the CSV string is generated correctly
             csv = trade_log_df.to_csv(index=False)  # `csv` should hold the CSV data as a string
