@@ -436,7 +436,9 @@ elif selected == "Doctor Strategy":
                         df = df.sort_values('Date').reset_index(drop=True)
                         
                         # Find closest index to entry_time
-                        entry_idx = df['Date'].searchsorted(entry_time)
+                        #entry_idx = df['Date'].searchsorted(entry_time)
+                        entry_time = pd.to_datetime(trade['Entry_Time']).tz_convert('Asia/Kolkata') if pd.to_datetime(trade['Entry_Time']).tzinfo else pd.to_datetime(trade['Entry_Time']).tz_localize('Asia/Kolkata')
+
                         
                         for idx in range(entry_idx + 1, len(df)):
                             current_time = df.at[idx, 'Date']
