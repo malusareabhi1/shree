@@ -124,8 +124,8 @@ if run_strategy:
             df.index = df.index.tz_localize(None)  # Remove timezone for compatibility
             st.success(f"✅ Loaded {len(df)} rows of data.")
             st.dataframe(df.tail())  # Show last few rows
-            st.print(df.columns)
-            st.print(df.head())        
+            st.write(df.columns)
+            st.write(df.head())        
 
             
        
