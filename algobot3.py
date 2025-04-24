@@ -337,7 +337,7 @@ elif selected == "Get Stock Data":
             st.error(f"❌ Error fetching data: {e}")
 
 elif selected == "Doctor Strategy":
-    st.title("⚙️ Test Trade Strategy")
+    st.title("⚙️ Test Doctor Trade Strategy")
 
     uploaded_file = st.file_uploader("Upload CSV file", type="csv")
     capital = st.number_input("Capital Allocation (₹)", value=50000)
@@ -348,68 +348,150 @@ elif selected == "Doctor Strategy":
 
         # Convert 'Date' to datetime if it's not already
         df['Date'] = pd.to_datetime(df['Date'])
-        
+
         # Check if the 'Date' column is timezone-aware
         if df['Date'].dt.tz is None:
-            # If naive (no timezone), localize to UTC and convert to Asia/Kolkata
             df['Date'] = df['Date'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
         else:
-            # If already timezone-aware, just convert to Asia/Kolkata
             df['Date'] = df['Date'].dt.tz_convert('Asia/Kolkata')
-        
-        # Now you can filter the times for 9:15 AM to 3:30 PM market hours
-        df = df[df['Date'].dt.time.between(pd.to_datetime('09:15:00').time(), pd.to_datetime('15:30:00').time())]
-        
+
+        # Filter times for 9:30 AM to 1:30 PM market hours
+        df = df[df['Date'].dt.time.between(pd.to_datetime('09:30:00').time(), pd.to_datetime('13:30:00').time())]
+
         # Display the final DataFrame
-        print(df.head())
-       
+        st.write(df.head())
 
         if "Close" not in df.columns:
             st.error("CSV must contain a 'Close' column")
         else:
-            # Example strategy: Buy if Close increases by 5 points, Sell if it decreases by 5 points
-            df['Signal'] = df['Close'].diff().apply(lambda x: 'BUY' if x > 5 else 'SELL' if x < -5 else None)
-            df.dropna(subset=['Signal'], inplace=True)
+            # Step 1: Time Frame (5-minute chart)
+            df = df.resample('5T', on='Date').agg({'Open': 'first', 'High': 'max', 'Low': 'min', 'Close': 'last'})
+            df.dropna(inplace=True)
 
-            # Generate the trade log
-            trade_log = pd.DataFrame({
-                "Date": df['Date'],
-                "Stock": "TEST-STOCK",
-                "Action": df['Signal'],
-                "Price": df['Close'],
-                "Qty": 10,
-                "PnL": df['Close'].diff().fillna(0) * 10  # Example
-            })
+            # Step 2: Center Line (20 SMA) and Bollinger Bands
+            df['SMA_20'] = df['Close'].rolling(window=20).mean()
+            df['Upper_BB'] = df['SMA_20'] + 2 * df['Close'].rolling(window=20).std()
+            df['Lower_BB'] = df['SMA_20'] - 2 * df['Close'].rolling(window=20).std()
 
-            # Calculate net PnL and other stats
-            net_pnl = trade_log["PnL"].sum()
-            win_trades = trade_log[trade_log["PnL"] > 0].shape[0]
-            lose_trades = trade_log[trade_log["PnL"] < 0].shape[0]
-            if not trade_log.empty:
-                last_order = f"{trade_log.iloc[-1]['Action']} - TEST-STOCK - 10 shares @ {trade_log.iloc[-1]['Price']}"
-            else:
-                last_order = "No trades executed yet."
+            # Step 3: Cross and Confirm Closing Above SMA
+            df['Crossed_SMA_Up'] = (df['Close'] > df['SMA_20']) & (df['Close'].shift(1) < df['SMA_20'].shift(1))
 
-            last_order = f"{trade_log.iloc[-1]['Action']} - TEST-STOCK - 10 shares @ {trade_log.iloc[-1]['Price']}"
+            # Step 4: Reference Candle - Next Candle Close Above 20 SMA
+            df['Ref_Candle_Up'] = (df['Close'] > df['SMA_20']) & (df['Close'].shift(1) > df['SMA_20'].shift(1))
 
-            # Store to session state for Account Info
-            st.session_state['net_pnl'] = float(net_pnl)
-            st.session_state['used_capital'] = capital
-            st.session_state['open_positions'] = {"TEST-STOCK": {"Qty": 10, "Avg Price": round(df['Close'].iloc[-1], 2)}}
-            st.session_state['last_order'] = last_order
+            # Step 5: Check IV Condition (only if IV data available)
+            # Note: You should fetch IV data externally (example: using API), this is just a placeholder
+            iv_data = 16  # Placeholder value, replace with actual API fetch for IV
 
-            # Results
-            st.metric("Net PnL", f"₹{net_pnl:.2f}")
-            st.metric("Winning Trades", win_trades)
-            st.metric("Losing Trades", lose_trades)
+            # Step 6: Trade Execution Based on Cross and IV Condition
+            df['Signal'] = None
+            for idx in range(1, len(df)):
+                if df['Ref_Candle_Up'].iloc[idx] and iv_data >= 16:
+                    if df['Close'].iloc[idx] > df['Close'].iloc[idx - 1]:  # Confirm Next Candle Cross
+                        df.at[idx, 'Signal'] = 'BUY'
+
+            # Step 7: Stop Loss Logic (10% below entry price)
+            df['Stop_Loss'] = df['Close'] * 0.90
+
+            # Step 8: Profit Booking and Trailing Stop Loss
+            df['Initial_Stop_Loss'] = df['Close'] * 0.90
+            df['Profit_Target'] = df['Close'] * 1.05
+
+            # For trailing stop loss and profit booking logic
+            trades = []
+            for idx in range(1, len(df)):
+                if df['Signal'].iloc[idx] == 'BUY':
+                    entry_price = df['Close'].iloc[idx]
+                    stop_loss = entry_price * 0.90
+                    profit_target = entry_price * 1.05
+                    trade = {
+                        'Entry_Time': df['Date'].iloc[idx],
+                        'Entry_Price': entry_price,
+                        'Stop_Loss': stop_loss,
+                        'Profit_Target': profit_target,
+                        'Exit_Time': None,
+                        'Exit_Price': None,
+                        'PnL': None,
+                    }
+
+                    # Track the trade for 10-minute exit and trailing logic
+                    trades.append(trade)
+
+                    # Logic for trailing stop loss and profit booking
+                    for trade in trades:
+                        entry_time = trade['Entry_Time']
+                        entry_price = trade['Entry_Price']
+                        stop_loss = trade['Stop_Loss']
+                        profit_target = trade['Profit_Target']
+                        current_stop_loss = stop_loss
+                        current_profit_target = profit_target
+                        trailing_stop_loss_triggered = False
+                        profit_booked = False
+
+                        for idx in range(df[df['Date'] == entry_time].index[0] + 1, len(df)):
+                            current_time = df.at[idx, 'Date']
+                            close_price = df.at[idx, 'Close']
+
+                            if close_price >= current_profit_target and not profit_booked:
+                                trade['Exit_Time'] = current_time
+                                trade['Exit_Price'] = current_profit_target
+                                trade['PnL'] = current_profit_target - entry_price
+                                profit_booked = True
+                                break
+
+                            if close_price >= entry_price * 1.04 and not trailing_stop_loss_triggered:
+                                current_stop_loss = entry_price
+                                trailing_stop_loss_triggered = True
+
+                            if trailing_stop_loss_triggered:
+                                if close_price >= entry_price * 1.10:
+                                    current_stop_loss = entry_price * 1.04
+                                elif close_price >= entry_price * 1.15:
+                                    current_stop_loss = entry_price * 1.11
+                                elif close_price >= entry_price * 1.20:
+                                    trade['Exit_Time'] = current_time
+                                    trade['Exit_Price'] = close_price
+                                    trade['PnL'] = close_price - entry_price
+                                    break
+
+                            if df.at[idx, 'Low'] <= current_stop_loss:
+                                trade['Exit_Time'] = current_time
+                                trade['Exit_Price'] = current_stop_loss
+                                trade['PnL'] = current_stop_loss - entry_price
+                                break
+
+                        # Step 9: Time-Based Exit (after 10 minutes)
+                        if not trade.get('Exit_Time'):
+                            entry_time = pd.to_datetime(trade['Entry_Time'])
+                            for idx in range(df[df['Date'] == entry_time].index[0] + 1, len(df)):
+                                current_time = df.at[idx, 'Date']
+                                if (current_time - entry_time).seconds >= 600:  # 600 seconds = 10 minutes
+                                    trade['Exit_Time'] = current_time
+                                    trade['Exit_Price'] = df.at[idx, 'Close']
+                                    trade['PnL'] = df.at[idx, 'Close'] - entry_price
+                                    break
+
+                        # Step 10: Trading Hours Check
+                        entry_time = pd.to_datetime(trade['Entry_Time'])
+                        trading_start_time = pd.to_datetime(entry_time.date().strftime('%Y-%m-%d') + ' 09:30:00')
+                        trading_end_time = pd.to_datetime(entry_time.date().strftime('%Y-%m-%d') + ' 13:30:00')
+
+                        if entry_time < trading_start_time or entry_time > trading_end_time:
+                            trade['Exit_Time'] = entry_time
+                            trade['Exit_Price'] = "N/A"
+                            trade['PnL'] = "N/A"
+                            trade['Status'] = "Trade Not Allowed"
+                            continue  # Skip further processing
+
+            # Display the trades
+            trade_log = pd.DataFrame(trades)
             st.dataframe(trade_log)
 
-            # CSV download button
+            # CSV download button for trades
             csv = trade_log.to_csv(index=False).encode("utf-8")
             st.download_button("📥 Download Trade Log", data=csv, file_name="trade_log.csv", mime="text/csv")
-            st.session_state['trade_log_df'] = trade_log  # Store trade log in session
 
-            # Create a Candlestick chart
+            # Display chart with trade signals (optional)
             fig = go.Figure(data=[go.Candlestick(
                 x=df['Date'],
                 open=df['Open'],
@@ -419,12 +501,8 @@ elif selected == "Doctor Strategy":
                 increasing_line_color='green',
                 decreasing_line_color='red',
             )])
-            
 
-            # Mark BUY and SELL signals on the chart
             buy_signals = df[df['Signal'] == 'BUY']
-            sell_signals = df[df['Signal'] == 'SELL']
-
             fig.add_trace(go.Scatter(
                 x=buy_signals['Date'],
                 y=buy_signals['Close'],
@@ -433,40 +511,14 @@ elif selected == "Doctor Strategy":
                 marker=dict(symbol='triangle-up', color='green', size=12)
             ))
 
-            fig.add_trace(go.Scatter(
-                x=sell_signals['Date'],
-                y=sell_signals['Close'],
-                mode='markers',
-                name='Sell Signal',
-                marker=dict(symbol='triangle-down', color='red', size=12)
-            ))
-
-            # Update the chart layout
             fig.update_layout(
-                #title=f'{stock} Candlestick Chart with Trade Entries and Exits',
-                #title=f' Candlestick Chart with Trade Entries and Exits',
                 xaxis_title='Date',
                 yaxis_title='Price (₹)',
-                xaxis_rangeslider_visible=False,  # Hide the range slider
-                template='plotly_dark',  # Use a dark template
-                hovermode='x unified',  # Hover across x-axis to get details
+                xaxis_rangeslider_visible=False,
+                template='plotly_dark',
+                hovermode='x unified',
             )
-
-            # Display the interactive candlestick chart
             st.plotly_chart(fig)
-            # Convert 'BUY'/'SELL' signals to numeric form for backtesting compatibility
-            df['Signal_Code'] = df['Signal'].map({'BUY': 1, 'SELL': -1})
-            
-            # Save the DataFrame with signal for backtest/papertrade usage
-            csv_with_signal = df[["Date", "Open", "High", "Low", "Close", "Signal_Code"]]
-            csv_data = csv_with_signal.rename(columns={"Signal_Code": "Signal"}).to_csv(index=False).encode("utf-8")
-            
-            st.download_button(
-                label="📥 Download CSV with Signals",
-                data=csv_data,
-                file_name="signal_output.csv",
-                mime="text/csv"
-            )
 
   
     
