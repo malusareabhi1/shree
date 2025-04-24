@@ -58,6 +58,22 @@ def send_telegram(msg: str):
 #import datetime
 #import streamlit as st
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+if run_strategy:
+    with st.spinner("Fetching data..."):
+        end_date = datetime.datetime.now()
+        start_date = end_date - datetime.timedelta(days=2)
+
+        try:
+            df = yf.download(stock, start=start_date, end=end_date, interval=frame_interval, progress=False)
+
+            if df.empty:
+                st.warning("No data found for the selected stock and timeframe.")
+            else:
+                st.success(f"Fetched {len(df)} rows of data for {stock}.")
+                st.dataframe(df.tail(10))  # Show last 10 rows
+
+        except Exception as e:
+            st.error(f"Data fetch error: {e}")
 
 
    
