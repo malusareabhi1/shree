@@ -81,7 +81,11 @@ if run_strategy:
 st.subheader(f"{stock} - {frame_interval} Chart")
 st.subheader("🕯️  5-Min Candle Chart with 20 EMA")
 #df_today=df
-today = datetime.now().astimezone(df.index.tz).date()
+if df.index.tz is not None:
+    today = datetime.datetime.now().astimezone(df.index.tz).date()
+else:
+    today = datetime.datetime.now().date()
+#today = datetime.now().astimezone(df.index.tz).date()
 df_today = df[df.index.date == today]
     
     # Calculate 20 EMA
