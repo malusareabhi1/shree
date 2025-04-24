@@ -425,7 +425,7 @@ elif selected == "Doctor Strategy":
                         'Profit_Target': profit_target,
                         'Exit_Time': None,
                         'Exit_Price': None,
-                        'Brokerage'     : 20    # ₹20 per trade
+                        'Brokerage'     : 20 ,   # ₹20 per trade
                         'PnL': None,
                         'Exit_Reason': None  # Add the Exit_Reason field
                     }
