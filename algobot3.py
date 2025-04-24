@@ -565,6 +565,7 @@ elif selected == "Doctor Strategy":
                 name='Buy Signal',
                 marker=dict(symbol='triangle-up', color='green', size=12)
             ))
+            st.subheader("Daily Chart")
 
             fig.update_layout(
                 xaxis_title='Date',
