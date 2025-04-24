@@ -595,10 +595,11 @@ elif selected == "Doctor Strategy":
              # Display the chart
             st.subheader("Trade Log ")
             st.dataframe(trade_log)
+            
             # Download Button
             st.download_button(
                 label="📥 Download Trade Log",
-                data=csv,
+                data=csv,  # Make sure `csv` is correctly defined here
                 file_name="trade_log.csv",
                 mime="text/csv",
                 key="download_button"
