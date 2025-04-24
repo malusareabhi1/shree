@@ -465,8 +465,9 @@ elif selected == "Doctor Strategy":
                             if close_price >= current_profit_target and not profit_booked:
                                 trade['Exit_Time'] = current_time
                                 trade['Exit_Price'] = current_profit_target
-                                trade['PnL_After_Brokerage'] = trade['PnL'] - trade['Brokerage']
+                               
                                 trade['PnL'] = current_profit_target - entry_price
+                                 trade['PnL_After_Brokerage'] = trade['PnL'] - trade['Brokerage']
                                 trade['Exit_Reason'] = 'Profit Booking'  # Add exit reason
                                 profit_booked = True
                                 break
@@ -485,6 +486,7 @@ elif selected == "Doctor Strategy":
                                     trade['Exit_Time'] = current_time
                                     trade['Exit_Price'] = close_price
                                     trade['PnL'] = close_price - entry_price
+                                    trade['PnL_After_Brokerage'] = trade['PnL'] - trade['Brokerage']
                                     trade['Exit_Reason'] = 'Profit Target Reached'  # Exit reason
                                     break
             
@@ -493,6 +495,7 @@ elif selected == "Doctor Strategy":
                                 trade['Exit_Time'] = current_time
                                 trade['Exit_Price'] = current_stop_loss
                                 trade['PnL'] = current_stop_loss - entry_price
+                                 trade['PnL_After_Brokerage'] = trade['PnL'] - trade['Brokerage']
                                 trade['Exit_Reason'] = 'Stop Loss Hit'  # Exit reason
                                 break
             
