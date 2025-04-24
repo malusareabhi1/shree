@@ -488,6 +488,8 @@ elif selected == "Doctor Strategy":
 
                         # Step 9: Time-Based Exit (after 10 minutes)
                         if not trade.get('Exit_Time'):
+                            # Ensure 'Date' column is in datetime format
+                            df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
                            # # Convert entry_time to datetime if not already
                             entry_time = pd.to_datetime(trade['Entry_Time'])
                             
