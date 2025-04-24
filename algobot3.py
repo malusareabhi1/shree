@@ -600,14 +600,14 @@ elif selected == "Doctor Strategy":
             # Display the trade log
              # Display the chart
             st.subheader("Trade Log ")
-            st.dataframe(trade)
+            st.dataframe(trades)
 
             # Create a DataFrame
             trade_log_df = pd.DataFrame(trades)
             
             # Ensure the CSV string is generated correctly
             csv = trade_log_df.to_csv(index=False)  # `csv` should hold the CSV data as a string
-            print(csv)  # This will print the CSV content in the console for debugging
+            #print(csv)  # This will print the CSV content in the console for debugging
             
             # Download Button
             st.download_button(
