@@ -80,16 +80,16 @@ st.subheader(f"{stock} - {frame_interval} Chart")
 st.subheader("🕯️  5-Min Candle Chart with 20 EMA")
     
     # Plot the candlestick chart with 20 EMA
-    fig = go.Figure(data=[
+fig = go.Figure(data=[
         go.Candlestick(
-            x=df_today.index,
-            open=df_today["Open"],
-            high=df_today["High"],
-            low=df_today["Low"],
-            close=df_today["Close"],
-            increasing_line_color="green",
-            decreasing_line_color="red",
-            name="Candles"
+        x=df_today.index,
+        open=df_today["Open"],
+        high=df_today["High"],
+        low=df_today["Low"],
+        close=df_today["Close"],
+        increasing_line_color="green",
+        decreasing_line_color="red",
+        name="Candles"
         ),
         go.Scatter(
             x=df_today.index,
@@ -100,15 +100,14 @@ st.subheader("🕯️  5-Min Candle Chart with 20 EMA")
         )
     ])
     
-    fig.update_layout(
-        xaxis_rangeslider_visible=False,
-        xaxis_title="Time",
-        yaxis_title="Price (₹)",
-        template="plotly_dark",
-        height=500
-    )
-    
-    st.plotly_chart(fig, use_container_width=True)
+ fig.update_layout(
+         xaxis_rangeslider_visible=False,
+         xaxis_title="Time",
+         yaxis_title="Price (₹)",
+         template="plotly_dark",
+         height=500
+     )
+st.plotly_chart(fig, use_container_width=True)
 
 
             
