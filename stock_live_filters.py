@@ -70,18 +70,7 @@ if run_strategy:
     }
     yf_interval = interval_map.get(frame_interval, "5m")
 
-    try:
-        # Fetch last 2 days of selected intraday frame
-         
-
-
-
-            
-        
-
-    except Exception as e:
-        st.error(f"❌ Error while loading data: {e}")
-
+   
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
