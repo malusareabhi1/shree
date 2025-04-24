@@ -80,6 +80,7 @@ if run_strategy:
 # Plot chart
 st.subheader(f"{stock} - {frame_interval} Chart")
 st.subheader("🕯️  5-Min Candle Chart with 20 EMA")
+df_today=df
     
     # Plot the candlestick chart with 20 EMA
 fig = go.Figure(data=[
