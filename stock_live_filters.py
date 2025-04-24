@@ -138,6 +138,14 @@ if run_strategy:
             progress=False
         )
 
+         if df.index.tz is None:
+            df = df.tz_localize("UTC").tz_convert("Asia/Kolkata")
+        else:
+            df = df.tz_convert("Asia/Kolkata")
+                
+    
+            df = df.between_time("09:15", "15:30")    
+
         if df.empty:
             st.error("⚠️ No data found. Please try another stock or timeframe.")
         else:
@@ -147,13 +155,7 @@ if run_strategy:
             st.dataframe(df.tail())  # Show last few rows
 
             
-        if df.index.tz is None:
-            df = df.tz_localize("UTC").tz_convert("Asia/Kolkata")
-        else:
-            df = df.tz_convert("Asia/Kolkata")
-                
-    
-            df = df.between_time("09:15", "15:30")
+       
 
             # You can now call your strategy, chart, or signal logic here
         plot_candlestick_chart(df, stock)
