@@ -144,7 +144,8 @@ if run_strategy:
                     'Close': 'close',
                     'Volume': 'volume'
             }, inplace=True)
-
+                
+            st.write(df.columns)
             # Convert datetime if needed
             df['datetime'] = pd.to_datetime(df['datetime'])
     
