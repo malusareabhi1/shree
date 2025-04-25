@@ -110,63 +110,63 @@ if selected == "Live Algo Trading":
 
     # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
     def check_doctor_strategy_entry(df, current_iv):
-    """
-    Checks for a valid entry signal using Doctor Strategy conditions.
+        """
+        Checks for a valid entry signal using Doctor Strategy conditions.
+        
+        Parameters:
+        - df: DataFrame with live 5-min OHLC data (should be at least 5-10 recent candles)
+        - current_iv: Live Implied Volatility (%) of the index
     
-    Parameters:
-    - df: DataFrame with live 5-min OHLC data (should be at least 5-10 recent candles)
-    - current_iv: Live Implied Volatility (%) of the index
-
-    Returns:
-    - signal: Dict with 'signal' (True/False), 'entry_price', 'sl', 'target', 'reference_candle', 'entry_time'
-    """
-    df = df.copy()
-    df['20sma'] = df['close'].rolling(window=20).mean()
-
-    # Ensure we have at least 25 candles to get a clean 20 SMA
-    if len(df) < 25:
+        Returns:
+        - signal: Dict with 'signal' (True/False), 'entry_price', 'sl', 'target', 'reference_candle', 'entry_time'
+        """
+        df = df.copy()
+        df['20sma'] = df['close'].rolling(window=20).mean()
+    
+        # Ensure we have at least 25 candles to get a clean 20 SMA
+        if len(df) < 25:
+            return {'signal': False}
+    
+        # Step 10: Only allow trades between 9:30 and 13:30
+        now = datetime.now().time()
+        if not (time(9, 30) <= now <= time(13, 30)):
+            return {'signal': False}
+    
+        # Last 4 candles needed for reference
+        c3 = df.iloc[-3]
+        c2 = df.iloc[-2]
+        c1 = df.iloc[-1]
+    
+        # Step 2-3: C3 crosses above 20 SMA and closes above it
+        cross_condition = (c3['close'] > c3['20sma']) and (c3['open'] < c3['20sma'])
+    
+        # Step 4: C2 closes above 20 SMA and does not touch it
+        c2_above_sma = (c2['low'] > c2['20sma'])
+    
+        if not (cross_condition and c2_above_sma):
+            return {'signal': False}
+    
+        # Step 5: IV filter
+        if current_iv < 16:
+            return {'signal': False}
+    
+        # Step 6: C1 crosses above max(c2.close, c3.high)
+        breakout_level = max(c2['close'], c3['high'])
+        if c1['close'] > breakout_level and c1['low'] < breakout_level:
+            entry_price = c1['close']
+            sl = round(entry_price * 0.90, 2)  # 10% SL
+            target = round(entry_price * 1.05, 2)  # Initial 5% target
+    
+            return {
+                'signal': True,
+                'entry_price': entry_price,
+                'sl': sl,
+                'target': target,
+                'reference_candle': c2.to_dict(),
+                'entry_time': datetime.now()
+            }
+    
         return {'signal': False}
-
-    # Step 10: Only allow trades between 9:30 and 13:30
-    now = datetime.now().time()
-    if not (time(9, 30) <= now <= time(13, 30)):
-        return {'signal': False}
-
-    # Last 4 candles needed for reference
-    c3 = df.iloc[-3]
-    c2 = df.iloc[-2]
-    c1 = df.iloc[-1]
-
-    # Step 2-3: C3 crosses above 20 SMA and closes above it
-    cross_condition = (c3['close'] > c3['20sma']) and (c3['open'] < c3['20sma'])
-
-    # Step 4: C2 closes above 20 SMA and does not touch it
-    c2_above_sma = (c2['low'] > c2['20sma'])
-
-    if not (cross_condition and c2_above_sma):
-        return {'signal': False}
-
-    # Step 5: IV filter
-    if current_iv < 16:
-        return {'signal': False}
-
-    # Step 6: C1 crosses above max(c2.close, c3.high)
-    breakout_level = max(c2['close'], c3['high'])
-    if c1['close'] > breakout_level and c1['low'] < breakout_level:
-        entry_price = c1['close']
-        sl = round(entry_price * 0.90, 2)  # 10% SL
-        target = round(entry_price * 1.05, 2)  # Initial 5% target
-
-        return {
-            'signal': True,
-            'entry_price': entry_price,
-            'sl': sl,
-            'target': target,
-            'reference_candle': c2.to_dict(),
-            'entry_time': datetime.now()
-        }
-
-    return {'signal': False}
   
 
     
