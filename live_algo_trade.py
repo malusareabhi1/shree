@@ -67,7 +67,9 @@ if selected == "Live Algo Trading":
     @st.cache_data(ttl=60)
     def fetch_data(ticker: str) -> pd.DataFrame:
         df = yf.download(ticker, interval="5m", period="5d", progress=False)
+        st.write(df.head())
         df.index = pd.to_datetime(df.index)
+        st.write(df.head())
     
         if df.index.tz is None:
             df = df.tz_localize("UTC").tz_convert("Asia/Kolkata")
