@@ -109,6 +109,7 @@ if selected == "Live Algo Trading":
 
 
     # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
+    st.write((df.columns))
     def check_doctor_strategy_entry(df, current_iv):
         """
         Checks for a valid entry signal using Doctor Strategy conditions.
