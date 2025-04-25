@@ -427,6 +427,7 @@ elif selected == "Doctor Strategy":
                         'Exit_Price': None,
                         'Brokerage'     : 20 ,   # ₹20 per trade
                         'PnL': None,
+                        'Turnover':None,
                         'Exit_Reason': None  # Add the Exit_Reason field
                     }
             
@@ -465,7 +466,7 @@ elif selected == "Doctor Strategy":
                             if close_price >= current_profit_target and not profit_booked:
                                 trade['Exit_Time'] = current_time
                                 trade['Exit_Price'] = current_profit_target
-                               
+                                trade['Turnover'] = trade['Exit_Price'] + trade['Entry_Price']
                                 trade['PnL'] = current_profit_target - entry_price
                                 trade['PnL_After_Brokerage'] = trade['PnL'] - trade['Brokerage']
                                 trade['Exit_Reason'] = 'Profit Booking'  # Add exit reason
@@ -486,6 +487,7 @@ elif selected == "Doctor Strategy":
                                     trade['Exit_Time'] = current_time
                                     trade['Exit_Price'] = close_price
                                     trade['PnL'] = close_price - entry_price
+                                    trade['Turnover'] = trade['Exit_Price'] + trade['Entry_Price']
                                     trade['PnL_After_Brokerage'] = trade['PnL'] - trade['Brokerage']
                                     trade['Exit_Reason'] = 'Profit Target Reached'  # Exit reason
                                     break
@@ -495,6 +497,7 @@ elif selected == "Doctor Strategy":
                                 trade['Exit_Time'] = current_time
                                 trade['Exit_Price'] = current_stop_loss
                                 trade['PnL'] = current_stop_loss - entry_price
+                                trade['Turnover'] = trade['Exit_Price'] + trade['Entry_Price']
                                 trade['PnL_After_Brokerage'] = trade['PnL'] - trade['Brokerage']
                                 trade['Exit_Reason'] = 'Stop Loss Hit'  # Exit reason
                                 break
@@ -537,6 +540,7 @@ elif selected == "Doctor Strategy":
                                     trade['Exit_Price'] = df.at[idx, 'Close']
                                     trade['PnL'] = df.at[idx, 'Close'] - entry_price
                                     trade['PnL_After_Brokerage'] = trade['PnL'] - trade['Brokerage']
+                                    trade['Turnover'] = trade['Exit_Price'] + trade['Entry_Price']
                                     trade['Exit_Reason'] = 'Time-Based Exit'  # Exit reason
                                     break
                     # 2️⃣ If you didn't compute PnL_After_Brokerage per-trade, do it now:
