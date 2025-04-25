@@ -37,13 +37,12 @@ if run:
 
     df = yf.download(stock, start=start_date, end=end_date, interval=interval)
 
-    if df is not None and not df.empty and 'Close' in df.columns and not df['Close'].isnull().all():
+    if df is not None and not df.empty and 'Close' in df.columns and df['Close'].notnull().all():
         df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
         df.dropna(subset=['EMA20'], inplace=True)
 
         # Signal Logic
         df['Signal'] = (df['Close'] > df['EMA20']) & (df['Close'].shift(1) <= df['EMA20'].shift(1))
-        st.success("Signal column added successfully.")
 
         # === Backtesting ===
         trades = []
@@ -79,7 +78,7 @@ if run:
                 })
                 daily_trades += 1
 
-        # === Display ===
+        # === Display Results ===
         st.markdown("### 🔍 Raw Data & Signal")
         st.dataframe(df.tail(20))
 
@@ -120,6 +119,5 @@ if run:
 
         st.markdown("### 📈 Equity Curve")
         st.line_chart(equity_curve)
-
     else:
-        st.warning("DataFrame is empty or missing 'Close' values.")
+        st.warning("No valid data fetched. Please try different timeframe or stock.")
