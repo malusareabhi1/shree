@@ -38,7 +38,7 @@ st.sidebar.success("🟢 Strategy Status: Active")
 st.sidebar.markdown("⏱️ Updates every 30 seconds")
 
 # Use selected symbol in main code
-symbol = symbol_choice
+#symbol = symbol_choice
 
 if selected == "Live Trading":
     st.title("🤖 Live Algo Trading (Paper/Real Mode) Hello ")
