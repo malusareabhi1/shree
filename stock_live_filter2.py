@@ -39,8 +39,9 @@ if run:
 
     # ✅ Check if 'Close' column exists before EMA calculation
    if df is not None and not df.empty and 'Close' in df.columns and not df['Close'].isnull().all():
-        df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()# proceed with logic
-   else:
+       df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()# proceed with logic
+
+ else:
         st.warning("DataFrame is empty or missing 'Close' values.")
            
     
