@@ -74,10 +74,14 @@ if selected == "Live Algo Trading":
         else:
             df = df.tz_convert("Asia/Kolkata")
 
+        st.write(df.columns)  # To check the columns of the DataFrame
+
         # Ensure 'Date' is datetime for x-axis
         df['Date'] = pd.to_datetime(df['Date'])
         df.rename(columns={'timestamp': 'Date'}, inplace=True)  # Adjust 'timestamp' if it's the correct column
 
+        df.rename(columns={'timestamp': 'Date'}, inplace=True)
+        st.write(df.columns)  # To check the columns of the DataFrame
     
         df = df.between_time("09:15", "15:30")
     
