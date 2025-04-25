@@ -108,7 +108,6 @@ if selected == "Live Algo Trading":
         send_telegram(market_close_msg)
 
 
-
     # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
    # Initialize
 # Initialize the KiteConnect object with your API key
