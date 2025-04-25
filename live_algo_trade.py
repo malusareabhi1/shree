@@ -89,6 +89,7 @@ if selected == "Live Algo Trading":
     prev = df.iloc[-2]
 
     st.write(df.dtypes)
+    st.write(df.head())
 
     
     # ─── MARKET OPEN/Close MESSAGE ────────────────────────────────────────────────
@@ -140,7 +141,7 @@ if selected == "Live Algo Trading":
         st.write(f"Current time: {now}")
     
         # Display the last 25 rows
-        st.dataframe(df.tail(25))
+        #st.dataframe(df.tail(25))
     
         # Check trading time range (9:30 to 13:30)
         if not (time(9, 30) <= now <= time(13, 30)):
