@@ -179,8 +179,8 @@ if selected == "Live Algo Trading":
     st.plotly_chart(fig, use_container_width=True)
     
     #---------------------------------------------------------------------------------------
-    st.subheader("📈 Price vs EMA20")
-    st.line_chart(df[["Close", "EMA20"]])
+    #st.subheader("📈 Price vs EMA20")
+    #st.line_chart(df[["Close", "EMA20"]])
     
     # ─── STRATEGY TEST STOPPED ────────────────────────────────────────────────────
     stop_msg = "🔴 Strategy Test Ended (for current run)"
