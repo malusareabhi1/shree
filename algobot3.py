@@ -638,6 +638,10 @@ elif selected == "Doctor Strategy":
             
             avg_win   = wins['PnL_After_Brokerage'].mean()  if num_wins   else 0
             avg_loss  = losses['PnL_After_Brokerage'].mean() if num_losses else 0
+
+            # Total Turnover & Brokerage
+            total_turnover = trade_log_df['Turnover'].sum()
+            total_brokerage = trade_log_df['Brokerage'].sum()
             
             # Expectancy per trade
             expectancy = (win_rate/100) * avg_win + (1 - win_rate/100) * avg_loss
@@ -658,7 +662,12 @@ elif selected == "Doctor Strategy":
             c7.metric("Avg. Win",   f"₹{avg_win:.2f}")
             c8.metric("Avg. Loss",  f"₹{avg_loss:.2f}")
             c9.metric("Expectancy", f"₹{expectancy:.2f}")
-            
+
+            c10, c11, c12 = st.columns(3)
+            c10.metric("Total Turnover",   f"₹{total_turnover:.2f}")
+            c11.metric("Total Brokerage",  f"₹{total_brokerage:.2f}")
+            c12.metric("Expectancy", f"₹{expectancy:.2f}")
+        
             # 3️⃣ (Optional) Equity curve
             st.markdown("### 📈 Equity Curve")
             st.line_chart(trade_log_df['PnL_After_Brokerage'].cumsum())
