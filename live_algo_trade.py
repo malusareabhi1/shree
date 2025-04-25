@@ -128,49 +128,50 @@ if selected == "Live Algo Trading":
         send_telegram(msg)
 
     #-----TREND LOGIC____________________________________________________________
+   
+
+    def get_trend(df):
+                data=df
+                data['EMA20'] = ta.trend.ema_indicator(data['Close'], window=20).ema_indicator()
+                data['EMA50'] = ta.trend.ema_indicator(data['Close'], window=50).ema_indicator()
+                latest = data.iloc[-1]
+                if latest['EMA20'] > latest['EMA50']:
+                    return "UP"
+                elif latest['EMA20'] < latest['EMA50']:
+                    return "DOWN"
+                else:
+                    return "SIDEWAYS"
+        
+        def fetch_nifty_trends():
+            symbol = "^NSEI"  # NIFTY 50 Index on Yahoo Finance
+        
+            trends = {}
+            intervals = {
+                "5min": ("5m", "7d"),
+                "15min": ("15m", "30d"),
+                "daily": ("1d", "3mo"),
+                "weekly": ("1wk", "1y"),
+                "monthly": ("1mo", "5y")
+            }
+        
+            for label, (interval, period) in intervals.items():
+                data = yf.download(symbol, interval=interval, period=period, progress=False)
+                if not data.empty:
+                    trend = get_trend(data)
+                    trends[label] = trend
+                else:
+                    trends[label] = "No Data"
+        
+            return trends
+        
+        # Run it
+        trends = fetch_nifty_trends()
+        for tf, trend in trends.items():
+            print(f"{tf.upper()} Trend ➜ {trend}")
+
 
     
-
-
-    
-def get_trend(df):
-        data=df
-        data['EMA20'] = ta.trend.ema_indicator(data['Close'], window=20).ema_indicator()
-        data['EMA50'] = ta.trend.ema_indicator(data['Close'], window=50).ema_indicator()
-        latest = data.iloc[-1]
-        if latest['EMA20'] > latest['EMA50']:
-            return "UP"
-        elif latest['EMA20'] < latest['EMA50']:
-            return "DOWN"
-        else:
-            return "SIDEWAYS"
-
-def fetch_nifty_trends():
-    symbol = "^NSEI"  # NIFTY 50 Index on Yahoo Finance
-
-    trends = {}
-    intervals = {
-        "5min": ("5m", "7d"),
-        "15min": ("15m", "30d"),
-        "daily": ("1d", "3mo"),
-        "weekly": ("1wk", "1y"),
-        "monthly": ("1mo", "5y")
-    }
-
-    for label, (interval, period) in intervals.items():
-        data = yf.download(symbol, interval=interval, period=period, progress=False)
-        if not data.empty:
-            trend = get_trend(data)
-            trends[label] = trend
-        else:
-            trends[label] = "No Data"
-
-    return trends
-
-# Run it
-trends = fetch_nifty_trends()
-for tf, trend in trends.items():
-    print(f"{tf.upper()} Trend ➜ {trend}")
+        
 
     
     
