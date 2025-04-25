@@ -234,7 +234,8 @@ if selected == "Live Algo Trading":
     # Plot the candlestick chart with 20 EMA
     fig = go.Figure(data=[
         go.Candlestick(
-            x=df_today.index,
+            #x=df_today.index,
+            x=df['Date'],  # Time series for x-axis
             open=df_today["Open"],
             high=df_today["High"],
             low=df_today["Low"],
