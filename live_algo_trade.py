@@ -133,7 +133,7 @@ if selected == "Live Algo Trading":
 
 
     
-    def get_trend(df):
+def get_trend(df):
         data=df
         data['EMA20'] = ta.trend.ema_indicator(data['Close'], window=20).ema_indicator()
         data['EMA50'] = ta.trend.ema_indicator(data['Close'], window=50).ema_indicator()
