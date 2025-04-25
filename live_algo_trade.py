@@ -88,7 +88,7 @@ if selected == "Live Algo Trading":
     latest = df.iloc[-1]
     prev = df.iloc[-2]
 
-    st.write(df.dtypes)
+    #st.write(df.dtypes)
     st.write(df.head())
 
     
