@@ -11,7 +11,7 @@ from kiteconnect import KiteConnect
 import time
 import threading
 import datetime
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta,time
 import os
 import pytz
 import ta  # Required for trend calculation (ensure installed)
