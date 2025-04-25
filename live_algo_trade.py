@@ -110,17 +110,11 @@ if selected == "Live Algo Trading":
 
 
     # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
-    signal = "No Signal"
-    if (prev["Close"] < prev["EMA20"]) and (latest["Close"] > prev["EMA20"]) and (latest["Volume"] > latest["VMA20"]):
-        signal = "BUY"
-        entry_price = round(latest["Close"], 2)
-        msg = (
-            f"📥 <b>LIVE BUY SIGNAL</b>\n"
-            f"<b>Symbol:</b> {symbol}\n"
-            f"<b>Entry:</b> ₹{entry_price}\n"
-            f"<b>Volume:</b> {latest['Volume']:,}\n"
-            f"<b>Time:</b> {latest.name.strftime('%H:%M')}"
-        )
+   
+
+
+
+        
         send_telegram(msg)
 
     
