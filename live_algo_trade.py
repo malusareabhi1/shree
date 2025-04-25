@@ -120,7 +120,7 @@ if selected == "Live Algo Trading":
     col1, col2, col3 = st.columns(3)
     col1.metric("🔹 Close", f"₹{latest['Close']:.2f}")
     col2.metric("🔸 EMA20", f"₹{latest['EMA20']:.2f}")
-    col3.metric("📌 Signal", signal)
+    #col3.metric("📌 Signal", signal)
     #---------------------------------------------------------------------------------------
     import plotly.graph_objects as go
     from datetime import datetime
