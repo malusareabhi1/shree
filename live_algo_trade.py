@@ -88,7 +88,7 @@ if selected == "Live Algo Trading":
     latest = df.iloc[-1]
     prev = df.iloc[-2]
     
-    # ─── MARKET OPEN/CLOSE MESSAGE ────────────────────────────────────────────────
+    # ─── MARKET OPEN/Close MESSAGE ────────────────────────────────────────────────
     now = latest.name
     if now.hour == 9 and now.minute == 15:
         market_msg = "📈 Market Opened at 09:15 But My Doctor Stratergy will Start 09:30 "
@@ -96,16 +96,16 @@ if selected == "Live Algo Trading":
         send_telegram(market_msg)
 
     if now.hour == 14 and now.minute == 30:
-        market_close_msg = "📉 Doctor Stratergy will  not take Trade after 02:30"
-        st.warning(market_close_msg)
-        send_telegram(market_close_msg)
+        market_Close_msg = "📉 Doctor Stratergy will  not take Trade after 02:30"
+        st.warning(market_Close_msg)
+        send_telegram(market_Close_msg)
 
      
 
     if now.hour == 15 and now.minute == 30:
-        market_close_msg = "📉 Market Closed at 15:30 Bye ! See you Tomorrow 9:30"
-        st.warning(market_close_msg)
-        send_telegram(market_close_msg)
+        market_Close_msg = "📉 Market Closed at 15:30 Bye ! See you Tomorrow 9:30"
+        st.warning(market_Close_msg)
+        send_telegram(market_Close_msg)
 
 
     # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
@@ -122,7 +122,7 @@ if selected == "Live Algo Trading":
         - signal: Dict with 'signal' (True/False), 'entry_price', 'sl', 'target', 'reference_candle', 'entry_time'
         """
         df = df.copy()
-        df['20sma'] = df['close'].rolling(window=20).mean()
+        df['20sma'] = df['Close'].rolling(window=20).mean()
     
         # Ensure we have at least 25 candles to get a clean 20 SMA
         if len(df) < 25:
@@ -138,10 +138,10 @@ if selected == "Live Algo Trading":
         c2 = df.iloc[-2]
         c1 = df.iloc[-1]
     
-        # Step 2-3: C3 crosses above 20 SMA and closes above it
-        cross_condition = (c3['close'] > c3['20sma']) and (c3['open'] < c3['20sma'])
+        # Step 2-3: C3 crosses above 20 SMA and Closes above it
+        cross_condition = (c3['Close'] > c3['20sma']) and (c3['open'] < c3['20sma'])
     
-        # Step 4: C2 closes above 20 SMA and does not touch it
+        # Step 4: C2 Closes above 20 SMA and does not touch it
         c2_above_sma = (c2['low'] > c2['20sma'])
     
         if not (cross_condition and c2_above_sma):
@@ -151,10 +151,10 @@ if selected == "Live Algo Trading":
         if current_iv < 16:
             return {'signal': False}
     
-        # Step 6: C1 crosses above max(c2.close, c3.high)
-        breakout_level = max(c2['close'], c3['high'])
-        if c1['close'] > breakout_level and c1['low'] < breakout_level:
-            entry_price = c1['close']
+        # Step 6: C1 crosses above max(c2.Close, c3.high)
+        breakout_level = max(c2['Close'], c3['high'])
+        if c1['Close'] > breakout_level and c1['low'] < breakout_level:
+            entry_price = c1['Close']
             sl = round(entry_price * 0.90, 2)  # 10% SL
             target = round(entry_price * 1.05, 2)  # Initial 5% target
     
@@ -219,7 +219,7 @@ if selected == "Live Algo Trading":
             open=df_today["Open"],
             high=df_today["High"],
             low=df_today["Low"],
-            close=df_today["Close"],
+            Close=df_today["Close"],
             increasing_line_color="green",
             decreasing_line_color="red",
             name="Candles"
