@@ -40,7 +40,7 @@ st.sidebar.markdown("⏱️ Updates every 30 seconds")
 # Use selected symbol in main code
 #symbol = symbol_choice
 
-if selected == "Live Trading":
+if selected == "Live Algo Trading":
     st.title("🤖 Live Algo Trading (Paper/Real Mode) Hello ")
     from dotenv import load_dotenv
 
