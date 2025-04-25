@@ -37,7 +37,7 @@ st.sidebar.markdown("⏱️ Updates every 30 seconds")
 
 
 if selected == "Live Algo Trading":
-    st.title("🤖 Live Algo Trading (Paper/Real Mode) Hello ")
+    st.title("🤖 Live Algo Trading   ")
     from dotenv import load_dotenv
 
     # ─── LOAD ENVIRONMENT VARIABLES ───────────────────────────────────────────────
@@ -56,7 +56,7 @@ if selected == "Live Algo Trading":
     
     # ─── PAGE CONFIG ──────────────────────────────────────────────────────────────
     #st.set_page_config(page_title="📈 Nifty EMA20 Breakout", layout="wide")
-    st.title("📊 Nifty 5-min EMA20 + Volume Breakout Monitor")
+    #st.title("📊 Nifty 5-min EMA20 + Volume Breakout Monitor")
     
     # ─── STRATEGY TEST STARTED ─────────────────────────────────────────────────────
     start_msg = "🟢 Strategy Test Started"
