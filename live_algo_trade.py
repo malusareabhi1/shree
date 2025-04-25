@@ -73,6 +73,10 @@ if selected == "Live Algo Trading":
             df = df.tz_localize("UTC").tz_convert("Asia/Kolkata")
         else:
             df = df.tz_convert("Asia/Kolkata")
+
+        # Ensure 'Date' is datetime for x-axis
+        df['Date'] = pd.to_datetime(df['Date'])
+
     
         df = df.between_time("09:15", "15:30")
     
