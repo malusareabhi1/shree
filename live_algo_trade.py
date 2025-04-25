@@ -21,10 +21,14 @@ import pytz  # ✅ Add this
 # ─── SIDEBAR ─────────────────────────────────────────────────────────────────────
 st.sidebar.title("⚙️ Strategy Settings")
 
-# Select trading symbol
-symbol_choice = st.sidebar.selectbox("Select Symbol", ["^NSEI", "^NSEBANK"], index=0)
-mode = st.sidebar.radio("Select Mode", ["Paper Trading", "Live Trading"], index=0)
-
+st.sidebar.title("📋 Navigation")
+selected = st.sidebar.selectbox("Choose a section", [
+    "Home",
+    "Live Algo Trading",
+    "Backtest Strategy",
+    "View Logs",
+    "Settings"
+])
 # Telegram alert toggle
 telegram_alert = st.sidebar.checkbox("📣 Send Telegram Alerts", value=True)
 
