@@ -111,10 +111,12 @@ if selected == "Live Algo Trading":
 
     # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
     st.write((df.columns))
+    from datetime import datetime, time
+
     def check_doctor_strategy_entry(df, current_iv):
         """
         Checks for a valid entry signal using Doctor Strategy conditions.
-        
+    
         Parameters:
         - df: DataFrame with live 5-min OHLC data (should be at least 5-10 recent candles)
         - current_iv: Live Implied Volatility (%) of the index
@@ -123,49 +125,46 @@ if selected == "Live Algo Trading":
         - signal: Dict with 'signal' (True/False), 'entry_price', 'sl', 'target', 'reference_candle', 'entry_time'
         """
         df = df.copy()
+    
+        # Step 1: Calculate the 20-period SMA and Bollinger Bands
         df['20sma'] = df['Close'].rolling(window=20).mean()
     
-        # Ensure we have at least 25 candles to get a clean 20 SMA
+        # Ensure we have enough data
         if len(df) < 25:
-            return {'signal': False}
+            return {'signal': False, 'message': 'Insufficient data'}
     
         # Step 10: Only allow trades between 9:30 and 13:30
-        #now = datetime.now().time()
         now = datetime.now().time()
-        st.write(now)  # Should print the current time like 10:23:45.123456
-        #st.df.tail(25)
-        st.dataframe(df.tail(25))
-
-        
-        # Check comparison
-        if time(9, 30) <= now <= time(13, 30):
-            print("Within trading hours")
-        else:
-            print("Outside trading hours")
-        if not (time(9, 30) <= now <= time(13, 30)):
-            return {'signal': False}
+        st.write(f"Current time: {now}")
     
-        # Last 4 candles needed for reference
+        # Display the last 25 rows
+        st.dataframe(df.tail(25))
+    
+        # Check trading time range (9:30 to 13:30)
+        if not (time(9, 30) <= now <= time(13, 30)):
+            return {'signal': False, 'message': 'Outside trading hours'}
+    
+        # Get the last 3 candles (C3, C2, C1)
         c3 = df.iloc[-3]
         c2 = df.iloc[-2]
         c1 = df.iloc[-1]
     
-        # Step 2-3: C3 crosses above 20 SMA and Closes above it
-        cross_condition = (c3['Close'] > c3['20sma']) and (c3['open'] < c3['20sma'])
+        # Step 2-3: C3 crosses above 20 SMA and closes above it
+        cross_condition = (c3['Close'] > c3['20sma']) and (c3['Open'] < c3['20sma'])
     
-        # Step 4: C2 Closes above 20 SMA and does not touch it
-        c2_above_sma = (c2['low'] > c2['20sma'])
+        # Step 4: C2 closes above 20 SMA and does not touch it
+        c2_above_sma = c2['Low'] > c2['20sma']
     
         if not (cross_condition and c2_above_sma):
-            return {'signal': False}
+            return {'signal': False, 'message': 'Conditions for entry not met'}
     
         # Step 5: IV filter
         if current_iv < 16:
-            return {'signal': False}
+            return {'signal': False, 'message': 'IV too low'}
     
-        # Step 6: C1 crosses above max(c2.Close, c3.high)
-        breakout_level = max(c2['Close'], c3['high'])
-        if c1['Close'] > breakout_level and c1['low'] < breakout_level:
+        # Step 6: C1 crosses above max(C2.Close, C3.high)
+        breakout_level = max(c2['Close'], c3['High'])
+        if c1['Close'] > breakout_level and c1['Low'] < breakout_level:
             entry_price = c1['Close']
             sl = round(entry_price * 0.90, 2)  # 10% SL
             target = round(entry_price * 1.05, 2)  # Initial 5% target
@@ -179,8 +178,9 @@ if selected == "Live Algo Trading":
                 'entry_time': datetime.now()
             }
     
-        return {'signal': False}
-        
+        return {'signal': False, 'message': 'No breakout detected'}
+
+
   
 
     
