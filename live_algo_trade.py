@@ -126,8 +126,8 @@ if selected == "Live Algo Trading":
     
     
     # ─── DISPLAY ──────────────────────────────────────────────────────────────────
-    st.subheader("📊 Last 5 Candles")
-    st.dataframe(df.tail(5))
+    #st.subheader("📊 Last 5 Candles")
+    #st.dataframe(df.tail(5))
     
     col1, col2, col3 = st.columns(3)
     col1.metric("🔹 Close", f"₹{latest['Close']:.2f}")
