@@ -110,7 +110,117 @@ if selected == "Live Algo Trading":
 
 
     # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
-   
+   # Initialize
+st.title("📈 Live Doctor Strategy - NIFTY 5m")
+telegram_token = 'your_token'
+telegram_chat_id = 'your_chat_id'
+symbol_token = '256265'  # NIFTY index
+capital = 100000
+qty = 50
+iv_threshold = 16
+active_trade = None
+trade_log = []
+
+# Assuming kite is your logged-in KiteConnect object
+def get_live_5min_data(kite, instrument_token, days=1):
+    to_date = datetime.now()
+    from_date = to_date - timedelta(days=days)
+    data = kite.historical_data(instrument_token, from_date, to_date, "5minute")
+    df = pd.DataFrame(data)
+    df['datetime'] = pd.to_datetime(df['date'])
+    return df[['datetime', 'open', 'high', 'low', 'close']]
+
+def send_telegram(msg):
+    url = f"https://api.telegram.org/bot{telegram_token}/sendMessage"
+    requests.post(url, data={"chat_id": telegram_chat_id, "text": msg})
+
+# Main Loop
+placeholder = st.empty()
+run_button = st.button("Start Live Algo")
+
+if run_button:
+    while True:
+        try:
+            df = get_live_5min_data(kite, int(symbol_token), days=2)
+
+            # Technical Indicators
+            df['sma_20'] = df['close'].rolling(20).mean()
+            df['upper_band'] = df['sma_20'] + 2 * df['close'].rolling(20).std()
+            df['lower_band'] = df['sma_20'] - 2 * df['close'].rolling(20).std()
+
+            # Signal Logic
+            latest = df.iloc[-1]
+            prev = df.iloc[-2]
+            now = datetime.now().time()
+
+            condition_entry = (
+                prev['close'] < prev['upper_band']
+                and latest['close'] > latest['upper_band']
+                and latest['close'] > latest['sma_20']
+                and iv_threshold > 15  # You could make this dynamic
+                and datetime.strptime("09:30:00", "%H:%M:%S").time() < now < datetime.strptime("14:30:00", "%H:%M:%S").time()
+            )
+
+            if active_trade is None and condition_entry:
+                entry_price = latest['close']
+                stop_loss = entry_price * 0.995
+                target = entry_price * 1.02
+                active_trade = {
+                    'Entry_Time': latest['datetime'],
+                    'Entry_Price': entry_price,
+                    'Stop_Loss': stop_loss,
+                    'Target': target,
+                    'Status': 'OPEN'
+                }
+                msg = f"🚀 LONG ENTRY\nNIFTY @ {entry_price}\nSL: {stop_loss:.2f}, Target: {target:.2f}"
+                send_telegram(msg)
+
+            # Check Exit Conditions
+            if active_trade:
+                current_price = latest['close']
+                hit_sl = current_price <= active_trade['Stop_Loss']
+                hit_target = current_price >= active_trade['Target']
+                time_exit = now >= datetime.strptime("15:20:00", "%H:%M:%S").time()
+
+                if hit_sl or hit_target or time_exit:
+                    exit_price = current_price
+                    pnl = (exit_price - active_trade['Entry_Price']) * qty
+                    trade_log.append({
+                        **active_trade,
+                        'Exit_Time': latest['datetime'],
+                        'Exit_Price': exit_price,
+                        'PnL': pnl
+                    })
+                    result = "TARGET HIT" if hit_target else "STOP LOSS" if hit_sl else "TIME EXIT"
+                    send_telegram(f"💼 EXIT ({result}) @ {exit_price:.2f}, PnL: ₹{pnl:.2f}")
+                    active_trade = None
+
+            # UI Updates
+            with placeholder.container():
+                st.subheader("🔁 Live Data")
+                st.write(df.tail(3))
+
+                fig = go.Figure()
+                fig.add_trace(go.Candlestick(x=df['datetime'], open=df['open'], high=df['high'],
+                                             low=df['low'], close=df['close'], name='Candles'))
+                fig.add_trace(go.Scatter(x=df['datetime'], y=df['upper_band'], name='Upper Band', line=dict(color='red')))
+                fig.add_trace(go.Scatter(x=df['datetime'], y=df['lower_band'], name='Lower Band', line=dict(color='green')))
+                fig.add_trace(go.Scatter(x=df['datetime'], y=df['sma_20'], name='SMA 20', line=dict(color='blue')))
+
+                if active_trade:
+                    fig.add_trace(go.Scatter(x=[active_trade['Entry_Time']], y=[active_trade['Entry_Price']],
+                                             mode='markers', name='Entry', marker=dict(color='yellow', size=12)))
+
+                st.plotly_chart(fig, use_container_width=True)
+
+                if trade_log:
+                    st.subheader("📊 Trade Log")
+                    st.dataframe(pd.DataFrame(trade_log))
+
+            time.sleep(60)  # Wait 1 minute
+        except Exception as e:
+            st.error(f"Error: {str(e)}")
+            time.sleep(60)
 
 
 
