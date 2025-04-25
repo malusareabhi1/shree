@@ -76,6 +76,7 @@ if selected == "Live Algo Trading":
 
         # Ensure 'Date' is datetime for x-axis
         df['Date'] = pd.to_datetime(df['Date'])
+        df.rename(columns={'timestamp': 'Date'}, inplace=True)  # Adjust 'timestamp' if it's the correct column
 
     
         df = df.between_time("09:15", "15:30")
