@@ -131,6 +131,14 @@ if selected == "Live Algo Trading":
     
         # Step 10: Only allow trades between 9:30 and 13:30
         now = datetime.now().time()
+        now = datetime.now().time()
+        print(now)  # Should print the current time like 10:23:45.123456
+        
+        # Check comparison
+        if time(9, 30) <= now <= time(13, 30):
+            print("Within trading hours")
+        else:
+            print("Outside trading hours")
         if not (time(9, 30) <= now <= time(13, 30)):
             return {'signal': False}
     
