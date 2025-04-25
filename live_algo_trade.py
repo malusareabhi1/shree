@@ -190,5 +190,5 @@ if selected == "Live Algo Trading":
     # ─── AUTO REFRESH ─────────────────────────────────────────────────────────────
     st.markdown("⏱️ Auto-refresh every 30 seconds")
     #with st.spinner("⏳ Refreshing in 30 seconds..."):
-        time.sleep(30)
-        st.rerun()
+    time.sleep(30)
+    st.rerun()
