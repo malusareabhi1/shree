@@ -41,7 +41,7 @@ st.sidebar.markdown("⏱️ Updates every 30 seconds")
 #symbol = symbol_choice
 
 if selected == "Live Algo Trading":
-    st.title("🤖 Live Algo Trading (Paper/Real Mode) Hello ")
+    st.title("🤖 Live Algo Trading (Paper/Real Mode) ")
     from dotenv import load_dotenv
 
     # ─── LOAD ENVIRONMENT VARIABLES ───────────────────────────────────────────────
@@ -60,7 +60,7 @@ if selected == "Live Algo Trading":
     
     # ─── PAGE CONFIG ──────────────────────────────────────────────────────────────
     #st.set_page_config(page_title="📈 Nifty EMA20 Breakout", layout="wide")
-    st.title("📊 Nifty 5-min EMA20 + Volume Breakout Monitor")
+    #st.title("📊 Nifty 5-min EMA20 + Volume Breakout Monitor")
     
     # ─── STRATEGY TEST STARTED ─────────────────────────────────────────────────────
     start_msg = "🟢 Strategy Test Started"
@@ -189,7 +189,7 @@ if selected == "Live Algo Trading":
     # ─── STRATEGY TEST STOPPED ────────────────────────────────────────────────────
     stop_msg = "🔴 Strategy Test Ended (for current run)"
     st.info(stop_msg)
-    send_telegram(stop_msg)
+    #send_telegram(stop_msg)
     
     # ─── AUTO REFRESH ─────────────────────────────────────────────────────────────
     st.markdown("⏱️ Auto-refresh every 30 seconds")
