@@ -111,6 +111,15 @@ if selected == "Live Algo Trading":
 
     # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
    # Initialize
+# Initialize the KiteConnect object with your API key
+kite = KiteConnect(api_key="your_api_key")
+
+# If you have the access token, you can set it here:
+kite.set_access_token("your_access_token")
+
+# Now you can make API calls, for example, to get the account profile:
+profile = kite.profile()
+print(profile)
 st.title("📈 Live Doctor Strategy - NIFTY 5m")
 telegram_token = 'your_token'
 telegram_chat_id = 'your_chat_id'
