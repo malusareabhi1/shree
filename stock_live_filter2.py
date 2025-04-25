@@ -36,18 +36,19 @@ if run:
     start_date = end_date - timedelta(days=2)
 
     df = yf.download(stock, start=start_date, end=end_date, interval=interval)
-
-   if df is not None and not df.empty:
-    if 'Close' in df.columns:
-        if df['Close'].notnull().all():
-            df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
-            st.line_chart(df[['Close', 'EMA20']])
+     if df is not None and not df.empty:
+        if 'Close' in df.columns:
+            if df['Close'].notnull().all():
+                df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
+                st.line_chart(df[['Close', 'EMA20']])
+            else:
+                st.warning("The 'Close' column contains null values.")
         else:
-            st.warning("The 'Close' column contains null values.")
+            st.warning("The 'Close' column is missing.")
     else:
-        st.warning("The 'Close' column is missing.")
-else:
-    st.warning("DataFrame is empty or not loaded.")
+        st.warning("DataFrame is empty or not loaded.")
+
+  
         if df['Close'].notnull().all():
             # safe to proceed with 'Close' values
             ...
