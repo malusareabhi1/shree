@@ -88,6 +88,8 @@ if selected == "Live Algo Trading":
     latest = df.iloc[-1]
     prev = df.iloc[-2]
 
+    print(df.dtypes)
+
     
     # ─── MARKET OPEN/Close MESSAGE ────────────────────────────────────────────────
     now = latest.name
@@ -110,7 +112,7 @@ if selected == "Live Algo Trading":
 
 
     # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
-    st.write((df.columns))
+    #st.write((df.columns))
     from datetime import datetime, time
 
     def check_doctor_strategy_entry(df, current_iv):
