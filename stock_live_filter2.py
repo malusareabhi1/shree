@@ -55,8 +55,7 @@ if run:
             ...
         else:
             st.warning("Close column has missing values.")
-    else:
-        st.warning("Dataframe is empty or missing 'Close' column.")
+            st.warning("Dataframe is empty or missing 'Close' column.")
         df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
         df.dropna(subset=['EMA20'], inplace=True)
 
@@ -140,3 +139,7 @@ if run:
         st.line_chart(equity_curve)
 #else:
     #st.warning("No valid data fetched. Please try different timeframe or stock.")
+
+            
+
+        
