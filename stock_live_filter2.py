@@ -37,9 +37,16 @@ if run:
 
     df = yf.download(stock, start=start_date, end=end_date, interval=interval)
 
-    if df is not None and not df.empty and 'Close' in df.columns and df['Close'].notnull().all():
-        df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
-        df.dropna(subset=['EMA20'], inplace=True)
+    if df is not None and not df.empty and 'Close' in df.columns:
+        if df['Close'].notnull().all():
+            # safe to proceed with 'Close' values
+            ...
+        else:
+            st.warning("Close column has missing values.")
+    else:
+        st.warning("Dataframe is empty or missing 'Close' column.")
+            df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
+            df.dropna(subset=['EMA20'], inplace=True)
 
         # Signal Logic
         df['Signal'] = (df['Close'] > df['EMA20']) & (df['Close'].shift(1) <= df['EMA20'].shift(1))
