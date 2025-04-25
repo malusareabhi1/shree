@@ -133,7 +133,9 @@ if selected == "Live Algo Trading":
         #now = datetime.now().time()
         now = datetime.now().time()
         st.write(now)  # Should print the current time like 10:23:45.123456
-        st.df.tail(25)
+        #st.df.tail(25)
+        st.dataframe(df.tail(25))
+
         
         # Check comparison
         if time(9, 30) <= now <= time(13, 30):
