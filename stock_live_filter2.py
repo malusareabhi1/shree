@@ -126,5 +126,5 @@ if run:
 
         st.markdown("### 📈 Equity Curve")
         st.line_chart(equity_curve)
-else:
-    st.warning("No valid data fetched. Please try different timeframe or stock.")
+#else:
+    #st.warning("No valid data fetched. Please try different timeframe or stock.")
