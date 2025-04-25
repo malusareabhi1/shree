@@ -167,10 +167,28 @@ if selected == "Live Algo Trading":
             }
     
         return {'signal': False}
+        
   
 
     
+    # Example: get last 25 candles (5-min each)
+    latest_candles = df.tail(25)
     
+    # Assume you got this from live options chain IV
+    current_iv = 17.2
+    
+    # Now call the strategy
+    signal = check_doctor_strategy_entry(latest_candles, current_iv)
+    
+    if signal['signal']:
+        print("🚀 ENTRY SIGNAL GENERATED")
+        print(f"Entry Price: {signal['entry_price']}")
+        print(f"Stop Loss: {signal['sl']}")
+        print(f"Target: {signal['target']}")
+        print(f"Reference Candle: {signal['reference_candle']}")
+        print(f"Entry Time: {signal['entry_time']}")
+    else:
+        print("No entry signal yet.")
     # ─── DISPLAY ──────────────────────────────────────────────────────────────────
     #st.subheader("📊 Last 5 Candles")
     #st.dataframe(df.tail(5))
