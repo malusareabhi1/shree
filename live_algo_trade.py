@@ -87,6 +87,7 @@ if selected == "Live Algo Trading":
     df = fetch_data(symbol)
     latest = df.iloc[-1]
     prev = df.iloc[-2]
+
     
     # ─── MARKET OPEN/Close MESSAGE ────────────────────────────────────────────────
     now = latest.name
