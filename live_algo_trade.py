@@ -36,7 +36,7 @@ st.sidebar.success("🟢 Strategy Status: Active")
 st.sidebar.markdown("⏱️ Updates every 30 seconds")
 
 
-elif selected == "Live Algo Trading":
+if selected == "Live Algo Trading":
     st.title("🤖 Live Algo Trading (Paper/Real Mode) Hello ")
     from dotenv import load_dotenv
 
