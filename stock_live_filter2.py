@@ -45,8 +45,8 @@ if run:
             st.warning("Close column has missing values.")
     else:
         st.warning("Dataframe is empty or missing 'Close' column.")
-            df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
-            df.dropna(subset=['EMA20'], inplace=True)
+        df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
+        df.dropna(subset=['EMA20'], inplace=True)
 
         # Signal Logic
         df['Signal'] = (df['Close'] > df['EMA20']) & (df['Close'].shift(1) <= df['EMA20'].shift(1))
