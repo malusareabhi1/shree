@@ -294,9 +294,9 @@ elif selected == "Intraday Paper Trading":
     # 2. Convert 'Datetime' column to India timezone
     datetime_col = st.selectbox("Select your Datetime column", df.columns)
 
-    df['Datetime'] = pd.to_datetime(df['Datetime'])
-    df['Datetime'] = df['Datetime'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
-    df.set_index('Datetime', inplace=True)
+    df['Date'] = pd.to_datetime(df['Date'])
+    df['Date'] = df['Date'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
+    df.set_index('Date', inplace=True)
     
     # 3. ➡️ INSERT PAPER TRADING CODE HERE
     # (Paste full paper trading code block from earlier here)
