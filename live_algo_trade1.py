@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from io import BytesIO
 
+
 # ---- Sidebar Config Inputs ----
 st.sidebar.title("Trading Settings")
 
