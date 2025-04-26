@@ -395,7 +395,7 @@ elif selected == "Intraday Paper Trading":
 
 #_________________________________________________________________________________________________________________
 elif selected == "Bollinger Band Breakout":
-    import talib
+    import pandas_ta as ta
     #Bollinger Band Breakout
     # File Upload
     st.title("Algo Trading BOT - Bollinger Band Breakout")
