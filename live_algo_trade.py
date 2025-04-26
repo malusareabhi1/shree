@@ -209,20 +209,18 @@ elif selected == "Intraday Algo Trading":
         df['Date'] = pd.to_datetime(df['Date'])
         st.write(df.columns.tolist())
         # Localize to UTC if it's naive (no timezone info), then convert to Asia/Kolkata
-        if df['Date'].dt.tz is None:
-            df['Date'] = df['Date'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
-        else:
-            df['Date'] = df['Date'].dt.tz_convert('Asia/Kolkata')
+        #if df['Date'].dt.tz is None:
+           # df['Date'] = df['Date'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
+        #else:
+            #df['Date'] = df['Date'].dt.tz_convert('Asia/Kolkata')
         
         # Set as index (optional but useful for time-based slicing)
         #df.set_index('Date', inplace=True)
 
 
         #_________________________________________________________________________
-        #
-        st.subheader("Available Columns in Uploaded File:")
-        #
-        st.write(df.columns.tolist())
+        #        st.subheader("Available Columns in Uploaded File:")
+        #        st.write(df.columns.tolist())
 
         # Let user select the datetime column
         
