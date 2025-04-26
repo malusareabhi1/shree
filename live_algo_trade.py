@@ -292,7 +292,11 @@ elif selected == "Intraday Paper Trading":
         df = pd.read_csv(uploaded_file)
     
     # 2. Convert 'Datetime' column to India timezone
+    #datetime_col = st.selectbox("Select your Datetime column", df.columns)
     datetime_col = st.selectbox("Select your Datetime column", df.columns)
+
+    # Now convert that selected column
+    df[datetime_col] = pd.to_datetime(df[datetime_col])
 
     df['Date'] = pd.to_datetime(df['Date'])
     #df['Date'] = df['Date'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
