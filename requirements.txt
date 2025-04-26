@@ -20,3 +20,4 @@ nsepython
 requests
 beautifulsoup4
 nsetools
+talib
