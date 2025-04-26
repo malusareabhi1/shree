@@ -82,14 +82,11 @@ if selected == "Live Algo Trading":
         df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
         df["VMA20"] = df["Volume"].rolling(20).mean()
         return df
+    
     symbol = "^NSEI"
     df = fetch_data(symbol)
-    st.write(df.columns)
-    #st.write(df.head)
-    
     latest = df.iloc[-1]
     prev = df.iloc[-2]
-
     #st.write(df.dtypes)
     st.write(df.head())
 
