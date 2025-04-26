@@ -6,7 +6,7 @@ from io import BytesIO
 
 # ---- Config ----
 CAPITAL = 100000
-RISK_PER_TRADE = 0.02
+RISK_PER_TRADE = 0.05
 BROKERAGE_PER_TRADE = 20  # ₹20 per trade assumed
 
 def load_data():
