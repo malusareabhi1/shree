@@ -200,6 +200,7 @@ elif selected == "Intraday Algo Trading":
     import requests
     import pandas as pd
     from bs4 import BeautifulSoup
+    from nsetools import Nse
     @st.cache_data(ttl=86400)  # Cache for 1 day
     def get_nifty_50_symbols():
         url = "https://www.nseindia.com/live_market/dynaContent/live_watch/stock_watch/niftyStockWatch.json"
