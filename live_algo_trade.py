@@ -219,8 +219,10 @@ elif selected == "Intraday Algo Trading":
 
 
         #_________________________________________________________________________
-        #st.subheader("Available Columns in Uploaded File:")
-        #st.write(df.columns.tolist())
+        #
+        st.subheader("Available Columns in Uploaded File:")
+        #
+        st.write(df.columns.tolist())
 
         # Let user select the datetime column
         
