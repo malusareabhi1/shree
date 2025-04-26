@@ -403,7 +403,7 @@ elif selected == "Bollinger Band Breakout":
     
     if uploaded_file is not None:
         # Read CSV
-        df = pd.read_csv(uploaded_file)
+        #df = pd.read_csv(uploaded_file)
     
         df = pd.read_csv(uploaded_file)
 
