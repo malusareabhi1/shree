@@ -349,13 +349,34 @@ elif selected == "Intraday Paper Trading":
                 })
                 in_position = False
 
-        # 9. After trading simulation
+        
+
+        # After trading simulation
         trades_df = pd.DataFrame(trades)
-        total_pnl = trades_df['PnL'].sum()
 
-        st.success(f"Total PnL: ₹{round(total_pnl, 2)}")
+        # Performance metrics
+        total_trades = len(trades_df)
+        gross_pnl = trades_df['PnL'].sum()
 
-        # Show the trades table
+        turnover = 0
+        if not trades_df.empty:
+            turnover = (trades_df['Entry Price'].sum() + trades_df['Exit Price'].sum()) * (position_size / trades_df['Entry Price'].mean())
+
+        tax_rate = 0.0003  # 0.03% brokerage + other taxes approx
+        taxes = turnover * tax_rate
+        net_pnl = gross_pnl - taxes
+
+        # Display performance
+        st.subheader("📈 Performance Report:")
+        st.write(f"**Total Capital:** ₹{capital:,.2f}")
+        st.write(f"**Total Trades:** {total_trades}")
+        st.write(f"**Total Turnover:** ₹{turnover:,.2f}")
+        st.write(f"**Total Taxes (approx):** ₹{taxes:,.2f}")
+        st.write(f"**Gross P&L:** ₹{gross_pnl:,.2f}")
+        st.success(f"**Net P&L after Taxes:** ₹{net_pnl:,.2f}")
+
+        # Show trades table
+        st.subheader("📋 Trade Log:")
         st.dataframe(trades_df)
 
         # Download CSV button
