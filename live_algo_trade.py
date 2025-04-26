@@ -226,7 +226,8 @@ elif selected == "Intraday Algo Trading":
     today = df['Date'].iloc[-1]
     today_df = df[df['Date'] == today]
 
-    opening_range = today_df[(today_df['Time'] >= datetime.time(9,15)) & (today_df['Time'] <= datetime.time(9,30))]
+    #opening_range = today_df[(today_df['Time'] >= datetime.time(9,15)) & (today_df['Time'] <= datetime.time(9,30))]
+    opening_range = today_df[(today_df['Time'] >= time(9,15)) & (today_df['Time'] <= time(9,30))]
     or_high = opening_range['High'].max()
     or_low = opening_range['Low'].min()
 
