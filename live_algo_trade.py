@@ -215,7 +215,7 @@ elif selected == "Intraday Algo Trading":
             df['Time'] = df[datetime_col].dt.time
             df['Date'] = df[datetime_col].dt.date
             st.success("Datetime parsed successfully.")
-            st.dataframe(df.head())
+            st.dataframe(df.head(50))
         except Exception as e:
             st.error(f"❌ Failed to parse datetime: {e}")
     else:
