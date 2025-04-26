@@ -17,6 +17,7 @@ import pytz
 import ta  # Required for trend calculation (ensure installed)
 
 
+
 # ─── SIDEBAR ─────────────────────────────────────────────────────────────────────
 st.sidebar.title("⚙️ Strategy Settings")
 
