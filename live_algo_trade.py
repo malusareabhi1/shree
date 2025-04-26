@@ -199,22 +199,30 @@ elif selected == "Intraday Algo Trading":
     st.header("📊 Intraday ORB Strategy (Opening Range Breakout)")
     import requests
     import pandas as pd
+    from bs4 import BeautifulSoup
     @st.cache_data(ttl=86400)  # Cache for 1 day
     def get_nifty_50_symbols():
-        url = "https://www.nseindia.com/api/equity-stockIndices?index=NIFTY%2050"
+        url = "https://www.nseindia.com/live_market/dynaContent/live_watch/stock_watch/niftyStockWatch.json"
         headers = {
             "User-Agent": "Mozilla/5.0"
         }
+    
+        # Create a session and set the headers
         session = requests.Session()
         session.headers.update(headers)
-        response = session.get(url)
-        if response.status_code == 200:
-            data = response.json()
-            stocks = data["data"]
-            symbol_list = [item["symbol"] for item in stocks]
-            return symbol_list
-        else:
-            st.error("Failed to fetch NIFTY 50 symbols.")
+    
+        try:
+            # Fetch data from the URL
+            response = session.get(url)
+            if response.status_code == 200:
+                data = response.json()
+                symbols = [stock["symbol"] for stock in data["data"]]
+                return symbols
+            else:
+                st.error(f"Failed to fetch NIFTY 50 symbols. Status code: {response.status_code}")
+                return []
+        except Exception as e:
+            st.error(f"Error fetching NIFTY 50 symbols: {str(e)}")
             return []
 
 
