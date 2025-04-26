@@ -97,6 +97,7 @@ if selected == "Live Algo Trading":
     
     symbol = "^NSEI"
     df = fetch_data(symbol)
+     df['Date'] = pd.to_datetime(df['Date'])
     latest = df.iloc[-1]
     prev = df.iloc[-2]
 
