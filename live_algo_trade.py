@@ -69,6 +69,7 @@ if selected == "Live Algo Trading":
         df = yf.download(ticker, interval="5m", period="5d", progress=False)
         st.write(df.head())
         df.index = pd.to_datetime(df.index)
+        df['Date'] = pd.to_datetime(df['Date'])
         st.write(df.head())
     
         if df.index.tz is None:
