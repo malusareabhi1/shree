@@ -204,10 +204,26 @@ elif selected == "Intraday Algo Trading":
     uploaded_file = st.file_uploader("Upload CSV file with OHLCV data", type=["csv"])
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
+        #______________________________________________________________________
+        # Convert the datetime column (assume it's named 'Datetime') to datetime object
+        df['Datetime'] = pd.to_datetime(df['Datetime'])
+        
+        # Localize to UTC if it's naive (no timezone info), then convert to Asia/Kolkata
+        if df['Datetime'].dt.tz is None:
+            df['Datetime'] = df['Datetime'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
+        else:
+            df['Datetime'] = df['Datetime'].dt.tz_convert('Asia/Kolkata')
+        
+        # Set as index (optional but useful for time-based slicing)
+        df.set_index('Datetime', inplace=True)
+
+
+        #_________________________________________________________________________
         #st.subheader("Available Columns in Uploaded File:")
         #st.write(df.columns.tolist())
 
         # Let user select the datetime column
+        
         datetime_col = st.selectbox("Select your Datetime column", df.columns)
 
         try:
