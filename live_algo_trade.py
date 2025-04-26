@@ -85,7 +85,7 @@ if selected == "Live Algo Trading":
     symbol = "^NSEI"
     df = fetch_data(symbol)
     st.write(df.columns)
-    st.write(df.head)
+    #st.write(df.head)
     
     latest = df.iloc[-1]
     prev = df.iloc[-2]
