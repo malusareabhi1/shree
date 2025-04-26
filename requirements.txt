@@ -17,3 +17,4 @@ pandas_ta
 streamlit-autorefresh
 python-dotenv
 nsepython 
+requests beautifulsoup4
