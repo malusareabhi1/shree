@@ -236,7 +236,9 @@ elif selected == "Intraday Algo Trading":
 
     # Find breakout
     trade_signal = None
-    breakout_df = today_df[today_df['Time'] > datetime.time(9,30)]
+    #breakout_df = today_df[today_df['Time'] > datetime.time(9,30)]
+    breakout_df = today_df[today_df['Time'] > time(9, 30)]
+
 
     for i, row in breakout_df.iterrows():
         if row['High'] > or_high and trade_signal is None:
