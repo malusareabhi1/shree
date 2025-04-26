@@ -204,8 +204,8 @@ elif selected == "Intraday Algo Trading":
     uploaded_file = st.file_uploader("Upload CSV file with OHLCV data", type=["csv"])
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
-        st.subheader("Available Columns in Uploaded File:")
-        st.write(df.columns.tolist())
+        #st.subheader("Available Columns in Uploaded File:")
+        #st.write(df.columns.tolist())
 
         # Let user select the datetime column
         datetime_col = st.selectbox("Select your Datetime column", df.columns)
