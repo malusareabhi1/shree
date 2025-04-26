@@ -395,6 +395,7 @@ elif selected == "Intraday Paper Trading":
 
 #_________________________________________________________________________________________________________________
 elif selected == "Bollinger Band Breakout":
+    import talib
     #Bollinger Band Breakout
     # File Upload
     st.title("Algo Trading BOT - Bollinger Band Breakout")
