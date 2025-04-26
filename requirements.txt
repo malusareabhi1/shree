@@ -20,4 +20,4 @@ nsepython
 requests
 beautifulsoup4
 nsetools
-
+TA-Lib
