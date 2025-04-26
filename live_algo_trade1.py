@@ -61,6 +61,110 @@ def run_paper_trading(df):
 
 import ta
 
+def run_paper_trading2(df):
+    position_size = CAPITAL * RISK_PER_TRADE
+    trades = []
+    in_position = False
+    entry_price, entry_time, stoploss, target = None, None, None, None
+
+    for i in range(1, len(df)):
+        row_prev = df.iloc[i - 1]
+        row = df.iloc[i]
+
+        # Entry conditions
+        if not in_position:
+            # Bullish breakout
+            if row_prev['Close'] > row_prev['Open'] and row['High'] > row_prev['High']:
+                entry_price = row['Open']
+                stoploss = row_prev['Low']
+                risk = entry_price - stoploss
+                target = entry_price + 1.5 * risk
+                entry_time = row.name
+                in_position = True
+                trades.append({
+                    'Type': 'BUY',
+                    'Entry Time': entry_time,
+                    'Entry Price': entry_price,
+                    'Stoploss': stoploss,
+                    'Target': target
+                })
+
+            # Bearish breakdown
+            elif row_prev['Close'] < row_prev['Open'] and row['Low'] < row_prev['Low']:
+                entry_price = row['Open']
+                stoploss = row_prev['High']
+                risk = stoploss - entry_price
+                target = entry_price - 1.5 * risk
+                entry_time = row.name
+                in_position = True
+                trades.append({
+                    'Type': 'SELL',
+                    'Entry Time': entry_time,
+                    'Entry Price': entry_price,
+                    'Stoploss': stoploss,
+                    'Target': target
+                })
+
+        # Exit conditions
+        elif in_position:
+            last_trade = trades[-1]
+            if last_trade['Type'] == 'BUY':
+                # Hit Stoploss
+                if row['Low'] <= last_trade['Stoploss']:
+                    exit_price = last_trade['Stoploss']
+                    exit_time = row.name
+                    pnl = (exit_price - last_trade['Entry Price']) * (position_size / last_trade['Entry Price'])
+                    last_trade.update({
+                        'Exit Time': exit_time,
+                        'Exit Price': exit_price,
+                        'PnL': round(pnl, 2),
+                        'Exit Reason': 'Stoploss Hit'
+                    })
+                    in_position = False
+
+                # Hit Target
+                elif row['High'] >= last_trade['Target']:
+                    exit_price = last_trade['Target']
+                    exit_time = row.name
+                    pnl = (exit_price - last_trade['Entry Price']) * (position_size / last_trade['Entry Price'])
+                    last_trade.update({
+                        'Exit Time': exit_time,
+                        'Exit Price': exit_price,
+                        'PnL': round(pnl, 2),
+                        'Exit Reason': 'Target Hit'
+                    })
+                    in_position = False
+
+            elif last_trade['Type'] == 'SELL':
+                # Hit Stoploss
+                if row['High'] >= last_trade['Stoploss']:
+                    exit_price = last_trade['Stoploss']
+                    exit_time = row.name
+                    pnl = (last_trade['Entry Price'] - exit_price) * (position_size / last_trade['Entry Price'])
+                    last_trade.update({
+                        'Exit Time': exit_time,
+                        'Exit Price': exit_price,
+                        'PnL': round(pnl, 2),
+                        'Exit Reason': 'Stoploss Hit'
+                    })
+                    in_position = False
+
+                # Hit Target
+                elif row['Low'] <= last_trade['Target']:
+                    exit_price = last_trade['Target']
+                    exit_time = row.name
+                    pnl = (last_trade['Entry Price'] - exit_price) * (position_size / last_trade['Entry Price'])
+                    last_trade.update({
+                        'Exit Time': exit_time,
+                        'Exit Price': exit_price,
+                        'PnL': round(pnl, 2),
+                        'Exit Reason': 'Target Hit'
+                    })
+                    in_position = False
+
+    return pd.DataFrame(trades)
+
+
 def run_paper_trading1(df):
     # 1) Precompute Indicators
     df['ATR14'] = ta.volatility.average_true_range(df['High'], df['Low'], df['Close'], window=14)
@@ -200,7 +304,7 @@ def main():
     if df is not None:
         datetime_col = st.selectbox("Select your Datetime column", df.columns)
         df = convert_timezone(df, datetime_col)
-        trades_df = run_paper_trading1(df)
+        trades_df = run_paper_trading2(df)
         metrics = calculate_metrics1(trades_df)
         display_results(trades_df, metrics)
 
