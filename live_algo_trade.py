@@ -295,9 +295,16 @@ elif selected == "Intraday Paper Trading":
     datetime_col = st.selectbox("Select your Datetime column", df.columns)
 
     df['Date'] = pd.to_datetime(df['Date'])
-    df['Date'] = df['Date'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
-    df.set_index('Date', inplace=True)
-    
+    #df['Date'] = df['Date'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
+    # Check if the 'Date' column is timezone-aware
+    if df['Date'].dt.tz is None:
+        # If not, localize to UTC and then convert to Asia/Kolkata timezone
+        df['Date'] = pd.to_datetime(df['Date']).dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
+    else:
+        # If already timezone-aware, directly convert to Asia/Kolkata
+        df['Date'] = pd.to_datetime(df['Date']).dt.tz_convert('Asia/Kolkata')
+        df.set_index('Date', inplace=True)
+        
     # 3. ➡️ INSERT PAPER TRADING CODE HERE
     # (Paste full paper trading code block from earlier here)
     
