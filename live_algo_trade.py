@@ -26,6 +26,7 @@ selected = st.sidebar.selectbox("Choose a section", [
     "Home",
     "Live Algo Trading",
     "Intraday Algo Trading",
+    "Bollinger Band Breakout",
     "Intraday Paper Trading",
     "Backtest Strategy",    
     "View Logs",
@@ -391,4 +392,68 @@ elif selected == "Intraday Paper Trading":
             file_name='paper_trades.csv',
             mime='text/csv',
         )
-        
+
+#_________________________________________________________________________________________________________________
+elif selected == "Bollinger Band Breakout":
+    #Bollinger Band Breakout
+    # File Upload
+st.title("Algo Trading BOT - Bollinger Band Breakout")
+
+uploaded_file = st.file_uploader("Upload CSV File", type=['csv'])
+
+if uploaded_file is not None:
+    # Read CSV
+    df = pd.read_csv(uploaded_file)
+
+    # Make sure 'Datetime' is datetime format
+    df['Datetime'] = pd.to_datetime(df['Datetime'])
+    df = df.sort_values('Datetime')
+
+    st.success("CSV File Loaded Successfully!")
+
+    selected = st.selectbox("Select Strategy", ["Bollinger Band Breakout"])
+
+    if selected == "Bollinger Band Breakout":
+        st.subheader("Running Bollinger Band Breakout Strategy... 🚀")
+
+        # Parameters
+        period = 20  # Bollinger Band period
+        stddev = 2   # Standard deviation multiplier
+
+        # Calculate Bollinger Bands
+        df['UpperBand'], df['MiddleBand'], df['LowerBand'] = talib.BBANDS(df['Close'], timeperiod=period, nbdevup=stddev, nbdevdn=stddev, matype=0)
+
+        # Create Signal Column
+        df['Signal'] = None
+
+        # Simple breakout logic
+        for i in range(1, len(df)):
+            if df['Close'][i] > df['UpperBand'][i] and df['Close'][i-1] <= df['UpperBand'][i-1]:
+                df.at[i, 'Signal'] = 'BUY'
+            elif df['Close'][i] < df['LowerBand'][i] and df['Close'][i-1] >= df['LowerBand'][i-1]:
+                df.at[i, 'Signal'] = 'SELL'
+
+        # Show Result
+        st.dataframe(df[['Datetime', 'Close', 'UpperBand', 'MiddleBand', 'LowerBand', 'Signal']].tail(50))
+
+        # Plotting
+        fig, ax = plt.subplots(figsize=(12, 6))
+        ax.plot(df['Datetime'], df['Close'], label='Close Price', color='black')
+        ax.plot(df['Datetime'], df['UpperBand'], label='Upper Band', linestyle='--', color='green')
+        ax.plot(df['Datetime'], df['MiddleBand'], label='Middle Band', linestyle='--', color='blue')
+        ax.plot(df['Datetime'], df['LowerBand'], label='Lower Band', linestyle='--', color='red')
+
+        # Plot BUY/SELL signals
+        buy_signals = df[df['Signal'] == 'BUY']
+        sell_signals = df[df['Signal'] == 'SELL']
+        ax.scatter(buy_signals['Datetime'], buy_signals['Close'], marker='^', color='green', label='Buy Signal', s=100)
+        ax.scatter(sell_signals['Datetime'], sell_signals['Close'], marker='v', color='red', label='Sell Signal', s=100)
+
+        ax.set_title('Bollinger Band Breakout Strategy')
+        ax.legend()
+        ax.grid()
+
+        st.pyplot(fig)
+
+else:
+    st.warning("Please upload a CSV file to continue.")
