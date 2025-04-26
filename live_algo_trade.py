@@ -202,34 +202,25 @@ elif selected == "Intraday Algo Trading":
     from bs4 import BeautifulSoup
     from nsetools import Nse
     
-
-
-    nifty_50_list = ["^NSEI","NSEBANK",
-        "RELIANCE", "TCS", "INFY", "ICICIBANK", "HDFCBANK", "SBIN", "AXISBANK", "LT", "HCLTECH", "KOTAKBANK",
-        "ITC", "WIPRO", "MARUTI", "BHARTIARTL", "HINDUNILVR", "SUNPHARMA", "POWERGRID", "NTPC", "ONGC", "COALINDIA",
-        "NESTLEIND", "ULTRACEMCO", "TECHM", "BAJFINANCE", "BAJAJFINSV", "HDFCLIFE", "DIVISLAB", "ASIANPAINT", "JSWSTEEL", "TITAN",
-        "GRASIM", "ADANIENT", "ADANIPORTS", "BRITANNIA", "CIPLA", "DRREDDY", "EICHERMOT", "HEROMOTOCO", "INDUSINDBK", "M&M",
-        "SBILIFE", "SHREECEM", "TATACONSUM", "TATAMOTORS", "TATASTEEL", "UPL", "BAJAJ-AUTO", "BPCL", "HINDALCO", "IOC"
-    ]
-    #nifty_50_list = get_nifty_50_symbols()
-    symbol = st.selectbox("Select Symbol", nifty_50_list)
-    start_date = st.date_input("Start Date", pd.to_datetime("2024-04-01"))
-    end_date = st.date_input("End Date", pd.to_datetime("today"))
-    capital = st.number_input("Capital", value=100000)
-
-    # Fetch data
-    df = yf.download(symbol + ".NS", start=start_date, end=end_date, interval='5m')
-    df.reset_index(inplace=True)
-    st.write("Available columns:", df.columns.tolist())
-    if 'Datetime' not in df.columns:
-        st.error("⚠️ 'Datetime' column not found in the data. Please check your CSV or data source.")
-    else:
-    # Convert to datetime format if not already
-        df['Datetime'] = pd.to_datetime(df['Datetime'])
-        df['Time'] = df['Datetime'].dt.time
-        df['Time'] = df['Datetime'].dt.time
-        df['Date'] = df['Datetime'].dt.date
-        st.write("Available columns:", df.columns.tolist())
+    uploaded_file = st.file_uploader("Upload CSV file with OHLCV data", type=["csv"])
+        if uploaded_file is not None:
+            df = pd.read_csv(uploaded_file)
+            st.subheader("Available Columns in Uploaded File:")
+            st.write(df.columns.tolist())
+    
+            # Let user select the datetime column
+            datetime_col = st.selectbox("Select your Datetime column", df.columns)
+    
+            try:
+                df[datetime_col] = pd.to_datetime(df[datetime_col])
+                df['Time'] = df[datetime_col].dt.time
+                df['Date'] = df[datetime_col].dt.date
+                st.success("Datetime parsed successfully.")
+                st.dataframe(df.head())
+            except Exception as e:
+                st.error(f"❌ Failed to parse datetime: {e}")
+        else:
+            st.warning("📂 Please upload a CSV file to begin.")
 
     # Filter today's date and opening range (9:15 to 9:30)
     today = df['Date'].iloc[-1]
