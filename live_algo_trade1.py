@@ -158,6 +158,28 @@ def calculate_metrics(trades_df):
     }
     return metrics
 
+def calculate_metrics1(trades_df):
+    if trades_df.empty or 'PnL' not in trades_df.columns:
+        return {
+            'Total PnL': 0,
+            'Number of Trades': 0,
+            'Success Ratio (%)': 0,
+            'Average PnL per Trade': 0
+        }
+
+    total_pnl = trades_df['PnL'].sum()
+    number_of_trades = len(trades_df)
+    success_trades = trades_df[trades_df['PnL'] > 0]
+    success_ratio = (len(success_trades) / number_of_trades) * 100
+    avg_pnl_per_trade = trades_df['PnL'].mean()
+
+    return {
+        'Total PnL': round(total_pnl, 2),
+        'Number of Trades': number_of_trades,
+        'Success Ratio (%)': round(success_ratio, 2),
+        'Average PnL per Trade': round(avg_pnl_per_trade, 2)
+    }
+
 def download_link(df):
     csv = df.to_csv(index=False)
     st.download_button("Download Trade Log as CSV", data=csv, file_name="paper_trades.csv", mime="text/csv")
@@ -179,7 +201,7 @@ def main():
         datetime_col = st.selectbox("Select your Datetime column", df.columns)
         df = convert_timezone(df, datetime_col)
         trades_df = run_paper_trading1(df)
-        metrics = calculate_metrics(trades_df)
+        metrics = calculate_metrics1(trades_df)
         display_results(trades_df, metrics)
 
 if __name__ == "__main__":
