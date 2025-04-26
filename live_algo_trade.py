@@ -220,6 +220,7 @@ elif selected == "Intraday Algo Trading":
     # Fetch data
     df = yf.download(symbol + ".NS", start=start_date, end=end_date, interval='5m')
     df.reset_index(inplace=True)
+    st.write("Available columns:", df.columns.tolist())
     if 'Datetime' not in df.columns:
         st.error("⚠️ 'Datetime' column not found in the data. Please check your CSV or data source.")
     else:
