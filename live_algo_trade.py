@@ -365,6 +365,9 @@ elif selected == "Intraday Paper Trading":
         tax_rate = 0.0003  # 0.03% brokerage + other taxes approx
         taxes = turnover * tax_rate
         net_pnl = gross_pnl - taxes
+        # Success ratio calculation
+        winning_trades = trades_df[trades_df['PnL'] > 0]
+        success_ratio = (len(winning_trades) / total_trades * 100) if total_trades > 0 else 0
 
         # Display performance
         st.subheader("📈 Performance Report:")
@@ -374,6 +377,7 @@ elif selected == "Intraday Paper Trading":
         st.write(f"**Total Taxes (approx):** ₹{taxes:,.2f}")
         st.write(f"**Gross P&L:** ₹{gross_pnl:,.2f}")
         st.success(f"**Net P&L after Taxes:** ₹{net_pnl:,.2f}")
+        st.write(f"**Success Ratio:** {success_ratio:.2f}% ✅")
 
         # Show trades table
         st.subheader("📋 Trade Log:")
