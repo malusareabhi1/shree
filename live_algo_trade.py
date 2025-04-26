@@ -358,5 +358,11 @@ elif selected == "Intraday Paper Trading":
         # Show the trades table
         st.dataframe(trades_df)
 
-        # Optional: Save to CSV
-        trades_df.to_csv('paper_trades.csv', index=False)
+        # Download CSV button
+        csv = trades_df.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 Download Trades CSV",
+            data=csv,
+            file_name='paper_trades.csv',
+            mime='text/csv',
+        )
