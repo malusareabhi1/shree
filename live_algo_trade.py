@@ -207,7 +207,7 @@ elif selected == "Intraday Algo Trading":
         #______________________________________________________________________
         # Convert the datetime column (assume it's named 'Datetime') to datetime object
         #df['Date'] = pd.to_datetime(df['Date'])
-        st.write(df.columns.tolist())
+        #st.write(df.columns.tolist())
         # Localize to UTC if it's naive (no timezone info), then convert to Asia/Kolkata
         #if df['Date'].dt.tz is None:
            # df['Date'] = df['Date'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
