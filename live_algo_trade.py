@@ -247,14 +247,14 @@ elif selected == "Intraday Algo Trading":
             entry_price = row['Close']
             stop_loss = or_low
             target = entry_price + (entry_price - stop_loss) * 1.5
-            entry_time = row['Datetime']
+            entry_time = row['Time']
             break
         elif row['Low'] < or_low and trade_signal is None:
             trade_signal = "SELL"
             entry_price = row['Close']
             stop_loss = or_high
             target = entry_price - (stop_loss - entry_price) * 1.5
-            entry_time = row['Datetime']
+            entry_time = row['Time']
             break
 
     if trade_signal:
