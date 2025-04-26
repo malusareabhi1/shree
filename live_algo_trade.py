@@ -387,3 +387,4 @@ elif selected == "Intraday Paper Trading":
             file_name='paper_trades.csv',
             mime='text/csv',
         )
+        
