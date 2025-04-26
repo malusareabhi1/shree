@@ -213,6 +213,7 @@ if selected == "Live Algo Trading":
     col2.metric("🔸 EMA20", f"₹{latest['EMA20']:.2f}")
     #col3.metric("📌 Signal", signal)
     #---------------------------------------------------------------------------------------
+    #---------------------------------------------------------------------------------------
     import plotly.graph_objects as go
     from datetime import datetime
     
@@ -229,12 +230,11 @@ if selected == "Live Algo Trading":
     # Plot the candlestick chart with 20 EMA
     fig = go.Figure(data=[
         go.Candlestick(
-            #x=df_today.index,
-            x=df['Date'],  # Time series for x-axis
+            x=df_today.index,
             open=df_today["Open"],
             high=df_today["High"],
             low=df_today["Low"],
-            Close=df_today["Close"],
+            close=df_today["Close"],
             increasing_line_color="green",
             decreasing_line_color="red",
             name="Candles"
@@ -257,7 +257,6 @@ if selected == "Live Algo Trading":
     )
     
     st.plotly_chart(fig, use_container_width=True)
-    
     #---------------------------------------------------------------------------------------
     #st.subheader("📈 Price vs EMA20")
     #st.line_chart(df[["Close", "EMA20"]])
