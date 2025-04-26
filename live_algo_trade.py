@@ -26,6 +26,7 @@ selected = st.sidebar.selectbox("Choose a section", [
     "Home",
     "Live Algo Trading",
     "Intraday Algo Trading",
+    "Intraday Paper Trading",
     "Backtest Strategy",    
     "View Logs",
     "Settings"
@@ -282,6 +283,64 @@ elif selected == "Intraday Algo Trading":
     else:
         st.warning("No breakout signal found today.")
 
-
-
-   
+#_________________________________________________________________________________________________________________
+elif selected == "Intraday Paper Trading":
+    st.header("📊 Intraday ORB Strategy (Opening Range Breakout)")
+    # 1. Read the uploaded CSV
+    df = pd.read_csv(uploaded_file)
+    
+    # 2. Convert 'Datetime' column to India timezone
+    df['Datetime'] = pd.to_datetime(df['Datetime'])
+    df['Datetime'] = df['Datetime'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
+    df.set_index('Datetime', inplace=True)
+    
+    # 3. ➡️ INSERT PAPER TRADING CODE HERE
+    # (Paste full paper trading code block from earlier here)
+    
+    # Example: Start Paper Trading simulation
+    
+    capital = 100000  # Total capital
+    risk_per_trade = 0.02  # 2% risk per trade
+    position_size = capital * risk_per_trade
+    
+    trades = []
+    in_position = False
+    entry_price = None
+    entry_time = None
+    
+    for i in range(1, len(df)):
+        row_prev = df.iloc[i - 1]
+        row = df.iloc[i]
+    
+        if not in_position and row_prev['Close'] > row_prev['Open']:
+            entry_price = row['Open']
+            entry_time = row.name
+            in_position = True
+            trades.append({
+                'Type': 'BUY',
+                'Entry Time': entry_time,
+                'Entry Price': entry_price
+            })
+    
+        elif in_position and row_prev['Close'] < row_prev['Open']:
+            exit_price = row['Open']
+            exit_time = row.name
+            pnl = (exit_price - entry_price) * (position_size / entry_price)
+            trades[-1].update({
+                'Exit Time': exit_time,
+                'Exit Price': exit_price,
+                'PnL': round(pnl, 2)
+            })
+            in_position = False
+    
+    # 4. After trading simulation
+    trades_df = pd.DataFrame(trades)
+    total_pnl = trades_df['PnL'].sum()
+    print(f"Total PnL: ₹{round(total_pnl, 2)}")
+    
+    # Optional: Save to CSV
+    trades_df.to_csv('paper_trades.csv', index=False)
+    
+    
+    
+       
