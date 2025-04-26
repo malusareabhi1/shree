@@ -233,6 +233,7 @@ elif selected == "Intraday Algo Trading":
 
     st.write(f"🔼 Opening Range High: {or_high}")
     st.write(f"🔽 Opening Range Low: {or_low}")
+    st.write("Available columns:", today_df.columns.tolist())
 
     # Find breakout
     trade_signal = None
