@@ -206,16 +206,16 @@ elif selected == "Intraday Algo Trading":
         df = pd.read_csv(uploaded_file)
         #______________________________________________________________________
         # Convert the datetime column (assume it's named 'Datetime') to datetime object
-        df['Datetime'] = pd.to_datetime(df['Datetime'])
+        df['Date'] = pd.to_datetime(df['Date'])
         
         # Localize to UTC if it's naive (no timezone info), then convert to Asia/Kolkata
-        if df['Datetime'].dt.tz is None:
-            df['Datetime'] = df['Datetime'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
+        if df['Date'].dt.tz is None:
+            df['Date'] = df['Date'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
         else:
-            df['Datetime'] = df['Datetime'].dt.tz_convert('Asia/Kolkata')
+            df['Date'] = df['Date'].dt.tz_convert('Asia/Kolkata')
         
         # Set as index (optional but useful for time-based slicing)
-        df.set_index('Datetime', inplace=True)
+        df.set_index('Date', inplace=True)
 
 
         #_________________________________________________________________________
