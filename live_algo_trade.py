@@ -224,11 +224,11 @@ elif selected == "Intraday Algo Trading":
         st.error("⚠️ 'Datetime' column not found in the data. Please check your CSV or data source.")
     else:
     # Convert to datetime format if not already
-    df['Datetime'] = pd.to_datetime(df['Datetime'])
-    df['Time'] = df['Datetime'].dt.time
-    df['Time'] = df['Datetime'].dt.time
-    df['Date'] = df['Datetime'].dt.date
-    st.write("Available columns:", df.columns.tolist())
+        df['Datetime'] = pd.to_datetime(df['Datetime'])
+        df['Time'] = df['Datetime'].dt.time
+        df['Time'] = df['Datetime'].dt.time
+        df['Date'] = df['Datetime'].dt.date
+        st.write("Available columns:", df.columns.tolist())
 
     # Filter today's date and opening range (9:15 to 9:30)
     today = df['Date'].iloc[-1]
