@@ -197,7 +197,29 @@ if selected == "Live Algo Trading":
 
 elif selected == "Intraday Algo Trading":
     st.header("📊 Intraday ORB Strategy (Opening Range Breakout)")
+    import requests
+    import pandas as pd
+    @st.cache_data(ttl=86400)  # Cache for 1 day
+    def get_nifty_50_symbols():
+        url = "https://www.nseindia.com/api/equity-stockIndices?index=NIFTY%2050"
+        headers = {
+            "User-Agent": "Mozilla/5.0"
+        }
+        session = requests.Session()
+        session.headers.update(headers)
+        response = session.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            stocks = data["data"]
+            symbol_list = [item["symbol"] for item in stocks]
+            return symbol_list
+        else:
+            st.error("Failed to fetch NIFTY 50 symbols.")
+            return []
 
+
+
+    nifty_50_list = get_nifty_50_symbols()
     symbol = st.selectbox("Select Symbol", nifty_50_list)
     start_date = st.date_input("Start Date", pd.to_datetime("2024-04-01"))
     end_date = st.date_input("End Date", pd.to_datetime("today"))
