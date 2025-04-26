@@ -405,9 +405,28 @@ elif selected == "Bollinger Band Breakout":
         # Read CSV
         df = pd.read_csv(uploaded_file)
     
-        # Make sure 'Datetime' is datetime format
-        df['Datetime'] = pd.to_datetime(df['Datetime'])
-        df = df.sort_values('Datetime')
+        df = pd.read_csv(uploaded_file)
+
+        # 2. Select datetime column
+        datetime_col = st.selectbox("Select your Datetime column", df.columns)
+
+        # 3. Convert selected column to datetime
+        df[datetime_col] = pd.to_datetime(df[datetime_col])
+
+        # 4. Make a new 'Date' column from datetime_col
+        df['Date'] = df[datetime_col]
+
+        # 5. Check timezone
+        if df['Date'].dt.tz is None:
+            df['Date'] = df['Date'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
+        else:
+            df['Date'] = df['Date'].dt.tz_convert('Asia/Kolkata')
+
+        # 6. Set 'Date' as index
+        df.set_index('Date', inplace=True)
+
+        # 7. Show dataframe (optional)
+        st.write("Uploaded Data:", df.head())
     
         st.success("CSV File Loaded Successfully!")
     
