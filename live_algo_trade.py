@@ -211,7 +211,7 @@ elif selected == "Intraday Algo Trading":
         "GRASIM", "ADANIENT", "ADANIPORTS", "BRITANNIA", "CIPLA", "DRREDDY", "EICHERMOT", "HEROMOTOCO", "INDUSINDBK", "M&M",
         "SBILIFE", "SHREECEM", "TATACONSUM", "TATAMOTORS", "TATASTEEL", "UPL", "BAJAJ-AUTO", "BPCL", "HINDALCO", "IOC"
     ]
-    nifty_50_list = get_nifty_50_symbols()
+    #nifty_50_list = get_nifty_50_symbols()
     symbol = st.selectbox("Select Symbol", nifty_50_list)
     start_date = st.date_input("Start Date", pd.to_datetime("2024-04-01"))
     end_date = st.date_input("End Date", pd.to_datetime("today"))
