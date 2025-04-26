@@ -59,6 +59,83 @@ def run_paper_trading(df):
 
     return pd.DataFrame(trades)
 
+import ta
+
+def run_paper_trading1(df):
+    # 1) Precompute Indicators
+    df['ATR14'] = ta.volatility.average_true_range(df['High'], df['Low'], df['Close'], window=14)
+    df['VolAvg10'] = df['Volume'].rolling(10).mean()
+
+    # 2) Compute Daily Trend via 50-EMA on daily closes
+    df_daily = df.resample('1D').last()
+    df_daily['EMA50'] = df_daily['Close'].ewm(span=50).mean()
+
+    # 3) Extract date only for grouping
+    df['DateOnly'] = df.index.date
+
+    # 4) Opening Range (9:15–9:30) highs/lows per day
+    or_df = (
+        df.between_time('09:15','09:30')
+          .groupby('DateOnly')
+          .agg(or_high=('High','max'), or_low=('Low','min'))
+    )
+
+    position_size = CAPITAL * RISK_PER_TRADE
+    trades = []
+
+    # 5) Loop day by day
+    for day, day_data in df.groupby('DateOnly'):
+        # Skip if no OR
+        if day not in or_df.index:
+            continue
+        or_high, or_low = or_df.loc[day,['or_high','or_low']]
+        # ATR filter: skip narrow opening ranges
+        if (or_high - or_low) < 0.5 * day_data['ATR14'].iloc[-1]:
+            continue
+        # Trend filter
+        ts = pd.Timestamp(day)
+        if ts not in df_daily.index:
+            continue
+        up_trend = df_daily.at[ts,'Close'] > df_daily.at[ts,'EMA50']
+
+        in_position = False
+        entry_price = entry_time = None
+
+        # 6) Scan for breakouts AFTER 9:30
+        for idx in day_data.between_time('09:31','15:30').index:
+            row = day_data.loc[idx]
+            prev = day_data.loc[:idx].iloc[-2]
+
+            # Volume + Buffer
+            buffer = or_high * 0.001  # 0.1%
+            strong_break = row['High'] > or_high + buffer
+            vol_ok = row['Volume'] > 1.2 * day_data.at[idx,'VolAvg10']
+
+            # ENTRY
+            if not in_position and up_trend and strong_break and vol_ok:
+                in_position = True
+                entry_price = row['Open']
+                entry_time = idx
+                trades.append({
+                    'Type':'BUY','Entry Time':entry_time,'Entry Price':entry_price
+                })
+
+            # EXIT: simple opposite OR breakdown
+            elif in_position and row['Low'] < or_low - buffer:
+                exit_price = row['Open']
+                exit_time = idx
+                pnl = (exit_price - entry_price) * (position_size / entry_price)
+                trades[-1].update({
+                    'Exit Time': exit_time,
+                    'Exit Price': exit_price,
+                    'PnL': round(pnl,2)
+                })
+                in_position = False
+                break
+
+    return pd.DataFrame(trades)
+
+
 def calculate_metrics(trades_df):
     total_pnl = trades_df['PnL'].sum()
     success_trades = trades_df[trades_df['PnL'] > 0]
@@ -101,7 +178,7 @@ def main():
     if df is not None:
         datetime_col = st.selectbox("Select your Datetime column", df.columns)
         df = convert_timezone(df, datetime_col)
-        trades_df = run_paper_trading(df)
+        trades_df = run_paper_trading1(df)
         metrics = calculate_metrics(trades_df)
         display_results(trades_df, metrics)
 
