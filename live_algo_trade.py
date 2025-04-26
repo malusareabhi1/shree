@@ -67,7 +67,6 @@ if selected == "Live Algo Trading":
     @st.cache_data(ttl=60)
     def fetch_data(ticker: str) -> pd.DataFrame:
         df = yf.download(ticker, interval="5m", period="5d", progress=False)
-        st.write(df.head())
         df.index = pd.to_datetime(df.index)
     
         if df.index.tz is None:
@@ -79,31 +78,10 @@ if selected == "Live Algo Trading":
     
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
-        st.write(df.head())
-    
-        if df.index.tz is None:
-            df = df.tz_localize("UTC").tz_convert("Asia/Kolkata")
-        else:
-            df = df.tz_convert("Asia/Kolkata")
-        st.write(df.head())
-        st.write(df.columns)  # To check the columns of the DataFrame
-
-        # Ensure 'Date' is datetime for x-axis
-        df['Date'] = pd.to_datetime(df['Date'])
-        df.rename(columns={'timestamp': 'Date'}, inplace=True)  # Adjust 'timestamp' if it's the correct column
-
-        df.rename(columns={'timestamp': 'Date'}, inplace=True)
-        st.write(df.columns)  # To check the columns of the DataFrame
-    
-        df = df.between_time("09:15", "15:30")
-    
-        if isinstance(df.columns, pd.MultiIndex):
-            df.columns = df.columns.get_level_values(0)
     
         df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
         df["VMA20"] = df["Volume"].rolling(20).mean()
         return df
-    
     symbol = "^NSEI"
     df = fetch_data(symbol)
    
