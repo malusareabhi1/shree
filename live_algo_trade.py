@@ -398,6 +398,7 @@ elif selected == "Bollinger Band Breakout":
     #import pandas_ta as ta
     #Bollinger Band Breakout
     # File Upload
+    import pandas_ta as ta
     st.title("Algo Trading BOT - Bollinger Band Breakout")
 
     uploaded_file = st.file_uploader("Upload CSV File", type=['csv'])
@@ -441,7 +442,10 @@ elif selected == "Bollinger Band Breakout":
             stddev = 2   # Standard deviation multiplier
     
             # Calculate Bollinger Bands
-            df['UpperBand'], df['MiddleBand'], df['LowerBand'] = talib.BBANDS(df['Close'], timeperiod=period, nbdevup=stddev, nbdevdn=stddev, matype=0)
+            #df['UpperBand'], df['MiddleBand'], df['LowerBand'] = talib.BBANDS(df['Close'], timeperiod=period, nbdevup=stddev, nbdevdn=stddev, matype=0)
+            # Calculate Bollinger Bands with pandas-ta
+            df['UpperBand'], df['MiddleBand'], df['LowerBand'] = ta.bbands(df['Close'], length=period, std=stddev)
+
     
             # Create Signal Column
             df['Signal'] = None
