@@ -24,7 +24,8 @@ st.sidebar.title("📋 Navigation")
 selected = st.sidebar.selectbox("Choose a section", [
     "Home",
     "Live Algo Trading",
-    "Backtest Strategy",
+    "Intraday Algo Trading",
+    "Backtest Strategy",    
     "View Logs",
     "Settings"
 ])
@@ -192,5 +193,61 @@ if selected == "Live Algo Trading":
     with st.spinner("⏳ Refreshing in 30 seconds..."):
         time.sleep(30)
         st.rerun()
+
+elif selected == "Intraday Algo Trading":
+    st.header("📊 Intraday ORB Strategy (Opening Range Breakout)")
+
+    symbol = st.selectbox("Select Symbol", nifty_50_list)
+    start_date = st.date_input("Start Date", pd.to_datetime("2024-04-01"))
+    end_date = st.date_input("End Date", pd.to_datetime("today"))
+    capital = st.number_input("Capital", value=100000)
+
+    # Fetch data
+    df = yf.download(symbol + ".NS", start=start_date, end=end_date, interval='5m')
+    df.reset_index(inplace=True)
+    df['Time'] = df['Datetime'].dt.time
+    df['Date'] = df['Datetime'].dt.date
+
+    # Filter today's date and opening range (9:15 to 9:30)
+    today = df['Date'].iloc[-1]
+    today_df = df[df['Date'] == today]
+
+    opening_range = today_df[(today_df['Time'] >= datetime.time(9,15)) & (today_df['Time'] <= datetime.time(9,30))]
+    or_high = opening_range['High'].max()
+    or_low = opening_range['Low'].min()
+
+    st.write(f"🔼 Opening Range High: {or_high}")
+    st.write(f"🔽 Opening Range Low: {or_low}")
+
+    # Find breakout
+    trade_signal = None
+    breakout_df = today_df[today_df['Time'] > datetime.time(9,30)]
+
+    for i, row in breakout_df.iterrows():
+        if row['High'] > or_high and trade_signal is None:
+            trade_signal = "BUY"
+            entry_price = row['Close']
+            stop_loss = or_low
+            target = entry_price + (entry_price - stop_loss) * 1.5
+            entry_time = row['Datetime']
+            break
+        elif row['Low'] < or_low and trade_signal is None:
+            trade_signal = "SELL"
+            entry_price = row['Close']
+            stop_loss = or_high
+            target = entry_price - (stop_loss - entry_price) * 1.5
+            entry_time = row['Datetime']
+            break
+
+    if trade_signal:
+        st.success(f"📌 Signal: {trade_signal}")
+        st.write(f"📍 Entry Price: {entry_price}")
+        st.write(f"⛔ Stop Loss: {stop_loss}")
+        st.write(f"🎯 Target: {target}")
+        st.write(f"⏰ Time: {entry_time}")
+    else:
+        st.warning("No breakout signal found today.")
+
+
 
    
