@@ -69,14 +69,23 @@ if selected == "Live Algo Trading":
         df = yf.download(ticker, interval="5m", period="5d", progress=False)
         st.write(df.head())
         df.index = pd.to_datetime(df.index)
-        df['Date'] = pd.to_datetime(df['Date'])
+    
+        if df.index.tz is None:
+            df = df.tz_localize("UTC").tz_convert("Asia/Kolkata")
+        else:
+            df = df.tz_convert("Asia/Kolkata")
+    
+        df = df.between_time("09:15", "15:30")
+    
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
         st.write(df.head())
     
         if df.index.tz is None:
             df = df.tz_localize("UTC").tz_convert("Asia/Kolkata")
         else:
             df = df.tz_convert("Asia/Kolkata")
-
+        st.write(df.head())
         st.write(df.columns)  # To check the columns of the DataFrame
 
         # Ensure 'Date' is datetime for x-axis
