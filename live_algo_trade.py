@@ -287,7 +287,9 @@ elif selected == "Intraday Algo Trading":
 elif selected == "Intraday Paper Trading":
     st.header("📊 Intraday ORB Strategy (Opening Range Breakout)")
     # 1. Read the uploaded CSV
-    df = pd.read_csv(uploaded_file)
+    uploaded_file = st.file_uploader("Upload CSV file with OHLCV data", type=["csv"])
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file)
     
     # 2. Convert 'Datetime' column to India timezone
     df['Datetime'] = pd.to_datetime(df['Datetime'])
