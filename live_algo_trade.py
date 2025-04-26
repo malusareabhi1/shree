@@ -215,7 +215,7 @@ elif selected == "Intraday Algo Trading":
             df['Date'] = df['Date'].dt.tz_convert('Asia/Kolkata')
         
         # Set as index (optional but useful for time-based slicing)
-        df.set_index('Date', inplace=True)
+        #df.set_index('Date', inplace=True)
 
 
         #_________________________________________________________________________
