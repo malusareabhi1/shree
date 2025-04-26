@@ -19,3 +19,4 @@ python-dotenv
 nsepython 
 requests
 beautifulsoup4
+nse
