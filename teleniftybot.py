@@ -46,7 +46,8 @@ def main():
     market_closed_message_sent = False  # Control flag
 
     while True:
-        now = datetime.now(india_tz)
+        #now = datetime.now(india_tz)
+        now = datetime.datetime.now(india_tz)
         
         if is_market_open():
             try:
