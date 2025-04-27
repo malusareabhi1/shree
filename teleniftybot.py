@@ -37,7 +37,8 @@ def get_index_data(symbol):
         return None, None
 
 def is_market_open():
-    now = datetime.now(india_tz)
+    #now = datetime.now(india_tz)
+    now = datetime.datetime.now(india_tz)  # <-- Corrected line
     market_open = now.replace(hour=9, minute=15, second=0, microsecond=0)
     market_close = now.replace(hour=15, minute=30, second=0, microsecond=0)
     return market_open <= now <= market_close
