@@ -30,7 +30,9 @@ def get_nifty_price():
 
 def main():
     while True:
+        print("Strated")
         price = get_nifty_price()
+         print(price)
         if price:
             message = f"📈 NIFTY 50 Update:\nCurrent Price: {price:.2f} 🏦"
             send_telegram_message(bot_token, chat_id, message)
@@ -39,6 +41,7 @@ def main():
             print("Could not fetch NIFTY price.")
         
         time.sleep(300)  # Wait for 5 minutes
+         print("Strated")
 
 if __name__ == "__main__":
     main()
