@@ -19,29 +19,44 @@ def send_telegram_message(token, chat_id, message):
     }
     requests.post(url, data=payload)
 
-def get_nifty_price():
-    nifty = yf.Ticker("^NSEI")  # "^NSEI" is the Yahoo Finance code for NIFTY 50
-    data = nifty.history(period="1d", interval="5m")
+def get_index_data(symbol):
+    ticker = yf.Ticker(symbol)
+    data = ticker.history(period="1d", interval="5m")
     if not data.empty:
-        latest_price = data['Close'].iloc[-1]
-        return latest_price
+        current_price = data['Close'].iloc[-1]
+        previous_close = ticker.info['previousClose']
+        percent_change = ((current_price - previous_close) / previous_close) * 100
+        return current_price, percent_change
     else:
-        return None
+        return None, None
 
 def main():
     while True:
-        print("Strated")
-        price = get_nifty_price()
-         print(price)
-        if price:
-            message = f"📈 NIFTY 50 Update:\nCurrent Price: {price:.2f} 🏦"
-            send_telegram_message(bot_token, chat_id, message)
-            print(f"Sent: {message}")
-        else:
-            print("Could not fetch NIFTY price.")
+        try:
+            # Fetch data
+            nifty_price, nifty_change = get_index_data("^NSEI")
+            banknifty_price, banknifty_change = get_index_data("^NSEBANK")
+            bse_price, bse_change = get_index_data("^BSESN")
+            
+            if None not in (nifty_price, banknifty_price, bse_price):
+                message = f"""
+📊 *Market Update* 📊
+
+🔵 NIFTY 50: {nifty_price:.2f} ({nifty_change:+.2f}%)
+🟢 BANKNIFTY: {banknifty_price:.2f} ({banknifty_change:+.2f}%)
+🔴 BSE Sensex: {bse_price:.2f} ({bse_change:+.2f}%)
+
+⏰ Update every 5 minutes
+"""
+                send_telegram_message(bot_token, chat_id, message)
+                print("Sent Market Update!")
+            else:
+                print("Could not fetch data properly.")
         
-        time.sleep(300)  # Wait for 5 minutes
-         print("Strated")
+        except Exception as e:
+            print(f"Error: {e}")
+
+        time.sleep(300)  # 5 minutes
 
 if __name__ == "__main__":
     main()
