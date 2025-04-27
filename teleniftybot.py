@@ -4,6 +4,7 @@ import yfinance as yf
 from dotenv import load_dotenv
 import os
 import pytz
+import datetime
 
 # Load environment variables from .env file
 load_dotenv()
