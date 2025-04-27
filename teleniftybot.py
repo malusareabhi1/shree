@@ -3,6 +3,7 @@ import requests
 import yfinance as yf
 from dotenv import load_dotenv
 import os
+import pytz
 
 # Load environment variables from .env file
 load_dotenv()
