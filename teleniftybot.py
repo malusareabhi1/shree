@@ -8,8 +8,8 @@ import os
 load_dotenv()
 
 # Get bot details from environment variables
-bot_token = os.getenv("BOT_TOKEN")
-chat_id = os.getenv("CHAT_ID")
+bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+chat_id = os.getenv("TELEGRAM_CHAT_ID")
 
 def send_telegram_message(token, chat_id, message):
     url = f"https://api.telegram.org/bot{token}/sendMessage"
