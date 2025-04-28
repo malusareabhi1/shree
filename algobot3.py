@@ -1598,6 +1598,37 @@ elif selected == "Live Algo Trading":
                     df.at[idx, 'Signal'] = 'BUY'
     
         return df
+        #_________________________________________________________________________________________________________________
+        def get_live_iv(symbol, expiry_date, strike_price, option_type):
+            # Initialize the NSE object
+            nse = Nse()
+        
+            # Get Option chain data (you'll need the symbol, expiry, strike, and type)
+            option_data = nse.get_stock_option_chain(symbol)
+        
+            # Extract IV data (example; adapt depending on actual data structure)
+            for option in option_data['records']['data']:
+                if option['expiryDate'] == expiry_date and option['strikePrice'] == strike_price:
+                    if option_type == 'CE':  # Call option
+                        iv_value = option['CE']['impliedVolatility']
+                    elif option_type == 'PE':  # Put option
+                        iv_value = option['PE']['impliedVolatility']
+                    return iv_value
+            
+            return None
+        
+        # Example Usage
+        symbol = 'NIFTY'
+        expiry_date = '2025-04-30'  # expiry date
+        strike_price = 18000  # example strike price
+        option_type = 'CE'  # 'CE' for Call, 'PE' for Put
+        
+        iv_value = get_live_iv(symbol, expiry_date, strike_price, option_type)
+        if iv_value:
+            print(f"The live IV for {symbol} {expiry_date} {strike_price} {option_type} is: {iv_value}")
+        else:
+            print("IV data not available")
+     #____________________________________________________________________________________________________________________   
 
         
         signals_df = generate_signals(df, iv_data=live_iv_value, iv_threshold=16)
