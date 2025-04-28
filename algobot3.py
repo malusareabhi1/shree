@@ -1541,7 +1541,8 @@ elif selected == "Live Algo Trading":
     symbol = "^NSEI"
     df = fetch_data(symbol)
     if not df.empty:
-        latest = df.iloc[-1]
+        if len(df) > 0:
+            latest = df.iloc[-1]
     #latest = df.iloc[-1]
     if len(df) >= 2:
         prev = df.iloc[-2]  # Access second-to-last row
