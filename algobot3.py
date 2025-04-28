@@ -1564,7 +1564,7 @@ elif selected == "Live Algo Trading":
     # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
     def generate_signals(df: pd.DataFrame, iv_data: float, iv_threshold: float) -> pd.DataFrame:
         # 0a) See what columns you have:
-        print("Columns before normalize:", df.columns.tolist())
+        st.write("Columns before normalize:", df.columns.tolist())
         
         # 0b) Normalize your date column to 'Date'
         if 'Date' not in df.columns:
