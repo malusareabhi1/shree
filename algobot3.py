@@ -1630,7 +1630,7 @@ elif selected == "Live Algo Trading":
             st.write("IV data not available")
      #____________________________________________________________________________________________________________________   
 
-        
+        live_iv_value=17.06
         signals_df = generate_signals(df, iv_data=live_iv_value, iv_threshold=16)
         st.write(signals_df[['Date','Close','Signal']].dropna(subset=['Signal']))
     #_________________________________________________________________________________________________________________
