@@ -1520,6 +1520,8 @@ elif selected == "Live Algo Trading":
     def fetch_data(ticker: str) -> pd.DataFrame:
         df = yf.download(ticker, interval="5m", period="5d", progress=False)
         df.reset_index(inplace=True)
+        #df.reset_index(inplace=True)          # moves the old index into a 'Date' column
+        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
         #st.write("Columns after read:", df.columns.tolist())
         df.index = pd.to_datetime(df.index)
        
@@ -1554,8 +1556,7 @@ elif selected == "Live Algo Trading":
     
     # ─── MARKET OPEN/CLOSE MESSAGE ────────────────────────────────────────────────
     #now = latest.name
-    df.reset_index(inplace=True)          # moves the old index into a 'Date' column
-    df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+   
     if now.hour == 9 and now.minute == 15:
         market_msg = "📈 Market Opened at 09:15 But My Doctor Stratergy will Start 09:30 "
         st.success(market_msg)
