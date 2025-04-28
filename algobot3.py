@@ -1564,6 +1564,12 @@ elif selected == "Live Algo Trading":
     # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
     def generate_signals(df, iv_data: float, iv_threshold: float) -> pd.DataFrame:
         # 1) Ensure correct ordering & simple integer index
+        # If 'Date' is present, ensure it's a datetime column
+        if 'Date' in df.columns:
+            df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+            df = df.sort_values('Date').reset_index(drop=True)
+        else:
+            st.write("Column 'Date' not found. Please check the DataFrame.")
         df = df.sort_values('Date').reset_index(drop=True)
         
         # 2) SMA and Bollinger Bands
