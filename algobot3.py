@@ -1518,7 +1518,7 @@ elif selected == "Live Algo Trading":
     # ─── FETCH DATA ───────────────────────────────────────────────────────────────
     @st.cache_data(ttl=60)
     def fetch_data(ticker: str) -> pd.DataFrame:
-        df = yf.download(ticker, interval="5m", period="5d", progress=False)
+        df = yf.download(ticker, interval="5m", period="15d", progress=False)
         df.reset_index(inplace=True)
         #df.reset_index(inplace=True)          # moves the old index into a 'Date' column
         df['Date'] = pd.to_datetime(df['Datetime'], errors='coerce')
