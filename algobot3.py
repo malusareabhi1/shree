@@ -1562,37 +1562,43 @@ elif selected == "Live Algo Trading":
 
 
     # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
-    def generate_signals(df, iv_data: float, iv_threshold: float) -> pd.DataFrame:
-        # 1) Ensure correct ordering & simple integer index
-        # If 'Date' is present, ensure it's a datetime column
-        st.write(df.columns)
-        if 'Date' in df.columns:
-            df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
-            df = df.sort_values('Date').reset_index(drop=True)
-        else:
-            st.write("Column 'Date' not found. Please check the DataFrame.")
-        df = df.sort_values('Date').reset_index(drop=True)
+    def generate_signals(df: pd.DataFrame, iv_data: float, iv_threshold: float) -> pd.DataFrame:
+        # 0a) See what columns you have:
+        print("Columns before normalize:", df.columns.tolist())
         
-        # 2) SMA and Bollinger Bands
+        # 0b) Normalize your date column to 'Date'
+        if 'Date' not in df.columns:
+            if 'date' in df.columns:                 # lowercase
+                df = df.rename(columns={'date':'Date'})
+            elif 'timestamp' in df.columns:         # maybe it's timestamp?
+                df = df.rename(columns={'timestamp':'Date'})
+            else:
+                raise KeyError("No 'Date' (or 'date' / 'timestamp') column found in your DataFrame")
+        
+        # 0c) Convert to datetime
+        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+        if df['Date'].isna().any():
+            raise ValueError("Some 'Date' values could not be parsed as datetime")
+        
+        # 1) Now safe to sort
+        df = df.sort_values('Date').reset_index(drop=True)
+    
+        # … the rest of your logic …
         df['SMA_20']   = df['Close'].rolling(20).mean()
         df['Upper_BB'] = df['SMA_20'] + 2 * df['Close'].rolling(20).std()
         df['Lower_BB'] = df['SMA_20'] - 2 * df['Close'].rolling(20).std()
-        
-        # 3) Reference Candle
         df['Ref_Candle_Up'] = (
             (df['Close'] > df['SMA_20']) &
             (df['Close'].shift(1) > df['SMA_20'].shift(1))
         )
         
-        # 4) Vectorized BUY signal
+        # Vectorized BUY signal:
         df['Signal'] = np.where(
             (df['Ref_Candle_Up']) &
-            (iv_data >= iv_threshold) &
+            (iv_data  >= iv_threshold) &
             (df['Close'] > df['Close'].shift(1)),
-            'BUY',
-            None
+            'BUY', None
         )
-        
         return df
         #_________________________________________________________________________________________________________________
         def get_live_iv(symbol, expiry_date, strike_price, option_type):
