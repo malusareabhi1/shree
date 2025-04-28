@@ -1562,6 +1562,43 @@ elif selected == "Live Algo Trading":
 
 
     # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
+    def generate_signals(df, iv_data=16, iv_threshold=16):
+        """
+        Given a DataFrame with at least ['Date','Open','High','Low','Close'],
+        computes 20-period SMA, Bollinger Bands, and flags BUY signals when:
+          1. Price closes above the SMA (reference candle), AND
+          2. Implied volatility ≥ iv_threshold, AND
+          3. Close today > Close yesterday.
+        Returns the DataFrame with new columns: ['SMA_20','Upper_BB','Lower_BB',
+        'Crossed_SMA_Up','Ref_Candle_Up','Signal'].
+        """
+        # 1. 20-period SMA and Bollinger Bands
+        df['SMA_20']    = df['Close'].rolling(window=20).mean()
+        df['Upper_BB']  = df['SMA_20'] + 2 * df['Close'].rolling(window=20).std()
+        df['Lower_BB']  = df['SMA_20'] - 2 * df['Close'].rolling(window=20).std()
+    
+        # 2. Did price just cross above the SMA?
+        df['Crossed_SMA_Up'] = (
+            (df['Close'] > df['SMA_20']) &
+            (df['Close'].shift(1) < df['SMA_20'].shift(1))
+        )
+    
+        # 3. Reference candle: today and yesterday both closed above the SMA
+        df['Ref_Candle_Up'] = (
+            (df['Close'] > df['SMA_20']) &
+            (df['Close'].shift(1) > df['SMA_20'].shift(1))
+        )
+    
+        # 4. Generate BUY signals
+        df['Signal'] = None
+        for idx in range(1, len(df)):
+            if df.at[idx, 'Ref_Candle_Up'] and iv_data >= iv_threshold:
+                # ensure momentum continues
+                if df.at[idx, 'Close'] > df.at[idx-1, 'Close']:
+                    df.at[idx, 'Signal'] = 'BUY'
+    
+        return df
+    #_________________________________________________________________________________________________________________
     signal = "No Signal"
     if (prev["Close"] < prev["EMA20"]) and (latest["Close"] > prev["EMA20"]) and (latest["Volume"] > latest["VMA20"]):
         signal = "BUY"
