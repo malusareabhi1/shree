@@ -1547,8 +1547,8 @@ elif selected == "Live Algo Trading":
         if len(df) > 0:
             latest = df.iloc[-1]
             now = latest.name 
-            st.write(letest)
-            st.write(now)
+    st.write(letest)
+    st.write(now)
     #latest = df.iloc[-1]
     if len(df) >= 2:
         prev = df.iloc[-2]  # Access second-to-last row
@@ -1651,7 +1651,8 @@ elif selected == "Live Algo Trading":
     if len(df) >= 2:
         latest = df.iloc[-1]  # Get the latest row
         prev = df.iloc[-2]    # Get the previous row
-
+    st.write(df.shape)  # Shows the number of rows and columns
+    st.write(df.columns)  # Lists all the columns
     if (prev["Close"] < prev["EMA20"]) and (latest["Close"] > prev["EMA20"]) and (latest["Volume"] > latest["VMA20"]):
         signal = "BUY"
         entry_price = round(latest["Close"], 2)
