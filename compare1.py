@@ -5,12 +5,64 @@ import matplotlib.pyplot as plt
 
 # ---------- Define Strategy Functions ----------
 
+def calculate_performance(trades, brokerage_per_trade=20):
+    total_trades = len(trades)
+    winning_trades = trades[trades['Profit'] > 0].shape[0]
+    losing_trades = trades[trades['Profit'] <= 0].shape[0]
+    gross_profit = trades['Profit'].sum()
+    total_turnover = trades['Entry_Price'].sum() + trades['Exit_Price'].sum()
+    total_brokerage = total_trades * brokerage_per_trade  # Assuming 20 Rs per trade
+    risk_to_reward = (gross_profit / abs(trades['Profit'][trades['Profit'] < 0].sum())) if losing_trades > 0 else np.nan
+
+    return {
+        "Total Trades": total_trades,
+        "Winning Trades": winning_trades,
+        "Losing Trades": losing_trades,
+        "Gross Profit": gross_profit,
+        "Total Turnover": total_turnover,
+        "Total Brokerage": total_brokerage,
+        "Risk to Reward Ratio": risk_to_reward
+    }
+    
 def strategy_moving_average(df):
     df = df.copy()
     df['SMA20'] = df['Close'].rolling(window=20).mean()
     df['Signal'] = np.where(df['Close'] > df['SMA20'], 1, -1)
-    df['Strategy_Return'] = df['Signal'].shift(1) * df['Close'].pct_change()
-    return df, df['Strategy_Return'].cumsum()
+    df['Position'] = df['Signal'].shift(1)  # Lag signal for execution
+
+    # Create Trade Log
+    trades = []
+    position = 0
+    entry_price = 0
+
+    for index, row in df.iterrows():
+        if row['Position'] == 1 and position == 0:
+            entry_price = row['Close']
+            entry_date = index
+            position = 1
+        elif row['Position'] == -1 and position == 1:
+            exit_price = row['Close']
+            exit_date = index
+            profit = exit_price - entry_price
+            trades.append({
+                "Entry_Date": entry_date,
+                "Entry_Price": entry_price,
+                "Exit_Date": exit_date,
+                "Exit_Price": exit_price,
+                "Profit": profit
+            })
+            position = 0
+
+    trade_log = pd.DataFrame(trades)
+
+    # Strategy Cumulative Returns
+    df['Strategy_Return'] = df['Position'] * df['Close'].pct_change()
+    cumulative_returns = df['Strategy_Return'].cumsum()
+
+    # Performance Summary
+    performance = calculate_performance(trade_log)
+
+    return df, cumulative_returns, trade_log, performance
 
 def strategy_rsi(df):
     df = df.copy()
