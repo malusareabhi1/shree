@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import yfinance as yf
 import numpy as np
+import time
 
 st.set_page_config(layout="wide")
 st.title("📊 NIFTY 50 Trend Checker")
@@ -79,3 +80,6 @@ st.dataframe(
     df_trend.style.applymap(color_trend, subset=['Trend']),
     use_container_width=True
 )
+
+time.sleep(1)
+st.experimental_rerun()
