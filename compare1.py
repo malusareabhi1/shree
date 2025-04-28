@@ -197,25 +197,39 @@ if uploaded_file:
             for k, v in strat3_performance.items():
                 st.write(f"**{k}:** {round(v, 2)}")
 
-with tab4:
-        st.header("📋 Compare Strategies")
+# ---- Compare All Strategies ----
+    with tab4:
+        st.header("📊 Compare All Strategies")
+        if st.button("Compare Strategies"):
+            strat1_df, strat1_cumsum = strategy_moving_average(df)
+            strat2_df, strat2_cumsum = strategy_rsi(df)
+            strat3_df, strat3_cumsum = strategy_bollinger_bands(df)
 
-        # Only if at least one strategy is run
-        if any([strat1_performance, strat2_performance, strat3_performance]):
-            comparison_data = []
-            strategy_names = []
-            if strat1_performance:
-                comparison_data.append(strat1_performance)
-                strategy_names.append("Moving Average")
-            if strat2_performance:
-                comparison_data.append(strat2_performance)
-                strategy_names.append("RSI")
-            if strat3_performance:
-                comparison_data.append(strat3_performance)
-                strategy_names.append("Bollinger Bands")
+            # Plot all strategies together
+            fig, ax = plt.subplots(figsize=(12, 6))
+            ax.plot(strat1_cumsum, label='Moving Average')
+            ax.plot(strat2_cumsum, label='RSI Strategy')
+            ax.plot(strat3_cumsum, label='Bollinger Bands')
+            ax.set_title('Strategy Cumulative Returns Comparison')
+            ax.legend()
+            st.pyplot(fig)
 
-            comparison_df = pd.DataFrame(comparison_data, index=strategy_names)
-            st.dataframe(comparison_df)
+            # Show Final Returns
+            final_returns = {
+                "Strategy": ["Moving Average", "RSI", "Bollinger Bands"],
+                "Final Return (%)": [
+                    strat1_cumsum.iloc[-1] * 100,
+                    strat2_cumsum.iloc[-1] * 100,
+                    strat3_cumsum.iloc[-1] * 100
+                ]
+            }
+            final_returns_df = pd.DataFrame(final_returns)
+            st.dataframe(final_returns_df)
 
-        else:
-            st.warning("Run at least one strategy to compare!")
+    # ---- Show Raw Data ----
+    with tab5:
+        st.header("Raw Uploaded Data")
+        st.dataframe(df)
+
+else:
+    st.warning("👆 Please upload a CSV file to start.")
