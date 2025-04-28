@@ -196,3 +196,26 @@ if uploaded_file:
             st.subheader("📈 Performance Summary")
             for k, v in strat3_performance.items():
                 st.write(f"**{k}:** {round(v, 2)}")
+
+with tab4:
+        st.header("📋 Compare Strategies")
+
+        # Only if at least one strategy is run
+        if any([strat1_performance, strat2_performance, strat3_performance]):
+            comparison_data = []
+            strategy_names = []
+            if strat1_performance:
+                comparison_data.append(strat1_performance)
+                strategy_names.append("Moving Average")
+            if strat2_performance:
+                comparison_data.append(strat2_performance)
+                strategy_names.append("RSI")
+            if strat3_performance:
+                comparison_data.append(strat3_performance)
+                strategy_names.append("Bollinger Bands")
+
+            comparison_df = pd.DataFrame(comparison_data, index=strategy_names)
+            st.dataframe(comparison_df)
+
+        else:
+            st.warning("Run at least one strategy to compare!")
