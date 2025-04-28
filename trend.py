@@ -3,6 +3,8 @@ import pandas as pd
 import yfinance as yf
 import numpy as np
 import time
+from streamlit_autorefresh import st_autorefresh
+
 
 st.set_page_config(layout="wide")
 st.title("📊 NIFTY 50 Trend Checker")
@@ -82,4 +84,5 @@ st.dataframe(
 )
 
 time.sleep(1)
-st.experimental_rerun()
+#st.experimental_rerun()
+st_autorefresh(interval=1000, limit=None, key="trendrefresh")
