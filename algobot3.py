@@ -1543,7 +1543,9 @@ elif selected == "Live Algo Trading":
     if not df.empty:
         latest = df.iloc[-1]
     #latest = df.iloc[-1]
-    prev = df.iloc[-2]
+    if len(df) >= 2:
+        prev = df.iloc[-2]  # Access second-to-last row
+    #prev = df.iloc[-2]
     
     # ─── MARKET OPEN/CLOSE MESSAGE ────────────────────────────────────────────────
     now = latest.name
