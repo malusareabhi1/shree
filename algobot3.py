@@ -1520,7 +1520,7 @@ elif selected == "Live Algo Trading":
     def fetch_data(ticker: str) -> pd.DataFrame:
         df = yf.download(ticker, interval="5m", period="5d", progress=False)
         df.reset_index(inplace=True)
-        st.write("Columns after read:", df.columns.tolist())
+        #st.write("Columns after read:", df.columns.tolist())
         df.index = pd.to_datetime(df.index)
        
         if df.index.tz is None:
@@ -1535,6 +1535,7 @@ elif selected == "Live Algo Trading":
     
         df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
         df["VMA20"] = df["Volume"].rolling(20).mean()
+        st.write("Columns after read:", df.columns.tolist())
         return df
     
     symbol = "^NSEI"
