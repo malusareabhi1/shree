@@ -1545,6 +1545,8 @@ elif selected == "Live Algo Trading":
         if len(df) > 0:
             latest = df.iloc[-1]
             now = latest.name 
+            st.write(letest)
+            st.write(now)
     #latest = df.iloc[-1]
     if len(df) >= 2:
         prev = df.iloc[-2]  # Access second-to-last row
