@@ -1598,6 +1598,10 @@ elif selected == "Live Algo Trading":
                     df.at[idx, 'Signal'] = 'BUY'
     
         return df
+
+        
+        signals_df = generate_signals(df, iv_data=live_iv_value, iv_threshold=16)
+        st.write(signals_df[['Date','Close','Signal']].dropna(subset=['Signal']))
     #_________________________________________________________________________________________________________________
     signal = "No Signal"
     if (prev["Close"] < prev["EMA20"]) and (latest["Close"] > prev["EMA20"]) and (latest["Volume"] > latest["VMA20"]):
