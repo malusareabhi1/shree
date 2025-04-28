@@ -115,11 +115,17 @@ if uploaded_file:
 
     # ---- Strategy 1 ----
     with tab1:
-        st.header("Strategy 1: Moving Average Crossover")
-        if st.button("Run Moving Average Strategy"):
-            strat1_df, strat1_cumsum = strategy_moving_average(df)
-            st.line_chart(strat1_cumsum)
-            st.dataframe(strat1_df.tail(10))
+    st.header("Strategy 1: Moving Average Crossover")
+    if st.button("Run Moving Average Strategy"):
+        strat1_df, strat1_cumsum, strat1_trades, strat1_performance = strategy_moving_average(df)
+        st.line_chart(strat1_cumsum)
+
+        st.subheader("🔍 Trade Log")
+        st.dataframe(strat1_trades)
+
+        st.subheader("📈 Performance Summary")
+        for k, v in strat1_performance.items():
+            st.write(f"**{k}:** {round(v, 2)}")
 
     # ---- Strategy 2 ----
     with tab2:
