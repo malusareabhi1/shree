@@ -1625,9 +1625,9 @@ elif selected == "Live Algo Trading":
         
         iv_value = get_live_iv(symbol, expiry_date, strike_price, option_type)
         if iv_value:
-            print(f"The live IV for {symbol} {expiry_date} {strike_price} {option_type} is: {iv_value}")
+            st.write(f"The live IV for {symbol} {expiry_date} {strike_price} {option_type} is: {iv_value}")
         else:
-            print("IV data not available")
+            st.write("IV data not available")
      #____________________________________________________________________________________________________________________   
 
         
