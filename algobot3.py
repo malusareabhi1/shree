@@ -1519,6 +1519,7 @@ elif selected == "Live Algo Trading":
     @st.cache_data(ttl=60)
     def fetch_data(ticker: str) -> pd.DataFrame:
         df = yf.download(ticker, interval="5m", period="5d", progress=False)
+        df.reset_index(inplace=True)
         st.write("Columns after read:", df.columns.tolist())
         df.index = pd.to_datetime(df.index)
        
