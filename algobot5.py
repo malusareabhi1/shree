@@ -1654,6 +1654,9 @@ elif selected == "Live Algo Trading":
         prev = df.iloc[-2]    # Get the previous row
     st.write(df.shape)  # Shows the number of rows and columns
     st.write(df.columns)  # Lists all the columns
+    prev = df.iloc[-2]
+    latest = df.iloc[-1]
+
     if (prev["Close"] < prev["EMA20"]) and (latest["Close"] > prev["EMA20"]) and (latest["Volume"] > latest["VMA20"]):
         signal = "BUY"
         entry_price = round(latest["Close"], 2)
