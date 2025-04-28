@@ -1,96 +1,126 @@
 import streamlit as st
 import pandas as pd
-from nsetools import Nse
+from kiteconnect import KiteConnect
+import math
+from scipy.stats import norm
+
+# ----- Utility Functions -----
+
+def calculate_implied_volatility(S, K, T, r, market_price, option_type="CE"):
+    """
+    Calculate implied volatility using the Black-Scholes model via Newton-Raphson.
+    """
+    def bs_price(sigma):
+        d1 = (math.log(S / K) + (r + 0.5 * sigma**2) * T) / (sigma * math.sqrt(T))
+        d2 = d1 - sigma * math.sqrt(T)
+        if option_type == "CE":
+            return S * norm.cdf(d1) - K * math.exp(-r * T) * norm.cdf(d2)
+        else:
+            return K * math.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
+
+    sigma = 0.2
+    for _ in range(100):
+        price = bs_price(sigma)
+        # Vega
+        d1 = (math.log(S / K) + (r + 0.5 * sigma**2) * T) / (sigma * math.sqrt(T))
+        vega = S * norm.pdf(d1) * math.sqrt(T)
+        sigma -= (price - market_price) / vega
+        if abs(price - market_price) < 1e-3:
+            break
+    return sigma
 
 
-def generate_signals(df: pd.DataFrame, iv_data: float = 16.0, iv_threshold: float = 16.0) -> pd.DataFrame:
-    """
-    Given a DataFrame with at least ['Date','Open','High','Low','Close'],
-    computes 20-period SMA, Bollinger Bands, and flags BUY signals when:
-      1. Reference candle above SMA 20,
-      2. Implied volatility ≥ threshold,
-      3. Close today > Close yesterday.
-    Returns the DataFrame with new columns: ['SMA_20','Upper_BB','Lower_BB',
-    'Crossed_SMA_Up','Ref_Candle_Up','Signal'].
-    """
+def generate_signals(df: pd.DataFrame, iv_data: float, iv_threshold: float) -> pd.DataFrame:
     df = df.sort_values('Date').reset_index(drop=True)
-    df['SMA_20']   = df['Close'].rolling(window=20).mean()
-    df['Upper_BB'] = df['SMA_20'] + 2 * df['Close'].rolling(window=20).std()
-    df['Lower_BB'] = df['SMA_20'] - 2 * df['Close'].rolling(window=20).std()
-    df['Crossed_SMA_Up'] = (
-        (df['Close'] > df['SMA_20']) &
-        (df['Close'].shift(1) < df['SMA_20'].shift(1))
-    )
+    df['SMA_20']   = df['Close'].rolling(20).mean()
+    df['Upper_BB'] = df['SMA_20'] + 2 * df['Close'].rolling(20).std()
+    df['Lower_BB'] = df['SMA_20'] - 2 * df['Close'].rolling(20).std()
     df['Ref_Candle_Up'] = (
         (df['Close'] > df['SMA_20']) &
         (df['Close'].shift(1) > df['SMA_20'].shift(1))
     )
     df['Signal'] = None
-    for idx in range(1, len(df)):
-        if df.at[idx, 'Ref_Candle_Up'] and iv_data >= iv_threshold:
-            if df.at[idx, 'Close'] > df.at[idx - 1, 'Close']:
-                df.at[idx, 'Signal'] = 'BUY'
+    for i in range(1, len(df)):
+        if df.at[i, 'Ref_Candle_Up'] and iv_data >= iv_threshold:
+            if df.at[i, 'Close'] > df.at[i - 1, 'Close']:
+                df.at[i, 'Signal'] = 'BUY'
     return df
 
 
-def get_live_iv(symbol: str, expiry_date: str, strike_price: float, option_type: str) -> float:
+def get_live_iv_kite(kite: KiteConnect, symbol: str, expiry: str, strike: float, opt_type: str):
     """
-    Fetches live implied volatility from NSE option chain for a given symbol,
-    expiry date, strike price, and option type ('CE' or 'PE').
+    Fetch option LTP via Kite, then compute IV via Black-Scholes.
+    expiry format: 'DDMMMYYYY', e.g. '30APR2025'
     """
-    nse = Nse()
-    data = nse.get_stock_option_chain(symbol)
-    for rec in data.get('records', {}).get('data', []):
-        if rec.get('expiryDate') == expiry_date and rec.get('strikePrice') == strike_price:
-            if option_type.upper() == 'CE' and 'CE' in rec:
-                return rec['CE'].get('impliedVolatility')
-            elif option_type.upper() == 'PE' and 'PE' in rec:
-                return rec['PE'].get('impliedVolatility')
-    return None
+    try:
+        option_token = f"{symbol}{expiry}{int(strike)}{opt_type}"
+        ltp_data = kite.ltp([f"NSE:{option_token}"])
+        opt_price = ltp_data[f"NSE:{option_token}"]['last_price']
+        # Get underlying price
+        underlying_data = kite.ltp([f"NSE:{symbol}50"])
+        S = underlying_data[f"NSE:{symbol}50"]['last_price']
+        # Assume r and T
+        r = 0.05
+        # compute days to expiry
+        from datetime import datetime
+        expiry_dt = datetime.strptime(expiry, "%d%b%Y")
+        T = (expiry_dt - datetime.now()).days / 365
+        iv = calculate_implied_volatility(S, strike, T, r, opt_price, opt_type)
+        return iv * 100  # in percent
+    except Exception as e:
+        st.error(f"Error fetching IV: {e}")
+        return None
 
+
+# ----- Streamlit App -----
 
 def main():
-    st.title("⚙️ Doctor Trade Strategy Signals")
-    st.markdown("Upload OHLC CSV and fetch live IV to generate BUY signals.")
+    st.sidebar.title("Navigation")
+    choice = st.sidebar.selectbox("Go to", ["Doctor Strategy", "KITE API"])
 
-    uploaded_file = st.file_uploader("Upload OHLC CSV", type="csv")
-    col1, col2 = st.columns(2)
-    with col1:
-        symbol = st.text_input("Symbol", value="NIFTY")
-        expiry = st.text_input("Expiry Date (DD-MMM-YYYY)", value="30-Apr-2025")
-    with col2:
-        strike = st.number_input("Strike Price", min_value=0.0, value=18000.0)
-        opt_type = st.selectbox("Option Type", options=["CE", "PE"], index=0)
+    if choice == "Doctor Strategy":
+        st.header("⚙️ Doctor Strategy Signal Generator")
+        file = st.file_uploader("Upload OHLC CSV", type='csv')
+        iv_thresh = st.number_input("IV Threshold (%)", value=16.0, step=0.1)
+        if file:
+            df = pd.read_csv(file, parse_dates=['Date'])
+            iv_val = st.number_input("Use IV Value (%)", value=iv_thresh)
+            signals_df = generate_signals(df, iv_val, iv_thresh)
+            signals = signals_df.dropna(subset=['Signal'])
+            st.dataframe(signals[['Date','Close','Signal']])
 
-    if uploaded_file:
-        df = pd.read_csv(uploaded_file, parse_dates=['Date'])
-        df = df.sort_values('Date')
-
-        # Fetch live IV
-        iv_val = get_live_iv(symbol, expiry, strike, opt_type)
-        if iv_val is None:
-            st.error("Could not retrieve live IV for given parameters.")
-            return
-        st.success(f"Live IV for {symbol} {expiry} {strike} {opt_type}: {iv_val:.2f}%")
-
-        # Generate signals
-        result_df = generate_signals(df, iv_data=iv_val, iv_threshold=iv_val)
-        signals = result_df.dropna(subset=['Signal'])
-
-        if not signals.empty:
-            st.subheader("Generated BUY Signals")
-            st.dataframe(signals[['Date','Open','High','Low','Close','Signal']])
-        else:
-            st.info("No BUY signals generated with current IV conditions.")
-
-        # Download all results
-        csv_data = result_df.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            "📥 Download Full Signals CSV",
-            data=csv_data,
-            file_name="doctor_strategy_signals.csv",
-            mime="text/csv"
-        )
+    else:
+        st.header("🔐 Kite Connect API (Zerodha)")
+        api_key = st.text_input("API Key", type="password")
+        api_secret = st.text_input("API Secret", type="password")
+        if api_key and api_secret:
+            kite = KiteConnect(api_key=api_key)
+            login_url = kite.login_url()
+            st.markdown(f"[Login to Zerodha]({login_url})")
+            token = st.text_input("Request Token")
+            if token:
+                data = kite.generate_session(token, api_secret)
+                kite.set_access_token(data['access_token'])
+                st.success("Logged in to Kite API")
+                # IV Fetch Controls
+                st.subheader("Fetch Live Implied Volatility")
+                symbol = st.text_input("Symbol", value="NIFTY")
+                expiry = st.text_input("Expiry (DDMONYYYY)", value="30APR2025")
+                strike = st.number_input("Strike Price", value=18000.0)
+                opt_type = st.selectbox("Option Type", ["CE","PE"])
+                if st.button("Get Live IV"):
+                    iv = get_live_iv_kite(kite, symbol, expiry, strike, opt_type)
+                    if iv is not None:
+                        st.success(f"Implied Volatility: {iv:.2f}%")
+                        # Optionally: load OHLC for signals
+                        if st.checkbox("Generate Signals using this IV"):
+                            file = st.file_uploader("Upload OHLC CSV for Signals", type='csv')
+                            if file:
+                                df = pd.read_csv(file, parse_dates=['Date'])
+                                df = df.sort_values('Date')
+                                res = generate_signals(df, iv, iv)
+                                sig = res.dropna(subset=['Signal'])
+                                st.dataframe(sig[['Date','Close','Signal']])
 
 if __name__ == "__main__":
     main()
