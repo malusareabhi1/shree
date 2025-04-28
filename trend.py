@@ -47,15 +47,15 @@ for symbol in nifty_50_symbols:
     df = fetch_data(symbol)
     if df is not None and not df.empty:
         trend = determine_trend(df)
-        last_close = df['Close'].iloc[-1]
-        prev_close = df['Close'].iloc[-2] if len(df) >= 2 else last_close
+        last_close = float(df['Close'].iloc[-1])
+        prev_close = float(df['Close'].iloc[-2]) if len(df) >= 2 else last_close
         change_pct = ((last_close - prev_close) / prev_close) * 100 if prev_close != 0 else 0
-        volume = df['Volume'].iloc[-1]
+        volume = int(df['Volume'].iloc[-1])
         trend_data.append({
             "Symbol": symbol.replace(".NS", ""),
             "Price": round(last_close, 2),
             "Change %": round(change_pct, 2),
-            "Volume": int(volume),
+            "Volume": volume,
             "Trend": trend
         })
     else:
