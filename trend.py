@@ -45,8 +45,27 @@ trend_data = []
 
 for symbol in nifty_50_symbols:
     df = fetch_data(symbol)
-    trend = determine_trend(df)
-    trend_data.append({"Symbol": symbol.replace(".NS", ""), "Trend": trend})
+    if df is not None and not df.empty:
+        trend = determine_trend(df)
+        last_close = df['Close'].iloc[-1]
+        prev_close = df['Close'].iloc[-2] if len(df) >= 2 else last_close
+        change_pct = ((last_close - prev_close) / prev_close) * 100 if prev_close != 0 else 0
+        volume = df['Volume'].iloc[-1]
+        trend_data.append({
+            "Symbol": symbol.replace(".NS", ""),
+            "Price": round(last_close, 2),
+            "Change %": round(change_pct, 2),
+            "Volume": int(volume),
+            "Trend": trend
+        })
+    else:
+        trend_data.append({
+            "Symbol": symbol.replace(".NS", ""),
+            "Price": None,
+            "Change %": None,
+            "Volume": None,
+            "Trend": "No Data"
+        })
 
 df_trend = pd.DataFrame(trend_data)
 
@@ -56,4 +75,7 @@ def color_trend(val):
     color = "green" if val == "Uptrend" else ("red" if val == "Downtrend" else "gray")
     return f"color: {color}; font-weight: bold"
 
-st.dataframe(df_trend.style.applymap(color_trend, subset=['Trend']), use_container_width=True)
+st.dataframe(
+    df_trend.style.applymap(color_trend, subset=['Trend']),
+    use_container_width=True
+)
