@@ -1535,11 +1535,12 @@ elif selected == "Live Algo Trading":
     
         df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
         df["VMA20"] = df["Volume"].rolling(20).mean()
-        st.write("Columns after read:", df.columns.tolist())
+        
         return df
     
     symbol = "^NSEI"
     df = fetch_data(symbol)
+    st.write("Columns after read:", df.columns.tolist())
     if not df.empty:
         if len(df) > 0:
             latest = df.iloc[-1]
