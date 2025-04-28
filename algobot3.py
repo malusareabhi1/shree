@@ -1540,7 +1540,9 @@ elif selected == "Live Algo Trading":
     
     symbol = "^NSEI"
     df = fetch_data(symbol)
-    latest = df.iloc[-1]
+    if not df.empty:
+        latest = df.iloc[-1]
+    #latest = df.iloc[-1]
     prev = df.iloc[-2]
     
     # ─── MARKET OPEN/CLOSE MESSAGE ────────────────────────────────────────────────
