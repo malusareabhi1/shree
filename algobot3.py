@@ -1521,7 +1521,7 @@ elif selected == "Live Algo Trading":
         df = yf.download(ticker, interval="5m", period="5d", progress=False)
         df.reset_index(inplace=True)
         #df.reset_index(inplace=True)          # moves the old index into a 'Date' column
-        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+        df['Date'] = pd.to_datetime(df['Datetime'], errors='coerce')
         #st.write("Columns after read:", df.columns.tolist())
         df.index = pd.to_datetime(df.index)
        
