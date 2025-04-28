@@ -1551,7 +1551,7 @@ elif selected == "Live Algo Trading":
     #prev = df.iloc[-2]
     
     # ─── MARKET OPEN/CLOSE MESSAGE ────────────────────────────────────────────────
-    now = latest.name
+    #now = latest.name
     if now.hour == 9 and now.minute == 15:
         market_msg = "📈 Market Opened at 09:15 But My Doctor Stratergy will Start 09:30 "
         st.success(market_msg)
