@@ -1628,12 +1628,7 @@ elif selected == "Live Algo Trading":
             st.write(f"The live IV for {symbol} {expiry_date} {strike_price} {option_type} is: {iv_value}")
         else:
             st.write("IV data not available")
-     #____________________________________________________________________________________________________________________   
-
-        live_iv_value=17.06
-        signals_df = generate_signals(df, iv_data=live_iv_value, iv_threshold=16)
-        st.write(signals_df[['Date','Close','Signal']].dropna(subset=['Signal']))
-    #_________________________________________________________________________________________________________________
+    
     signal = "No Signal"
     if (prev["Close"] < prev["EMA20"]) and (latest["Close"] > prev["EMA20"]) and (latest["Volume"] > latest["VMA20"]):
         signal = "BUY"
@@ -1658,6 +1653,12 @@ elif selected == "Live Algo Trading":
     col2.metric("🔸 EMA20", f"₹{latest['EMA20']:.2f}")
     col3.metric("📌 Signal", signal)
     #---------------------------------------------------------------------------------------
+     #____________________________________________________________________________________________________________________   
+
+    live_iv_value=17.06
+    signals_df = generate_signals(df, iv_data=live_iv_value, iv_threshold=16)
+    st.write(signals_df[['Date','Close','Signal']].dropna(subset=['Signal']))
+    #_________________________________________________________________________________________________________________
     import plotly.graph_objects as go
     from datetime import datetime
     
