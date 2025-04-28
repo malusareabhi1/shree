@@ -1578,74 +1578,11 @@ elif selected == "Live Algo Trading":
 
 
     # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
-    def generate_signals(df: pd.DataFrame, iv_data: float, iv_threshold: float) -> pd.DataFrame:
-        # 0a) See what columns you have:
-        st.write("Columns before normalize:", df.columns.tolist())
+   
+    #_________________________________________________________________________________________________________________
         
-        # 0b) Normalize your date column to 'Date'
-        if 'Date' not in df.columns:
-            if 'date' in df.columns:                 # lowercase
-                df = df.rename(columns={'date':'Date'})
-            elif 'timestamp' in df.columns:         # maybe it's timestamp?
-                df = df.rename(columns={'timestamp':'Date'})
-            else:
-                raise KeyError("No 'Date' (or 'date' / 'timestamp') column found in your DataFrame")
         
-        # 0c) Convert to datetime
-        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
-        if df['Date'].isna().any():
-            raise ValueError("Some 'Date' values could not be parsed as datetime")
         
-        # 1) Now safe to sort
-        df = df.sort_values('Date').reset_index(drop=True)
-    
-        # … the rest of your logic …
-        df['SMA_20']   = df['Close'].rolling(20).mean()
-        df['Upper_BB'] = df['SMA_20'] + 2 * df['Close'].rolling(20).std()
-        df['Lower_BB'] = df['SMA_20'] - 2 * df['Close'].rolling(20).std()
-        df['Ref_Candle_Up'] = (
-            (df['Close'] > df['SMA_20']) &
-            (df['Close'].shift(1) > df['SMA_20'].shift(1))
-        )
-        
-        # Vectorized BUY signal:
-        df['Signal'] = np.where(
-            (df['Ref_Candle_Up']) &
-            (iv_data  >= iv_threshold) &
-            (df['Close'] > df['Close'].shift(1)),
-            'BUY', None
-        )
-        return df
-        #_________________________________________________________________________________________________________________
-        def get_live_iv(symbol, expiry_date, strike_price, option_type):
-            # Initialize the NSE object
-            nse = Nse()
-        
-            # Get Option chain data (you'll need the symbol, expiry, strike, and type)
-            option_data = nse.get_stock_option_chain(symbol)
-        
-            # Extract IV data (example; adapt depending on actual data structure)
-            for option in option_data['records']['data']:
-                if option['expiryDate'] == expiry_date and option['strikePrice'] == strike_price:
-                    if option_type == 'CE':  # Call option
-                        iv_value = option['CE']['impliedVolatility']
-                    elif option_type == 'PE':  # Put option
-                        iv_value = option['PE']['impliedVolatility']
-                    return iv_value
-            
-            return None
-        
-        # Example Usage
-        symbol = 'NIFTY'
-        expiry_date = '2025-04-30'  # expiry date
-        strike_price = 18000  # example strike price
-        option_type = 'CE'  # 'CE' for Call, 'PE' for Put
-        
-        iv_value = get_live_iv(symbol, expiry_date, strike_price, option_type)
-        if iv_value:
-            st.write(f"The live IV for {symbol} {expiry_date} {strike_price} {option_type} is: {iv_value}")
-        else:
-            st.write("IV data not available")
     
     signal = "No Signal"
     # Check if DataFrame has enough data
