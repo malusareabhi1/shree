@@ -148,15 +148,32 @@ def strategy_bollinger_bands(df):
     return df, cumulative_returns, trade_log, performance
 
 # Streamlit App
-st.title("📈 Trading Strategy Dashboard")
+# ---------- Streamlit App Starts Here ----------
 
-uploaded_file = st.file_uploader("Upload CSV File", type=["csv"])
+st.set_page_config(page_title="Algo Strategy Comparison", layout="wide")
+
+st.title("📈 Algo Trading Strategies Dashboard")
+
+# Sidebar for file upload
+st.sidebar.header("Upload CSV File")
+uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type=["csv"])
 
 if uploaded_file:
-    df = pd.read_csv(uploaded_file, index_col='Date', parse_dates=True)
-    st.success("File Uploaded Successfully!")
+    df = pd.read_csv(uploaded_file)
+
+    # Assuming CSV has a 'Date' and 'Close' columns
+    if 'Date' in df.columns:
+        df['Date'] = pd.to_datetime(df['Date'])
+        df = df.set_index('Date')
+
+    st.success("✅ File Loaded Successfully!")
     
-    tab1, tab2, tab3 = st.tabs(["Moving Average", "RSI", "Bollinger Bands"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Strategy 1 - Moving Average", 
+                                            "Strategy 2 - RSI", 
+                                            "Strategy 3 - Bollinger Bands",
+                                            "Compare All Strategies",
+                                            "Raw Data"])
+
 
     with tab1:
         st.header("Strategy 1: Moving Average Crossover")
