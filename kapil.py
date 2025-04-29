@@ -401,7 +401,7 @@ elif selected == "Doctor Strategy":
                         'Brokerage'     : 20 ,   # ₹20 per trade
                         'PnL': None,
                         'Turnover':None,
-                        'Exit_Reason': None  # Add the Exit_Reason field
+                        'Exit_Reason': None,  # Add the Exit_Reason field
                         'Signal_Reason': df['Signal_Reason'].iloc[idx]  # ✅ Add this line
                     }
             
