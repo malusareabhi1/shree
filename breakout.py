@@ -113,50 +113,59 @@ def macd_strategy(data):
     data.dropna(inplace=True)
     return data
 
-def calculate_performance_metrics(data):
-    data['Daily Return'] = data['Strategy'].pct_change()
-    data.dropna(inplace=True)
-    
-    # Metrics Calculation
-    total_profit = data['Strategy'].iloc[-1]
-    annualized_return = (data['Strategy'].iloc[-1] / data['Strategy'].iloc[0]) ** (252 / len(data)) - 1
-    volatility = data['Daily Return'].std() * (252 ** 0.5)
+def calculate_performance_metrics(df):
+    # Check if 'Strategy' column is empty or contains NaN values
+    if df['Strategy'].isna().all() or df['Strategy'].empty:
+        return {
+            "Total Profit": 0,
+            "Annualized Return": 0,
+            "Annualized Volatility": 0,
+            "Sharpe Ratio": 0,
+            "Sortino Ratio": 0,
+            "Max Drawdown": 0,
+            "Calmar Ratio": 0
+        }
+
+    # Calculate daily returns
+    df['Daily Return'] = df['Strategy'].pct_change()
+    df.dropna(inplace=True)
+
+    # Total Profit
+    total_profit = df['Strategy'].iloc[-1]
+
+    # Annualized Return
+    annualized_return = (df['Strategy'].iloc[-1] / df['Strategy'].iloc[0]) ** (252 / len(df)) - 1
+
+    # Volatility (Annualized)
+    volatility = df['Daily Return'].std() * (252 ** 0.5)
+
+    # Sharpe Ratio (Assuming a risk-free rate of 3%)
     risk_free_rate = 0.03
-    
     sharpe_ratio = (annualized_return - risk_free_rate) / volatility if volatility != 0 else 0
-    downside_std = data[data['Daily Return'] < 0]['Daily Return'].std() * (252 ** 0.5)
+
+    # Sortino Ratio
+    downside_std = df[df['Daily Return'] < 0]['Daily Return'].std() * (252 ** 0.5)
     sortino_ratio = (annualized_return - risk_free_rate) / downside_std if downside_std != 0 else 0
-    
-    cumulative = data['Strategy']
+
+    # Max Drawdown
+    cumulative = df['Strategy']
     rolling_max = cumulative.cummax()
     drawdown = (cumulative - rolling_max) / rolling_max
     max_drawdown = drawdown.min()
+
+    # Calmar Ratio
     calmar_ratio = annualized_return / abs(max_drawdown) if max_drawdown != 0 else 0
-    
-    trades = data[data['Signal'] != 0]
-    wins = trades[trades['Signal'] * trades['Daily Return'] > 0]
-    losses = trades[trades['Signal'] * trades['Daily Return'] <= 0]
-    num_trades = len(trades)
-    win_rate = len(wins) / num_trades * 100 if num_trades > 0 else 0
-    profit_factor = wins['Daily Return'].sum() / abs(losses['Daily Return'].sum()) if len(losses) > 0 else float('inf')
-    expectancy = data['Daily Return'].mean() if num_trades > 0 else 0
-    avg_duration = (data['Signal'] != 0).sum() / num_trades if num_trades > 0 else 0
-    
-    # Return performance metrics as a dictionary
+
     return {
         "Total Profit": total_profit,
-        "Annualized Return (%)": annualized_return * 100,
+        "Annualized Return": annualized_return * 100,
         "Annualized Volatility": volatility,
         "Sharpe Ratio": sharpe_ratio,
         "Sortino Ratio": sortino_ratio,
-        "Max Drawdown (%)": max_drawdown * 100,
-        "Calmar Ratio": calmar_ratio,
-        "Number of Trades": num_trades,
-        "Win Rate (%)": win_rate,
-        "Profit Factor": profit_factor,
-        "Expectancy per Trade": expectancy,
-        "Avg. Trade Duration (days)": avg_duration
+        "Max Drawdown": max_drawdown * 100,
+        "Calmar Ratio": calmar_ratio
     }
+
 
 def compare_all_strategies(data, selected_strategies):
     """
