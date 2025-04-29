@@ -36,13 +36,27 @@ def breakout_strategy(data):
 # --- Backtest function ---
 def backtest(data):
     data = data.copy()
+    
+    # Ensure 'Signal' column exists
+    if 'Signal' not in data.columns:
+        raise ValueError("Signal column is missing, cannot run backtest.")
+    
     data['Returns'] = data['Close'].pct_change()
     data['Strategy'] = data['Signal'].shift(1) * data['Returns']
     data.dropna(inplace=True)
+    
+    # Ensure 'Strategy' column exists after backtesting
+    if 'Strategy' not in data.columns:
+        raise ValueError("Strategy column is missing after backtest.")
+    
     return data['Strategy'].cumsum()
 
 # --- Performance Summary ---
 def performance_summary(data):
+    # Check if 'Strategy' column exists
+    if 'Strategy' not in data.columns:
+        return {"Error": "Strategy column not found. Make sure the backtest has run properly."}
+    
     # Calculate total profit
     total_profit = data['Strategy'].iloc[-1]  # Cumulative return at the end
     
