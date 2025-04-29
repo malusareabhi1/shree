@@ -596,55 +596,55 @@ if uploaded_file is not None:
                     st.error(f"Backtest failed: {str(e)}") 
                     
          elif selected_strategy == "MACD Strategy":
-            # Apply Fibonacci Pullback Strategy
-            df = macd_strategy(data)
+             # Apply Fibonacci Pullback Strategy
+             df = macd_strategy(data)
             
-            # Check if 'Signal' column was generated
-            if 'Signal' not in df.columns:
+             # Check if 'Signal' column was generated
+             if 'Signal' not in df.columns:
                 st.error("Signal column not found. Ensure the strategy logic is correct.")
-            else:
-                try:
-                    pnl = backtest(df)
+             else:
+                 try:
+                     pnl = backtest(df)
         
-                    # Cumulative Returns Plot
-                    st.subheader("MACD Strategy - Cumulative Returns")
-                    plt.figure(figsize=(10, 6))
-                    plt.plot(pnl, label="Cumulative Returns", color='purple')
-                    plt.title("Cumulative Returns of MACD Strategy")
-                    plt.xlabel("Date")
-                    plt.ylabel("Cumulative Return")
-                    plt.legend()
-                    st.pyplot(plt.gcf())
-                    plt.clf()
+                     # Cumulative Returns Plot
+                     st.subheader("MACD Strategy - Cumulative Returns")
+                     plt.figure(figsize=(10, 6))
+                     plt.plot(pnl, label="Cumulative Returns", color='purple')
+                     plt.title("Cumulative Returns of MACD Strategy")
+                     plt.xlabel("Date")
+                     plt.ylabel("Cumulative Return")
+                     plt.legend()
+                     st.pyplot(plt.gcf())
+                     plt.clf()
         
-                    # Performance Summary
-                    st.subheader("📊 Performance Summary")
-                    df['Daily Return'] = df['Strategy'].pct_change()
-                    df.dropna(inplace=True)
+                     # Performance Summary
+                     st.subheader("📊 Performance Summary")
+                     df['Daily Return'] = df['Strategy'].pct_change()
+                     df.dropna(inplace=True)
         
-                    total_profit = df['Strategy'].iloc[-1]
-                    annualized_return = (df['Strategy'].iloc[-1] / df['Strategy'].iloc[0]) ** (252 / len(df)) - 1
-                    volatility = df['Daily Return'].std() * (252 ** 0.5)
-                    risk_free_rate = 0.03
-                    sharpe_ratio = (annualized_return - risk_free_rate) / volatility if volatility != 0 else 0
-                    downside_std = df[df['Daily Return'] < 0]['Daily Return'].std() * (252 ** 0.5)
-                    sortino_ratio = (annualized_return - risk_free_rate) / downside_std if downside_std != 0 else 0
-                    cumulative = df['Strategy']
-                    rolling_max = cumulative.cummax()
-                    drawdown = (cumulative - rolling_max) / rolling_max
-                    max_drawdown = drawdown.min()
-                    calmar_ratio = annualized_return / abs(max_drawdown) if max_drawdown != 0 else 0
+                     total_profit = df['Strategy'].iloc[-1]
+                     annualized_return = (df['Strategy'].iloc[-1] / df['Strategy'].iloc[0]) ** (252 / len(df)) - 1
+                     volatility = df['Daily Return'].std() * (252 ** 0.5)
+                     risk_free_rate = 0.03
+                     sharpe_ratio = (annualized_return - risk_free_rate) / volatility if volatility != 0 else 0
+                     downside_std = df[df['Daily Return'] < 0]['Daily Return'].std() * (252 ** 0.5)
+                     sortino_ratio = (annualized_return - risk_free_rate) / downside_std if downside_std != 0 else 0
+                     cumulative = df['Strategy']
+                     rolling_max = cumulative.cummax()
+                     drawdown = (cumulative - rolling_max) / rolling_max
+                     max_drawdown = drawdown.min()
+                     calmar_ratio = annualized_return / abs(max_drawdown) if max_drawdown != 0 else 0
         
-                    trades = df[df['Signal'] != 0]
-                    wins = trades[trades['Signal'] * trades['Daily Return'] > 0]
-                    losses = trades[trades['Signal'] * trades['Daily Return'] <= 0]
-                    num_trades = len(trades)
-                    win_rate = len(wins) / num_trades * 100 if num_trades > 0 else 0
-                    profit_factor = wins['Daily Return'].sum() / abs(losses['Daily Return'].sum()) if len(losses) > 0 else float('inf')
-                    expectancy = df['Daily Return'].mean() if num_trades > 0 else 0
-                    avg_duration = (df['Signal'] != 0).sum() / num_trades if num_trades > 0 else 0
+                     trades = df[df['Signal'] != 0]
+                     wins = trades[trades['Signal'] * trades['Daily Return'] > 0]
+                     losses = trades[trades['Signal'] * trades['Daily Return'] <= 0]
+                     num_trades = len(trades)
+                     win_rate = len(wins) / num_trades * 100 if num_trades > 0 else 0
+                     profit_factor = wins['Daily Return'].sum() / abs(losses['Daily Return'].sum()) if len(losses) > 0 else float('inf')
+                     expectancy = df['Daily Return'].mean() if num_trades > 0 else 0
+                     avg_duration = (df['Signal'] != 0).sum() / num_trades if num_trades > 0 else 0
         
-                    summary_metrics = {
+                     summary_metrics = {
                         "📈 Total Profit": [f"{total_profit:.2f}"],
                         "📅 Annualized Return (%)": [f"{annualized_return * 100:.2f}"],
                         "📊 Annualized Volatility": [f"{volatility:.2f}"],
@@ -657,29 +657,29 @@ if uploaded_file is not None:
                         "📊 Profit Factor": [f"{profit_factor:.2f}"],
                         "📈 Expectancy per Trade": [f"{expectancy:.4f}"],
                         "⏱️ Avg. Trade Duration (days)": [f"{avg_duration:.2f}"]
-                    }
+                     }
         
-                    summary_df = pd.DataFrame.from_dict(summary_metrics, orient='columns')
-                    st.dataframe(summary_df.T.rename(columns={0: "Value"}))
+                     summary_df = pd.DataFrame.from_dict(summary_metrics, orient='columns')
+                     st.dataframe(summary_df.T.rename(columns={0: "Value"}))
         
                     # Trade Log
-                    st.subheader("Trade Log")
-                    trade_log = df[df['Signal'] != 0][['Signal', 'Close', 'Strategy']]
-                    trade_log['Date'] = trade_log.index
-                    trade_log = trade_log[['Date', 'Signal', 'Close', 'Strategy']]
-                    st.write(trade_log)
+                     st.subheader("Trade Log")
+                     trade_log = df[df['Signal'] != 0][['Signal', 'Close', 'Strategy']]
+                     trade_log['Date'] = trade_log.index
+                     trade_log = trade_log[['Date', 'Signal', 'Close', 'Strategy']]
+                     st.write(trade_log)
         
                     # Download Button
-                    csv = trade_log.to_csv(index=False).encode('utf-8')
-                    st.download_button(
-                        label="📥 Download Trade Log as CSV",
-                        data=csv,
-                        file_name='fibonacci_trade_log.csv',
-                        mime='text/csv',
-                    )
+                     csv = trade_log.to_csv(index=False).encode('utf-8')
+                     st.download_button(
+                         label="📥 Download Trade Log as CSV",
+                         data=csv,
+                         file_name='fibonacci_trade_log.csv',
+                         mime='text/csv',
+                     )
         
-                except Exception as e:
-                    st.error(f"Backtest failed: {str(e)}")             
+                 except Exception as e:
+                     st.error(f"Backtest failed: {str(e)}")             
                   
 
      
