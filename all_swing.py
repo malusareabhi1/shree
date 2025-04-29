@@ -22,7 +22,12 @@ def breakout_strategy(data):
     data['High_20'] = data['High'].rolling(window=20).max()
     data['Low_20'] = data['Low'].rolling(window=20).min()
     data['Signal'] = 0
-    mask_long = (data['Close'] > data['High_20'].shift(1)) & data['High_20'].shift(1).notna()
+    #mask_long = (data['Close'] > data['High_20'].shift(1)) & data['High_20'].shift(1).notna()
+    high_shifted = data['High_20'].shift(1)
+    low_shifted = data['Low_20'].shift(1)
+    
+    mask_long = (data['Close'] > high_shifted) & high_shifted.notna()
+    mask_short = (data['Close'] < low_shifted) & low_shifted.notna()
     mask_short = (data['Close'] < data['Low_20'].shift(1)) & data['Low_20'].shift(1).notna()
     data.loc[mask_long, 'Signal'] = 1
     data.loc[mask_short, 'Signal'] = -1
