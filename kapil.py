@@ -410,6 +410,8 @@ elif selected == "Doctor Strategy":
                     # Track the trade for 10-minute exit and trailing logic
                     trades.append(trade)
                     st.dataframe(trade_log_df.columns)  # 👈 First, inspect which columns are present
+                    # Debug print
+                    st.write("Columns available in trade_log_df:", trade_log_df.columns.tolist())
             
                     # Logic for trailing stop loss and profit booking
                     for trade in trades:
