@@ -206,7 +206,18 @@ if uploaded_file is not None:
     if not all(col in data.columns for col in required_columns):
         st.error(f"The CSV file must contain the following columns: {required_columns}")
     else:
-        if selected_strategy == "Breakout Strategy":
+        if compare_button:
+            # Your code for comparing all strategies goes here
+            comparison_df, cumulative_plot = compare_all_strategies(data, selected_strategies)
+        
+            # Display comparison results and plot
+            st.subheader("Performance Comparison")
+            st.dataframe(comparison_df)
+        
+            st.subheader("Cumulative Returns Comparison")
+            st.pyplot(cumulative_plot)
+            
+        elif selected_strategy == "Breakout Strategy":
             # Apply Breakout Strategy
             df = breakout_strategy(data)
             
