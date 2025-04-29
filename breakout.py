@@ -36,27 +36,30 @@ def breakout_strategy(data):
 # --- Backtest function ---
 def backtest(data):
     data = data.copy()
-    
-    # Ensure 'Signal' column exists
+
+    # Ensure 'Signal' column exists before backtesting
     if 'Signal' not in data.columns:
-        raise ValueError("Signal column is missing, cannot run backtest.")
-    
+        raise ValueError("Signal column is missing. Please run a strategy first.")
+
+    # Calculate Returns and Strategy columns
     data['Returns'] = data['Close'].pct_change()
     data['Strategy'] = data['Signal'].shift(1) * data['Returns']
-    data.dropna(inplace=True)
     
-    # Ensure 'Strategy' column exists after backtesting
+    # Drop NaN values to avoid errors in calculations
+    data.dropna(inplace=True)
+
+    # Check if 'Strategy' column is created successfully
     if 'Strategy' not in data.columns:
-        raise ValueError("Strategy column is missing after backtest.")
+        raise ValueError("Strategy column not found. Backtest failed.")
     
     return data['Strategy'].cumsum()
 
 # --- Performance Summary ---
 def performance_summary(data):
-    # Check if 'Strategy' column exists
+    # Ensure 'Strategy' column exists before calculating performance
     if 'Strategy' not in data.columns:
-        return {"Error": "Strategy column not found. Make sure the backtest has run properly."}
-    
+        return {"Error": "Strategy column not found. Please check if the backtest ran properly."}
+
     # Calculate total profit
     total_profit = data['Strategy'].iloc[-1]  # Cumulative return at the end
     
@@ -117,36 +120,45 @@ if uploaded_file is not None:
         if selected_strategy == "Breakout Strategy":
             # Apply Breakout Strategy
             df = breakout_strategy(data)
-            pnl = backtest(df)
-
-            # Displaying results
-            st.subheader("Breakout Strategy - Cumulative Returns")
-            plt.figure(figsize=(10, 6))
-            plt.plot(pnl, label="Cumulative Returns", color='blue')
-            plt.title("Cumulative Returns of Breakout Strategy")
-            plt.xlabel("Date")
-            plt.ylabel("Cumulative Return")
-            plt.legend()
-            st.pyplot(plt.gcf())
-            plt.clf()
-
-            # Performance Summary
-            summary = performance_summary(df)
-            if "Error" in summary:
-                st.error(summary["Error"])
+            
+            # Check if 'Signal' column was generated
+            if 'Signal' not in df.columns:
+                st.error("Signal column not found. Ensure the strategy logic is correct.")
             else:
-                st.subheader("Performance Summary")
-                summary_df = pd.DataFrame(list(summary.items()), columns=["Metric", "Value"])
-                st.table(summary_df)
+                # Run Backtest
+                try:
+                    pnl = backtest(df)
+                    
+                    # Displaying results
+                    st.subheader("Breakout Strategy - Cumulative Returns")
+                    plt.figure(figsize=(10, 6))
+                    plt.plot(pnl, label="Cumulative Returns", color='blue')
+                    plt.title("Cumulative Returns of Breakout Strategy")
+                    plt.xlabel("Date")
+                    plt.ylabel("Cumulative Return")
+                    plt.legend()
+                    st.pyplot(plt.gcf())
+                    plt.clf()
 
-            # Trade Log
-            if 'Strategy' in df.columns:
-                st.subheader("Trade Log")
-                trade_log = df[df['Signal'] != 0][['Signal', 'Close', 'Strategy']]
-                trade_log['Date'] = trade_log.index
-                trade_log = trade_log[['Date', 'Signal', 'Close', 'Strategy']]
-                st.write(trade_log)
-            else:
-                st.error("The strategy column was not generated correctly. Please check the backtest.")
+                    # Performance Summary
+                    summary = performance_summary(df)
+                    if "Error" in summary:
+                        st.error(summary["Error"])
+                    else:
+                        st.subheader("Performance Summary")
+                        summary_df = pd.DataFrame(list(summary.items()), columns=["Metric", "Value"])
+                        st.table(summary_df)
+
+                    # Trade Log
+                    if 'Strategy' in df.columns:
+                        st.subheader("Trade Log")
+                        trade_log = df[df['Signal'] != 0][['Signal', 'Close', 'Strategy']]
+                        trade_log['Date'] = trade_log.index
+                        trade_log = trade_log[['Date', 'Signal', 'Close', 'Strategy']]
+                        st.write(trade_log)
+                    else:
+                        st.error("The strategy column was not generated correctly. Please check the backtest.")
+                except Exception as e:
+                    st.error(f"Backtest failed: {str(e)}")
 else:
     st.error("Please upload a CSV file to proceed.")
