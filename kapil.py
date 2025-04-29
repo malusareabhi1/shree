@@ -406,6 +406,14 @@ elif selected == "Doctor Strategy":
                         #'Signal_Reason': df['Signal_Reason'].iloc[idx]  # ✅ Add this line
                         'Signal_Reason': '20 SMA Cross + IV >= 16'  # ✅ Add this line
                     }
+                    
+                    if 'PnL' not in trade_log_df.columns:
+                        trade_log_df['PnL'] = trade_log_df['Exit_Price'] - trade_log_df['Entry_Price']
+                    
+                    if 'Brokerage' not in trade_log_df.columns:
+                        trade_log_df['Brokerage'] = 0  # or your brokerage formula
+                    
+                    trade_log_df['PnL_After_Brokerage'] = trade_log_df['PnL'] - trade_log_df['Brokerage']
             
                     # Track the trade for 10-minute exit and trailing logic
                     trades.append(trade)
