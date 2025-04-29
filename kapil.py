@@ -260,7 +260,7 @@ elif selected == "Get Stock Data":
                 df.rename(columns=rename_map, inplace=True)
     
                 # Show dataframe
-                st.dataframe(df)
+                #st.dataframe(df)
     
                 # CSV download
                 csv = df.to_csv(index=False).encode('utf-8')
