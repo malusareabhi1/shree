@@ -127,8 +127,63 @@ if uploaded_file is not None:
 
                     # Performance Summary
                     st.subheader("Performance Summary")
-                    st.write(f"Total Profit: {pnl[-1]:.2f}")
-                    st.write(f"Annualized Return: {pnl[-1] / len(df) * 252:.2f}%")
+                    #st.write(f"Total Profit: {pnl[-1]:.2f}")
+                    #st.write(f"Annualized Return: {pnl[-1] / len(df) * 252:.2f}%")
+                    # Performance Summary
+                    st.subheader("Performance Summary")
+                    
+                    # Calculate daily returns
+                    df['Daily Return'] = df['Strategy'].pct_change()
+                    df.dropna(inplace=True)
+                    
+                    # Total Profit
+                    total_profit = df['Strategy'].iloc[-1]
+                    st.write(f"📈 **Total Profit:** {total_profit:.2f}")
+                    
+                    # Annualized Return
+                    annualized_return = (df['Strategy'].iloc[-1] / df['Strategy'].iloc[0]) ** (252 / len(df)) - 1
+                    st.write(f"📅 **Annualized Return:** {annualized_return * 100:.2f}%")
+                    
+                    # Volatility
+                    volatility = df['Daily Return'].std() * (252 ** 0.5)
+                    st.write(f"📊 **Annualized Volatility:** {volatility:.2f}")
+                    
+                    # Sharpe Ratio
+                    risk_free_rate = 0.03  # Example risk-free rate
+                    sharpe_ratio = (annualized_return - risk_free_rate) / volatility if volatility != 0 else 0
+                    st.write(f"⚖️ **Sharpe Ratio:** {sharpe_ratio:.2f}")
+                    
+                    # Sortino Ratio
+                    downside_std = df[df['Daily Return'] < 0]['Daily Return'].std() * (252 ** 0.5)
+                    sortino_ratio = (annualized_return - risk_free_rate) / downside_std if downside_std != 0 else 0
+                    st.write(f"⚖️ **Sortino Ratio:** {sortino_ratio:.2f}")
+                    
+                    # Max Drawdown
+                    cumulative = df['Strategy']
+                    rolling_max = cumulative.cummax()
+                    drawdown = (cumulative - rolling_max) / rolling_max
+                    max_drawdown = drawdown.min()
+                    st.write(f"📉 **Max Drawdown:** {max_drawdown * 100:.2f}%")
+                    
+                    # Calmar Ratio
+                    calmar_ratio = annualized_return / abs(max_drawdown) if max_drawdown != 0 else 0
+                    st.write(f"📏 **Calmar Ratio:** {calmar_ratio:.2f}")
+                    
+                    # Trade metrics
+                    trades = df[df['Signal'] != 0]
+                    wins = trades[trades['Signal'] * trades['Daily Return'] > 0]
+                    losses = trades[trades['Signal'] * trades['Daily Return'] <= 0]
+                    num_trades = len(trades)
+                    win_rate = len(wins) / num_trades * 100 if num_trades > 0 else 0
+                    profit_factor = wins['Daily Return'].sum() / abs(losses['Daily Return'].sum()) if len(losses) > 0 else float('inf')
+                    expectancy = df['Daily Return'].mean() if num_trades > 0 else 0
+                    avg_duration = (df['Signal'] != 0).sum() / num_trades if num_trades > 0 else 0
+                    
+                    st.write(f"🔁 **Number of Trades:** {num_trades}")
+                    st.write(f"✅ **Win Rate:** {win_rate:.2f}%")
+                    st.write(f"📊 **Profit Factor:** {profit_factor:.2f}")
+                    st.write(f"📈 **Expectancy per Trade:** {expectancy:.4f}")
+                    st.write(f"⏱️ **Avg. Trade Duration (days):** {avg_duration:.2f}")
 
                     # Trade Log
                     st.subheader("Trade Log")
