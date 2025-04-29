@@ -132,16 +132,21 @@ if uploaded_file is not None:
 
             # Performance Summary
             summary = performance_summary(df)
-            st.subheader("Performance Summary")
-            summary_df = pd.DataFrame(list(summary.items()), columns=["Metric", "Value"])
-            st.table(summary_df)
+            if "Error" in summary:
+                st.error(summary["Error"])
+            else:
+                st.subheader("Performance Summary")
+                summary_df = pd.DataFrame(list(summary.items()), columns=["Metric", "Value"])
+                st.table(summary_df)
 
             # Trade Log
-            st.subheader("Trade Log")
-            trade_log = df[df['Signal'] != 0][['Signal', 'Close', 'Strategy']]
-            trade_log['Date'] = trade_log.index
-            trade_log = trade_log[['Date', 'Signal', 'Close', 'Strategy']]
-            st.write(trade_log)
-
+            if 'Strategy' in df.columns:
+                st.subheader("Trade Log")
+                trade_log = df[df['Signal'] != 0][['Signal', 'Close', 'Strategy']]
+                trade_log['Date'] = trade_log.index
+                trade_log = trade_log[['Date', 'Signal', 'Close', 'Strategy']]
+                st.write(trade_log)
+            else:
+                st.error("The strategy column was not generated correctly. Please check the backtest.")
 else:
     st.error("Please upload a CSV file to proceed.")
