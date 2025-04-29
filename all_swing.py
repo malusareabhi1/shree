@@ -19,19 +19,33 @@ def moving_average_crossover(data):
 
 def breakout_strategy(data):
     data = data.copy()
+    
+    # Calculate High and Low rolling windows
     data['High_20'] = data['High'].rolling(window=20).max()
     data['Low_20'] = data['Low'].rolling(window=20).min()
+    
+    # Shift the high/low values by 1 for comparison
     high_shifted = data['High_20'].shift(1)
     low_shifted = data['Low_20'].shift(1)
 
+    # Initialize 'Signal' column
     data['Signal'] = 0
+    
+    # Mask for long (buy) signals where Close > shifted High_20
     mask_long = (data['Close'] > high_shifted) & high_shifted.notna()
+    
+    # Mask for short (sell) signals where Close < shifted Low_20
     mask_short = (data['Close'] < low_shifted) & low_shifted.notna()
-
+    
+    # Apply the signals
     data.loc[mask_long, 'Signal'] = 1
     data.loc[mask_short, 'Signal'] = -1
-    data.dropna(inplace=True)
+    
+    # Drop NaN values that may appear during the rolling window calculations
+    data.dropna(subset=['Signal'], inplace=True)
+    
     return data
+
 
 def fibonacci_pullback(data):
     data = data.copy()
