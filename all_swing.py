@@ -132,17 +132,30 @@ end_date = st.sidebar.date_input("End Date", datetime.today())
 
 if st.sidebar.button("Run Backtest"):
     data = yf.download(ticker, start=start_date, end=end_date)
+
     if data.empty:
         st.error("No data found for the ticker.")
     else:
-        df = selected_strategy(data.copy())
-        pnl = backtest(df)
+        required_cols = ['Close']
+        
+        # Some strategies also require 'High' and 'Low'
+        if strategy_name in ['Breakout', 'Fibonacci Pullback', 'Ichimoku']:
+            required_cols += ['High', 'Low']
+        if strategy_name == 'Volume + Price Action':
+            required_cols += ['Open', 'Volume']
 
-        st.subheader(f"Cumulative Returns: {strategy_name}")
-        plt.plot(pnl, label=strategy_name)
-        plt.title(f"{strategy_name} Strategy Performance on {ticker}")
-        plt.xlabel("Date")
-        plt.ylabel("Cumulative Return")
-        plt.legend()
-        st.pyplot(plt.gcf())
-        plt.clf()
+        # Check if all required columns exist
+        if not all(col in data.columns for col in required_cols):
+            st.error(f"The selected strategy requires columns {required_cols} but they are missing in the data.")
+        else:
+            df = selected_strategy(data.copy())
+            pnl = backtest(df)
+
+            st.subheader(f"Cumulative Returns: {strategy_name}")
+            plt.plot(pnl, label=strategy_name)
+            plt.title(f"{strategy_name} Strategy Performance on {ticker}")
+            plt.xlabel("Date")
+            plt.ylabel("Cumulative Return")
+            plt.legend()
+            st.pyplot(plt.gcf())
+            plt.clf()
