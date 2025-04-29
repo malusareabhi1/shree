@@ -8,24 +8,29 @@ from datetime import datetime
 
 # --- Helper functions for each strategy ---
 def moving_average_crossover(data):
+    data = data.copy()
     data['SMA_9'] = data['Close'].rolling(window=9).mean()
     data['SMA_21'] = data['Close'].rolling(window=21).mean()
     data['Signal'] = 0
     data.loc[data['SMA_9'] > data['SMA_21'], 'Signal'] = 1
     data.loc[data['SMA_9'] < data['SMA_21'], 'Signal'] = -1
+    data.dropna(inplace=True)
     return data
 
 def breakout_strategy(data):
+    data = data.copy()
     data['High_20'] = data['High'].rolling(window=20).max()
     data['Low_20'] = data['Low'].rolling(window=20).min()
     data['Signal'] = 0
-    mask_long = (data['Close'] > data['High_20'].shift(1)) & (data['High_20'].shift(1).notna())
-    mask_short = (data['Close'] < data['Low_20'].shift(1)) & (data['Low_20'].shift(1).notna())
+    mask_long = (data['Close'] > data['High_20'].shift(1)) & data['High_20'].shift(1).notna()
+    mask_short = (data['Close'] < data['Low_20'].shift(1)) & data['Low_20'].shift(1).notna()
     data.loc[mask_long, 'Signal'] = 1
     data.loc[mask_short, 'Signal'] = -1
+    data.dropna(inplace=True)
     return data
 
 def fibonacci_pullback(data):
+    data = data.copy()
     data['Signal'] = 0
     for i in range(20, len(data)):
         high = data['High'][i-20:i].max()
@@ -34,11 +39,13 @@ def fibonacci_pullback(data):
         fib_61 = high - 0.618 * diff
         fib_50 = high - 0.5 * diff
         fib_38 = high - 0.382 * diff
-        if data['Close'][i] in [fib_38, fib_50, fib_61]:
+        close = data['Close'].iloc[i]
+        if np.isclose(close, [fib_38, fib_50, fib_61], atol=0.01).any():
             data.loc[data.index[i], 'Signal'] = 1
     return data
 
 def rsi_strategy(data):
+    data = data.copy()
     delta = data['Close'].diff()
     gain = np.where(delta > 0, delta, 0)
     loss = np.where(delta < 0, -delta, 0)
@@ -49,16 +56,20 @@ def rsi_strategy(data):
     data['Signal'] = 0
     data.loc[data['RSI'] < 30, 'Signal'] = 1
     data.loc[data['RSI'] > 70, 'Signal'] = -1
+    data.dropna(inplace=True)
     return data
 
 def volume_price_action(data):
+    data = data.copy()
     data['Volume_SMA'] = data['Volume'].rolling(window=20).mean()
     data['Signal'] = 0
-    signal = (data['Volume'] > data['Volume_SMA']) & (data['Close'] > data['Open'])
-    data.loc[signal, 'Signal'] = 1
+    mask = (data['Volume'] > data['Volume_SMA']) & (data['Close'] > data['Open'])
+    data.loc[mask, 'Signal'] = 1
+    data.dropna(inplace=True)
     return data
 
 def ichimoku_cloud(data):
+    data = data.copy()
     high_9 = data['High'].rolling(window=9).max()
     low_9 = data['Low'].rolling(window=9).min()
     tenkan_sen = (high_9 + low_9) / 2
@@ -68,25 +79,36 @@ def ichimoku_cloud(data):
     kijun_sen = (high_26 + low_26) / 2
 
     data['Signal'] = 0
-    data.loc[tenkan_sen > kijun_sen, 'Signal'] = 1
-    data.loc[tenkan_sen < kijun_sen, 'Signal'] = -1
+    mask_long = (tenkan_sen > kijun_sen) & tenkan_sen.notna() & kijun_sen.notna()
+    mask_short = (tenkan_sen < kijun_sen) & tenkan_sen.notna() & kijun_sen.notna()
+    data.loc[mask_long, 'Signal'] = 1
+    data.loc[mask_short, 'Signal'] = -1
+    data.dropna(inplace=True)
     return data
 
 def macd_strategy(data):
+    data = data.copy()
     exp1 = data['Close'].ewm(span=12, adjust=False).mean()
     exp2 = data['Close'].ewm(span=26, adjust=False).mean()
     macd = exp1 - exp2
     signal_line = macd.ewm(span=9, adjust=False).mean()
     data['Signal'] = 0
-    data.loc[macd > signal_line, 'Signal'] = 1
-    data.loc[macd < signal_line, 'Signal'] = -1
+    mask_long = (macd > signal_line) & macd.notna() & signal_line.notna()
+    mask_short = (macd < signal_line) & macd.notna() & signal_line.notna()
+    data.loc[mask_long, 'Signal'] = 1
+    data.loc[mask_short, 'Signal'] = -1
+    data.dropna(inplace=True)
     return data
+
 
 # --- Backtest function ---
 def backtest(data):
+    data = data.copy()
     data['Returns'] = data['Close'].pct_change()
     data['Strategy'] = data['Signal'].shift(1) * data['Returns']
+    data.dropna(inplace=True)
     return data['Strategy'].cumsum()
+
 
 # --- Streamlit UI ---
 st.title("Compare Swing Trading Strategies")
