@@ -614,6 +614,8 @@ elif selected == "Doctor Strategy":
                 key="download_button"
             )
             # ──     assume you already have: trade_log_df = pd.DataFrame(trades) ──
+            if 'Turnover' not in trade_log_df.columns:
+                trade_log_df['Turnover'] = trade_log_df['Entry_Price'] + trade_log_df['Exit_Price']
             if 'PnL_After_Brokerage' not in trade_log_df.columns:
                 if 'PnL' in trade_log_df.columns and 'Brokerage' in trade_log_df.columns:
                     trade_log_df['PnL_After_Brokerage'] = trade_log_df['PnL'] - trade_log_df['Brokerage']
