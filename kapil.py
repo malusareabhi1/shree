@@ -614,7 +614,11 @@ elif selected == "Doctor Strategy":
                 wins = trade_log_df[trade_log_df['PnL_After_Brokerage'] > 0]
             else:
                 wins = pd.DataFrame()  # Empty fallback
-            losses      = trade_log_df[trade_log_df['PnL_After_Brokerage'] < 0]
+            #losses      = trade_log_df[trade_log_df['PnL_After_Brokerage'] < 0]
+            if 'PnL_After_Brokerage' in trade_log_df.columns:
+                losses = trade_log_df[trade_log_df['PnL_After_Brokerage'] < 0]
+            else:
+                losses = pd.DataFrame()
             
             num_wins    = len(wins)
             num_losses  = len(losses)
