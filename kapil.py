@@ -203,6 +203,103 @@ if selected == "Dashboard":
 
     else:
         st.warning("Please login to Kite Connect first.")
+
+elif selected == "Get Stock Data":
+    st.title("📈 Get Stock Data from NSE")
+
+    nifty_50_stocks = [
+        "^NSEI", "ADANIENT.NS", "ASIANPAINT.NS", "AXISBANK.NS", "BAJAJ-AUTO.NS", "BAJFINANCE.NS",
+        "BAJAJFINSV.NS", "BPCL.NS", "BHARTIARTL.NS", "BRITANNIA.NS", "CIPLA.NS", "COALINDIA.NS",
+        "DRREDDY.NS", "EICHERMOT.NS", "GRASIM.NS", "HCLTECH.NS", "HDFCBANK.NS", "HDFC.NS",
+        "HDFCLIFE.NS", "HEROMOTOCO.NS", "HINDALCO.NS", "HINDUNILVR.NS", "ICICIBANK.NS",
+        "INDUSINDBK.NS", "INFY.NS", "ITC.NS", "JSWSTEEL.NS", "KOTAKBANK.NS", "LT.NS", "M&M.NS",
+        "MARUTI.NS", "NESTLEIND.NS", "NTPC.NS", "ONGC.NS", "POWERGRID.NS", "RELIANCE.NS",
+        "SBIN.NS", "SHREECEM.NS", "SUNPHARMA.NS", "TATACONSUM.NS", "TATAMOTORS.NS",
+        "TATASTEEL.NS", "TCS.NS", "TECHM.NS", "TITAN.NS", "ULTRACEMCO.NS", "UPL.NS", "WIPRO.NS"
+    ]
+
+    stock = st.selectbox("Select NIFTY 50 stock or Index (^NSEI)", options=nifty_50_stocks, index=nifty_50_stocks.index("TCS.NS"))
+    from_date = st.date_input("From Date", datetime(2025, 1, 1))
+    to_date = st.date_input("To Date", datetime.today())
+    interval = st.selectbox("Select Interval", ["1m", "5m", "15m", "30m", "1h", "1d", "1wk", "1mo"], index=5)
+
+    if st.button("Fetch Data"):
+        st.info(f"Fetching data for {stock.upper()} from {from_date} to {to_date} at interval {interval}")
+        try:
+            df = yf.download(stock, start=from_date, end=to_date, interval=interval)
+    
+            if df.empty:
+                st.warning("No data returned. Check symbol or market hours for intraday intervals.")
+            else:
+                # Reset index to get 'Date' column
+                df.reset_index(inplace=True)
+                # Ensure proper column names and date
+                if 'Datetime' in df.columns:
+                    df.rename(columns={'Datetime': 'Date'}, inplace=True)
+                elif 'Date' not in df.columns:
+                    df.insert(0, 'Date', df.index)  # fallback
+                
+                # Rename OHLCV columns to match expected format
+                df.rename(columns=lambda x: x.strip().capitalize(), inplace=True)  # e.g., "open" -> "Open"
+    
+                # Flatten multi-index columns if needed
+                if isinstance(df.columns, pd.MultiIndex):
+                    df.columns = ['_'.join(col).strip() if col[1] else col[0] for col in df.columns]
+    
+                # Show the raw column names to debug
+                st.write("📊 Columns:", df.columns.tolist())
+    
+                # Rename columns for consistency
+                rename_map = {}
+                for col in df.columns:
+                    if "Open" in col and "Adj" not in col: rename_map[col] = "Open"
+                    if "High" in col: rename_map[col] = "High"
+                    if "Low" in col: rename_map[col] = "Low"
+                    if "Close" in col and "Adj" not in col: rename_map[col] = "Close"
+                    if "Volume" in col: rename_map[col] = "Volume"
+                df.rename(columns=rename_map, inplace=True)
+    
+                # Show dataframe
+                st.dataframe(df)
+    
+                # CSV download
+                csv = df.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="📥 Download CSV",
+                    data=csv,
+                    file_name=f"{stock.upper()}_{interval}_data.csv",
+                    mime="text/csv"
+                )
+    
+                # Plot candlestick chart
+                if {"Date", "Open", "High", "Low", "Close"}.issubset(df.columns):
+                    fig = go.Figure(data=[
+                        go.Candlestick(
+                            x=df["Date"],
+                            open=df["Open"],
+                            high=df["High"],
+                            low=df["Low"],
+                            close=df["Close"],
+                            increasing_line_color="green",
+                            decreasing_line_color="red"
+                        )
+                    ])
+                    fig.update_layout(
+                        title=f"{stock.upper()} Candlestick Chart",
+                        xaxis_title="Date",
+                        yaxis_title="Price",
+                        xaxis_rangeslider_visible=False,
+                        template="plotly_dark"
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                      st.warning("Could not find required columns to generate candlestick chart.")
+                      # ✅ Add line chart for Close price
+                      st.subheader("📈 Line Chart - Close Price")
+                      st.line_chart(df.set_index("Date")["Close"])
+    
+        except Exception as e:
+            st.error(f"❌ Error fetching data: {e}")
         
 
 
