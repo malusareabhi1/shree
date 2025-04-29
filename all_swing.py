@@ -3,9 +3,10 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 import matplotlib.pyplot as plt
+
 from datetime import datetime
 
-# --- Strategy Functions ---
+# --- Helper functions for each strategy ---
 def moving_average_crossover(data):
     data = data.copy()
     data['SMA_9'] = data['Close'].rolling(window=9).mean()
@@ -22,9 +23,11 @@ def breakout_strategy(data):
     data['Low_20'] = data['Low'].rolling(window=20).min()
     high_shifted = data['High_20'].shift(1)
     low_shifted = data['Low_20'].shift(1)
+
     data['Signal'] = 0
     mask_long = (data['Close'] > high_shifted) & high_shifted.notna()
     mask_short = (data['Close'] < low_shifted) & low_shifted.notna()
+
     data.loc[mask_long, 'Signal'] = 1
     data.loc[mask_short, 'Signal'] = -1
     data.dropna(inplace=True)
@@ -43,6 +46,7 @@ def fibonacci_pullback(data):
         close = data['Close'].iloc[i]
         if np.isclose(close, [fib_38, fib_50, fib_61], atol=0.01).any():
             data.loc[data.index[i], 'Signal'] = 1
+    data.dropna(inplace=True)
     return data
 
 def rsi_strategy(data):
@@ -82,6 +86,7 @@ def ichimoku_cloud(data):
     data['Signal'] = 0
     mask_long = (tenkan_sen > kijun_sen) & tenkan_sen.notna() & kijun_sen.notna()
     mask_short = (tenkan_sen < kijun_sen) & tenkan_sen.notna() & kijun_sen.notna()
+
     data.loc[mask_long, 'Signal'] = 1
     data.loc[mask_short, 'Signal'] = -1
     data.dropna(inplace=True)
@@ -101,7 +106,7 @@ def macd_strategy(data):
     data.dropna(inplace=True)
     return data
 
-# --- Backtest Function ---
+# --- Backtest function ---
 def backtest(data):
     data = data.copy()
     data['Returns'] = data['Close'].pct_change()
@@ -110,11 +115,12 @@ def backtest(data):
     return data['Strategy'].cumsum()
 
 # --- Streamlit UI ---
-st.title("Swing Trading Strategy Backtester")
+st.title("🧠 Compare Swing Trading Strategies")
+ticker = st.text_input("Enter Stock Ticker (e.g., AAPL, NIFTY)", "AAPL")
+start_date = st.date_input("Start Date", datetime(2020, 1, 1))
+end_date = st.date_input("End Date", datetime.today())
 
-# Sidebar
-st.sidebar.header("Strategy Settings")
-strategy_options = {
+strategies = {
     'MA Crossover': moving_average_crossover,
     'Breakout': breakout_strategy,
     'Fibonacci Pullback': fibonacci_pullback,
@@ -123,12 +129,9 @@ strategy_options = {
     'Ichimoku': ichimoku_cloud,
     'MACD': macd_strategy
 }
-strategy_name = st.sidebar.selectbox("Select a Strategy", list(strategy_options.keys()))
-selected_strategy = strategy_options[strategy_name]
 
-ticker = st.sidebar.text_input("Stock Ticker", "AAPL")
-start_date = st.sidebar.date_input("Start Date", datetime(2020, 1, 1))
-end_date = st.sidebar.date_input("End Date", datetime.today())
+strategy_name = st.sidebar.selectbox("Select Strategy", list(strategies.keys()))
+selected_strategy = strategies[strategy_name]
 
 if st.sidebar.button("Run Backtest"):
     data = yf.download(ticker, start=start_date, end=end_date)
@@ -136,22 +139,22 @@ if st.sidebar.button("Run Backtest"):
     if data.empty:
         st.error("No data found for the ticker.")
     else:
+        # Column requirements
         required_cols = ['Close']
-        
-        # Some strategies also require 'High' and 'Low'
+
         if strategy_name in ['Breakout', 'Fibonacci Pullback', 'Ichimoku']:
             required_cols += ['High', 'Low']
         if strategy_name == 'Volume + Price Action':
             required_cols += ['Open', 'Volume']
 
-        # Check if all required columns exist
         if not all(col in data.columns for col in required_cols):
-            st.error(f"The selected strategy requires columns {required_cols} but they are missing in the data.")
+            st.error(f"The selected strategy '{strategy_name}' requires columns {required_cols} but missing in data.")
         else:
             df = selected_strategy(data.copy())
             pnl = backtest(df)
 
             st.subheader(f"Cumulative Returns: {strategy_name}")
+            plt.figure(figsize=(10, 6))
             plt.plot(pnl, label=strategy_name)
             plt.title(f"{strategy_name} Strategy Performance on {ticker}")
             plt.xlabel("Date")
