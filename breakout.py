@@ -113,6 +113,71 @@ def macd_strategy(data):
     data.dropna(inplace=True)
     return data
 
+def compare_all_strategies(data, selected_strategies):
+    """
+    Compares the performance of multiple trading strategies by backtesting them on the input data.
+    The function returns a DataFrame with performance metrics for each strategy and plots cumulative returns.
+
+    Parameters:
+    - data: pd.DataFrame, stock data with columns ['Date', 'Open', 'High', 'Low', 'Close', 'Volume'].
+    - selected_strategies: list of str, list of strategies to backtest.
+
+    Returns:
+    - comparison_df: pd.DataFrame, a DataFrame containing performance metrics for each strategy.
+    - cumulative_returns: pd.DataFrame, cumulative returns for each strategy.
+    """
+    # Initialize an empty dictionary to store the results for comparison
+    comparison_results = {}
+    cumulative_returns = pd.DataFrame()
+
+    # Loop over selected strategies to backtest and compare
+    for strategy in selected_strategies:
+        # Apply strategy logic
+        if strategy == "Breakout Strategy":
+            df = breakout_strategy(data)
+        elif strategy == "Moving Average Strategy":
+            df = moving_average_crossover(data)
+        elif strategy == "Fibonacci Pullback Strategy":
+            df = fibonacci_pullback(data)
+        elif strategy == "RSI Strategy":
+            df = rsi_strategy(data)
+        elif strategy == "Volume Price Strategy":
+            df = volume_price_action(data)
+        elif strategy == "MACD Strategy":
+            df = macd_strategy(data)
+        elif strategy == "Ichimoku Cloud Strategy":
+            df = ichimoku_cloud(data)
+        else:
+            raise ValueError(f"Strategy {strategy} not recognized!")
+
+        # Run backtest
+        pnl = backtest(df)
+        df['Strategy'] = pnl
+        
+        # Calculate performance metrics
+        metrics = calculate_performance_metrics(df)
+        comparison_results[strategy] = metrics
+        
+        # Add cumulative returns to the comparison plot
+        cumulative_returns[strategy] = pnl
+
+    # Convert comparison results into a DataFrame
+    comparison_df = pd.DataFrame(comparison_results).T
+
+    # Plot cumulative returns for comparison
+    plt.figure(figsize=(10, 6))
+    for strategy in selected_strategies:
+        plt.plot(cumulative_returns[strategy], label=f"{strategy} Cumulative Returns")
+    plt.title("Cumulative Returns of Selected Strategies")
+    plt.xlabel("Date")
+    plt.ylabel("Cumulative Return")
+    plt.legend()
+    
+    # Return the comparison dataframe and the plot
+    return comparison_df, plt.gcf()
+
+
+
 
 # --- Streamlit UI ---
 st.title("🏦 Backtest Trading Strategy")
