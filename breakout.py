@@ -45,7 +45,7 @@ def backtest(data):
 st.title("🏦 Breakout Strategy Backtest")
 
 # Sidebar for CSV file upload
-uploaded_file = st.sidebar.file_uploader("Upload CSV file", type=["csv"])
+uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
 
 if uploaded_file is not None:
     # Load the CSV file into a DataFrame
@@ -61,29 +61,20 @@ if uploaded_file is not None:
     if not all(col in data.columns for col in required_columns):
         st.error(f"The CSV file must contain the following columns: {required_columns}")
     else:
-        # Sidebar for start and end date filter
-        start_date = st.sidebar.date_input("Start Date", data.index.min().date())
-        end_date = st.sidebar.date_input("End Date", data.index.max().date())
-        
-        # Filter data based on the selected date range
-        filtered_data = data.loc[start_date:end_date]
-        
-        if filtered_data.empty:
-            st.error("No data available for the selected date range.")
-        else:
-            # Apply Breakout Strategy
-            df = breakout_strategy(filtered_data)
-            pnl = backtest(df)
+        # Apply Breakout Strategy
+        df = breakout_strategy(data)
+        pnl = backtest(df)
 
-            # Displaying results
-            st.subheader("Breakout Strategy - Cumulative Returns")
-            plt.figure(figsize=(10, 6))
-            plt.plot(pnl, label="Cumulative Returns", color='blue')
-            plt.title("Cumulative Returns of Breakout Strategy")
-            plt.xlabel("Date")
-            plt.ylabel("Cumulative Return")
-            plt.legend()
-            st.pyplot(plt.gcf())
-            plt.clf()
+        # Displaying results
+        st.subheader("Breakout Strategy - Cumulative Returns")
+        plt.figure(figsize=(10, 6))
+        plt.plot(pnl, label="Cumulative Returns", color='blue')
+        plt.title("Cumulative Returns of Breakout Strategy")
+        plt.xlabel("Date")
+        plt.ylabel("Cumulative Return")
+        plt.legend()
+        st.pyplot(plt.gcf())
+        plt.clf()
+
 else:
     st.error("Please upload a CSV file to proceed.")
