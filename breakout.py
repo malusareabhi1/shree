@@ -114,7 +114,7 @@ def macd_strategy(data):
     return data
 
 def calculate_performance_metrics(df):
-    # Check if 'Strategy' column is empty or contains NaN values
+    # Check if the 'Strategy' column is empty or contains NaN values
     if df['Strategy'].isna().all() or df['Strategy'].empty:
         return {
             "Total Profit": 0,
@@ -126,8 +126,8 @@ def calculate_performance_metrics(df):
             "Calmar Ratio": 0
         }
 
-    # Ensure there is data to process
-    if len(df) < 2:  # We need at least 2 data points for returns and performance calculation
+    # Ensure that there is at least one valid row in the DataFrame
+    if df['Strategy'].iloc[-1] is np.nan or len(df) < 2:
         return {
             "Total Profit": 0,
             "Annualized Return": 0,
