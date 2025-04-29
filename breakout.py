@@ -593,9 +593,11 @@ if uploaded_file is not None:
                     )
         
                 except Exception as e:
-                    st.error(f"Backtest failed: {str(e)}") 
+                    st.error(f"Backtest failed: {str(e)}")
+
+        
                     
-         elif selected_strategy == "MACD Strategy":
+        elif selected_strategy == "MACD Strategy":
              # Apply Fibonacci Pullback Strategy
              df = macd_strategy(data)
             
