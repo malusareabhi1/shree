@@ -367,10 +367,12 @@ elif selected == "Doctor Strategy":
 
             # Step 6: Trade Execution Based on Cross and IV Condition
             df['Signal'] = None
+            df['Signal_Reason'] = None  # Add this new column
             for idx in range(1, len(df)):
                 if df['Ref_Candle_Up'].iloc[idx] and iv_data >= 16:
                     if df['Close'].iloc[idx] > df['Close'].iloc[idx - 1]:  # Confirm Next Candle Cross
                         df.at[idx, 'Signal'] = 'BUY'
+                        df.at[idx, 'Signal_Reason'] = "Ref Candle Up & IV >= 16 & Confirmed Next Candle"
 
             # Step 7: Stop Loss Logic (10% below entry price)
             df['Stop_Loss'] = df['Close'] * 0.90
@@ -400,6 +402,7 @@ elif selected == "Doctor Strategy":
                         'PnL': None,
                         'Turnover':None,
                         'Exit_Reason': None  # Add the Exit_Reason field
+                        'Signal_Reason': df['Signal_Reason'].iloc[idx]  # ✅ Add this line
                     }
             
                     # Track the trade for 10-minute exit and trailing logic
@@ -583,6 +586,7 @@ elif selected == "Doctor Strategy":
 
             # Create a DataFrame
             trade_log_df = pd.DataFrame(trades)
+            st.dataframe(trade_log_df[['Entry_Time', 'Entry_Price', 'Exit_Time', 'Exit_Price', 'PnL_After_Brokerage', 'Signal_Reason']])
             
             # Ensure the CSV string is generated correctly
             csv = trade_log_df.to_csv(index=False)  # `csv` should hold the CSV data as a string
