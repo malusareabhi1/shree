@@ -425,7 +425,7 @@ if uploaded_file is not None:
 
         elif selected_strategy == "RSI Strategy":
             # Apply Fibonacci Pullback Strategy
-            df = fibonacci_pullback(data)
+            df = rsi_strategy(data)
             
             # Check if 'Signal' column was generated
             if 'Signal' not in df.columns:
@@ -435,7 +435,7 @@ if uploaded_file is not None:
                     pnl = backtest(df)
         
                     # Cumulative Returns Plot
-                    st.subheader("Fibonacci Pullback Strategy - Cumulative Returns")
+                    st.subheader("RSI Strategy - Cumulative Returns")
                     plt.figure(figsize=(10, 6))
                     plt.plot(pnl, label="Cumulative Returns", color='purple')
                     plt.title("Cumulative Returns of Fibonacci Pullback Strategy")
