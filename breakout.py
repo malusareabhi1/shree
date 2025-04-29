@@ -521,10 +521,10 @@ if uploaded_file is not None:
                     pnl = backtest(df)
         
                     # Cumulative Returns Plot
-                    st.subheader("RSI Strategy - Cumulative Returns")
+                    st.subheader("Volume Price Strategy - Cumulative Returns")
                     plt.figure(figsize=(10, 6))
                     plt.plot(pnl, label="Cumulative Returns", color='purple')
-                    plt.title("Cumulative Returns of Fibonacci Pullback Strategy")
+                    plt.title("Cumulative Returns of Volume Price Strategy Strategy")
                     plt.xlabel("Date")
                     plt.ylabel("Cumulative Return")
                     plt.legend()
