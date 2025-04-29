@@ -49,3 +49,4 @@ if __name__ == "__main__":
     df_iv = get_live_iv_from_nse("NIFTY")
     #print(df_iv.head())
     st.write(df_iv.head())
+     st.write(df_iv)
