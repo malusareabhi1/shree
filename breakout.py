@@ -38,6 +38,22 @@ def backtest(data):
     data.dropna(subset=['Strategy'], inplace=True)
     return data['Strategy'].cumsum()
 
+def fibonacci_pullback(data):
+    data = data.copy()
+    data['Signal'] = 0
+    for i in range(20, len(data)):
+        high = data['High'][i-20:i].max()
+        low = data['Low'][i-20:i].min()
+        diff = high - low
+        fib_61 = high - 0.618 * diff
+        fib_50 = high - 0.5 * diff
+        fib_38 = high - 0.382 * diff
+        close = data['Close'].iloc[i]
+        if np.isclose(close, [fib_38, fib_50, fib_61], atol=0.01).any():
+            data.loc[data.index[i], 'Signal'] = 1
+    data.dropna(inplace=True)
+    return data
+
 # --- Streamlit UI ---
 st.title("🏦 Backtest Trading Strategy")
 
