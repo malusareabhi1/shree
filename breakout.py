@@ -33,6 +33,17 @@ def breakout_strategy(data):
     
     return data
 
+# --- Helper function for moving average crossover strategy ---
+def moving_average_crossover(data):
+    data = data.copy()
+    data['SMA_9'] = data['Close'].rolling(window=9).mean()
+    data['SMA_21'] = data['Close'].rolling(window=21).mean()
+    data['Signal'] = 0
+    data.loc[data['SMA_9'] > data['SMA_21'], 'Signal'] = 1
+    data.loc[data['SMA_9'] < data['SMA_21'], 'Signal'] = -1
+    data.dropna(inplace=True)
+    return data
+
 # --- Backtest function ---
 def backtest(data):
     data = data.copy()
