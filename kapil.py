@@ -402,6 +402,7 @@ elif selected == "Doctor Strategy":
                         'PnL': None,
                         'Turnover':None,
                         'Exit_Reason': None,  # Add the Exit_Reason field
+                        'PnL_After_Brokerage':None,
                         #'Signal_Reason': df['Signal_Reason'].iloc[idx]  # ✅ Add this line
                         'Signal_Reason': '20 SMA Cross + IV >= 16'  # ✅ Add this line
                     }
