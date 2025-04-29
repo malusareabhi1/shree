@@ -609,7 +609,11 @@ elif selected == "Doctor Strategy":
 
             # 1️⃣ Compute summary stats
             total_trades = len(trade_log_df)
-            wins        = trade_log_df[trade_log_df['PnL_After_Brokerage'] > 0]
+            #wins        = trade_log_df[trade_log_df['PnL_After_Brokerage'] > 0]
+            if 'PnL_After_Brokerage' in trade_log_df.columns:
+                wins = trade_log_df[trade_log_df['PnL_After_Brokerage'] > 0]
+            else:
+                wins = pd.DataFrame()  # Empty fallback
             losses      = trade_log_df[trade_log_df['PnL_After_Brokerage'] < 0]
             
             num_wins    = len(wins)
