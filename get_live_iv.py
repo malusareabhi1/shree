@@ -1,6 +1,6 @@
 import requests
 import pandas as pd
-
+import streamlit as st
 def get_live_iv_from_nse(symbol="NIFTY"):
     """
     Fetches live Implied Volatility (IV) data from NSE Option Chain for the given index.
@@ -47,4 +47,5 @@ def get_live_iv_from_nse(symbol="NIFTY"):
 # Example usage:
 if __name__ == "__main__":
     df_iv = get_live_iv_from_nse("NIFTY")
-    print(df_iv.head())
+    #print(df_iv.head())
+    st.write(df_iv.head())
