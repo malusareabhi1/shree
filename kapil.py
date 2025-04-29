@@ -402,7 +402,8 @@ elif selected == "Doctor Strategy":
                         'PnL': None,
                         'Turnover':None,
                         'Exit_Reason': None,  # Add the Exit_Reason field
-                        'Signal_Reason': df['Signal_Reason'].iloc[idx]  # ✅ Add this line
+                        #'Signal_Reason': df['Signal_Reason'].iloc[idx]  # ✅ Add this line
+                        'Signal_Reason': '20 SMA Cross + IV >= 16'  # ✅ Add this line
                     }
             
                     # Track the trade for 10-minute exit and trailing logic
