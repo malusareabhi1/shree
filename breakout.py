@@ -208,6 +208,15 @@ if uploaded_file is not None:
     else:
         if compare_button:
             # Your code for comparing all strategies goes here
+            selected_strategies = [
+                "Breakout Strategy", 
+                "Moving Average Strategy", 
+                "Fibonacci Pullback Strategy", 
+                "RSI Strategy", 
+                "Volume Price Strategy", 
+                "MACD Strategy", 
+                "Ichimoku Cloud Strategy"
+            ]
             comparison_df, cumulative_plot = compare_all_strategies(data, selected_strategies)
         
             # Display comparison results and plot
