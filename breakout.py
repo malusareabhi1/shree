@@ -149,6 +149,15 @@ if uploaded_file is not None:
                     trade_log['Date'] = trade_log.index
                     trade_log = trade_log[['Date', 'Signal', 'Close', 'Strategy']]
                     st.write(trade_log)
+                    # Download Button
+                    csv = trade_log.to_csv(index=False).encode('utf-8')
+                    st.download_button(
+                        label="📥 Download Trade Log as CSV",
+                        data=csv,
+                        file_name='trade_log.csv',
+                        mime='text/csv',
+                    )
+
 
                 except Exception as e:
                     st.error(f"Backtest failed: {str(e)}")
