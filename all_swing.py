@@ -3,10 +3,9 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 import matplotlib.pyplot as plt
-
 from datetime import datetime
 
-# --- Helper functions for each strategy ---
+# --- Strategy Functions ---
 def moving_average_crossover(data):
     data = data.copy()
     data['SMA_9'] = data['Close'].rolling(window=9).mean()
@@ -21,14 +20,11 @@ def breakout_strategy(data):
     data = data.copy()
     data['High_20'] = data['High'].rolling(window=20).max()
     data['Low_20'] = data['Low'].rolling(window=20).min()
-    data['Signal'] = 0
-    #mask_long = (data['Close'] > data['High_20'].shift(1)) & data['High_20'].shift(1).notna()
     high_shifted = data['High_20'].shift(1)
     low_shifted = data['Low_20'].shift(1)
-    
+    data['Signal'] = 0
     mask_long = (data['Close'] > high_shifted) & high_shifted.notna()
     mask_short = (data['Close'] < low_shifted) & low_shifted.notna()
-    mask_short = (data['Close'] < data['Low_20'].shift(1)) & data['Low_20'].shift(1).notna()
     data.loc[mask_long, 'Signal'] = 1
     data.loc[mask_short, 'Signal'] = -1
     data.dropna(inplace=True)
@@ -105,8 +101,7 @@ def macd_strategy(data):
     data.dropna(inplace=True)
     return data
 
-
-# --- Backtest function ---
+# --- Backtest Function ---
 def backtest(data):
     data = data.copy()
     data['Returns'] = data['Close'].pct_change()
@@ -114,39 +109,40 @@ def backtest(data):
     data.dropna(inplace=True)
     return data['Strategy'].cumsum()
 
-
 # --- Streamlit UI ---
-st.title("Compare Swing Trading Strategies")
-ticker = st.text_input("Enter Stock Ticker (e.g., AAPL, NIFTY)", "AAPL")
-start_date = st.date_input("Start Date", datetime(2020, 1, 1))
-end_date = st.date_input("End Date", datetime.today())
+st.title("Swing Trading Strategy Backtester")
 
-if st.button("Run Backtest"):
+# Sidebar
+st.sidebar.header("Strategy Settings")
+strategy_options = {
+    'MA Crossover': moving_average_crossover,
+    'Breakout': breakout_strategy,
+    'Fibonacci Pullback': fibonacci_pullback,
+    'RSI Strategy': rsi_strategy,
+    'Volume + Price Action': volume_price_action,
+    'Ichimoku': ichimoku_cloud,
+    'MACD': macd_strategy
+}
+strategy_name = st.sidebar.selectbox("Select a Strategy", list(strategy_options.keys()))
+selected_strategy = strategy_options[strategy_name]
+
+ticker = st.sidebar.text_input("Stock Ticker", "AAPL")
+start_date = st.sidebar.date_input("Start Date", datetime(2020, 1, 1))
+end_date = st.sidebar.date_input("End Date", datetime.today())
+
+if st.sidebar.button("Run Backtest"):
     data = yf.download(ticker, start=start_date, end=end_date)
     if data.empty:
-        st.error("No data found.")
+        st.error("No data found for the ticker.")
     else:
-        strategies = {
-            'MA Crossover': moving_average_crossover,
-            'Breakout': breakout_strategy,
-            'Fibonacci Pullback': fibonacci_pullback,
-            'RSI Strategy': rsi_strategy,
-            'Volume + Price Action': volume_price_action,
-            'Ichimoku': ichimoku_cloud,
-            'MACD': macd_strategy
-        }
+        df = selected_strategy(data.copy())
+        pnl = backtest(df)
 
-        results = {}
-        for name, func in strategies.items():
-            df = data.copy()
-            df = func(df)
-            pnl = backtest(df)
-            results[name] = pnl
-
-        # Plotting results
-        for name, pnl in results.items():
-            plt.plot(pnl, label=name)
-        plt.title("Cumulative Returns of Swing Strategies")
+        st.subheader(f"Cumulative Returns: {strategy_name}")
+        plt.plot(pnl, label=strategy_name)
+        plt.title(f"{strategy_name} Strategy Performance on {ticker}")
+        plt.xlabel("Date")
+        plt.ylabel("Cumulative Return")
         plt.legend()
         st.pyplot(plt.gcf())
         plt.clf()
