@@ -42,10 +42,16 @@ def backtest(data):
     return data['Strategy'].cumsum()
 
 # --- Streamlit UI ---
-st.title("🏦 Breakout Strategy Backtest")
+st.title("🏦 Backtest Trading Strategy")
 
-# Sidebar for CSV file upload
-uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
+# Sidebar: Upload CSV file
+uploaded_file = st.sidebar.file_uploader("Upload CSV file", type=["csv"])
+
+# Sidebar: Select strategy
+selected_strategy = st.sidebar.selectbox(
+    "Select a strategy to backtest",
+    ["Breakout Strategy"]
+)
 
 if uploaded_file is not None:
     # Load the CSV file into a DataFrame
@@ -61,20 +67,21 @@ if uploaded_file is not None:
     if not all(col in data.columns for col in required_columns):
         st.error(f"The CSV file must contain the following columns: {required_columns}")
     else:
-        # Apply Breakout Strategy
-        df = breakout_strategy(data)
-        pnl = backtest(df)
+        if selected_strategy == "Breakout Strategy":
+            # Apply Breakout Strategy
+            df = breakout_strategy(data)
+            pnl = backtest(df)
 
-        # Displaying results
-        st.subheader("Breakout Strategy - Cumulative Returns")
-        plt.figure(figsize=(10, 6))
-        plt.plot(pnl, label="Cumulative Returns", color='blue')
-        plt.title("Cumulative Returns of Breakout Strategy")
-        plt.xlabel("Date")
-        plt.ylabel("Cumulative Return")
-        plt.legend()
-        st.pyplot(plt.gcf())
-        plt.clf()
+            # Displaying results
+            st.subheader("Breakout Strategy - Cumulative Returns")
+            plt.figure(figsize=(10, 6))
+            plt.plot(pnl, label="Cumulative Returns", color='blue')
+            plt.title("Cumulative Returns of Breakout Strategy")
+            plt.xlabel("Date")
+            plt.ylabel("Cumulative Return")
+            plt.legend()
+            st.pyplot(plt.gcf())
+            plt.clf()
 
 else:
     st.error("Please upload a CSV file to proceed.")
