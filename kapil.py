@@ -605,8 +605,14 @@ elif selected == "Doctor Strategy":
                 mime="text/csv",
                 key="download_button"
             )
-            # ── assume you already have: trade_log_df = pd.DataFrame(trades) ──
-
+            # ──     assume you already have: trade_log_df = pd.DataFrame(trades) ──
+            if 'PnL_After_Brokerage' not in trade_log_df.columns:
+            if 'PnL' in trade_log_df.columns and 'Brokerage' in trade_log_df.columns:
+                trade_log_df['PnL_After_Brokerage'] = trade_log_df['PnL'] - trade_log_df['Brokerage']
+            else:
+                st.error("Missing 'PnL' or 'Brokerage' column. Cannot compute 'PnL_After_Brokerage'.")
+                trade_log_df['PnL_After_Brokerage'] = 0  # Optional fallback
+        
             # 1️⃣ Compute summary stats
             total_trades = len(trade_log_df)
             #wins        = trade_log_df[trade_log_df['PnL_After_Brokerage'] > 0]
