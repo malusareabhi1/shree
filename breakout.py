@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 # --- Function for Breakout Strategy ---
 def breakout_strategy(data):
     data['High_20'] = data['High'].rolling(window=20).max()
