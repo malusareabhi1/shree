@@ -172,7 +172,7 @@ if uploaded_file is not None:
                 except Exception as e:
                     st.error(f"Backtest failed: {str(e)}")
                     
-         if selected_strategy == "Moving Average Strategy":
+         elif selected_strategy == "Moving Average Strategy":
             # Apply Breakout Strategy
             df = moving_average_crossover(data)
             
