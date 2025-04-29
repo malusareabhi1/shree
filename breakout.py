@@ -111,7 +111,7 @@ uploaded_file = st.sidebar.file_uploader("Upload CSV file", type=["csv"])
 # Sidebar: Select strategy
 selected_strategy = st.sidebar.selectbox(
     "Select a strategy to backtest",
-    ["Breakout Strategy"]
+    ["Breakout Strategy"]   ["Moving Average Strategy"]
 )
 
 if uploaded_file is not None:
@@ -171,5 +171,51 @@ if uploaded_file is not None:
                         st.error("The strategy column was not generated correctly. Please check the backtest.")
                 except Exception as e:
                     st.error(f"Backtest failed: {str(e)}")
+                    
+         if selected_strategy == "Moving Average Strategy":
+            # Apply Breakout Strategy
+            df = moving_average_crossover(data)
+            
+            # Check if 'Signal' column was generated
+            if 'Signal' not in df.columns:
+                st.error("Signal column not found. Ensure the strategy logic is correct.")
+            else:
+                # Run Backtest
+                try:
+                    pnl = backtest(df)
+                    
+                    # Displaying results
+                    st.subheader("Breakout Strategy - Cumulative Returns")
+                    plt.figure(figsize=(10, 6))
+                    plt.plot(pnl, label="Cumulative Returns", color='blue')
+                    plt.title("Cumulative Returns of Breakout Strategy")
+                    plt.xlabel("Date")
+                    plt.ylabel("Cumulative Return")
+                    plt.legend()
+                    st.pyplot(plt.gcf())
+                    plt.clf()
+
+                    # Performance Summary
+                    summary = performance_summary(df)
+                    if "Error" in summary:
+                        st.error(summary["Error"])
+                    else:
+                        st.subheader("Performance Summary")
+                        summary_df = pd.DataFrame(list(summary.items()), columns=["Metric", "Value"])
+                        st.table(summary_df)
+
+                    # Trade Log
+                    if 'Strategy' in df.columns:
+                        st.subheader("Trade Log")
+                        trade_log = df[df['Signal'] != 0][['Signal', 'Close', 'Strategy']]
+                        trade_log['Date'] = trade_log.index
+                        trade_log = trade_log[['Date', 'Signal', 'Close', 'Strategy']]
+                        st.write(trade_log)
+                    else:
+                        st.error("The strategy column was not generated correctly. Please check the backtest.")
+                except Exception as e:
+                    st.error(f"Backtest failed: {str(e)}")            
+
+
 else:
     st.error("Please upload a CSV file to proceed.")
