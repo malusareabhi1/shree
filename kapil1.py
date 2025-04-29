@@ -143,10 +143,10 @@ if uploaded_file is not None:
         st.dataframe(trade_log_df)
 
         # Ensure proper columns for performance summary
-        if 'Turnover' not in trade_log_df.columns:
-            trade_log_df['Turnover'] = trade_log_df['Entry_Price'] + trade_log_df['Exit_Price']
-        if 'PnL_After_Brokerage' not in trade_log_df.columns:
-            trade_log_df['PnL_After_Brokerage'] = trade_log_df['PnL'] - trade_log_df['Brokerage']
+        #if 'Turnover' not in trade_log_df.columns:
+        trade_log_df['Turnover'] = trade_log_df['Entry_Price'] + trade_log_df['Exit_Price']
+        #if 'PnL_After_Brokerage' not in trade_log_df.columns:
+        trade_log_df['PnL_After_Brokerage'] = trade_log_df['PnL'] - trade_log_df['Brokerage']
 
         # Compute summary stats
         total_trades = len(trade_log_df)
