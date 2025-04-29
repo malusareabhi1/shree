@@ -41,6 +41,39 @@ def backtest(data):
     data.dropna(inplace=True)
     return data['Strategy'].cumsum()
 
+# --- Performance Summary ---
+def performance_summary(data):
+    # Calculate total profit
+    total_profit = data['Strategy'].iloc[-1]  # Cumulative return at the end
+    
+    # Number of trades
+    trades = data[data['Signal'] != 0]
+    num_trades = len(trades)
+    
+    # Win rate: percentage of positive trades
+    win_rate = len(trades[trades['Strategy'] > 0]) / num_trades * 100 if num_trades > 0 else 0
+    
+    # Average return per trade
+    avg_trade_return = data['Strategy'].pct_change().mean() * 100
+    
+    # Maximum drawdown
+    running_max = data['Strategy'].cummax()
+    drawdown = (data['Strategy'] - running_max).min()
+
+    # Sharpe ratio
+    risk_free_rate = 0.01  # Assuming a 1% risk-free rate
+    excess_returns = data['Returns'] - risk_free_rate / 252  # Daily excess returns
+    sharpe_ratio = excess_returns.mean() / excess_returns.std() * np.sqrt(252)  # Annualized Sharpe ratio
+
+    return {
+        "Total Profit": total_profit,
+        "Number of Trades": num_trades,
+        "Win Rate (%)": win_rate,
+        "Average Return per Trade (%)": avg_trade_return,
+        "Max Drawdown": drawdown,
+        "Sharpe Ratio": sharpe_ratio
+    }
+
 # --- Streamlit UI ---
 st.title("🏦 Backtest Trading Strategy")
 
@@ -82,6 +115,19 @@ if uploaded_file is not None:
             plt.legend()
             st.pyplot(plt.gcf())
             plt.clf()
+
+            # Performance Summary
+            summary = performance_summary(df)
+            st.subheader("Performance Summary")
+            summary_df = pd.DataFrame(list(summary.items()), columns=["Metric", "Value"])
+            st.table(summary_df)
+
+            # Trade Log
+            st.subheader("Trade Log")
+            trade_log = df[df['Signal'] != 0][['Signal', 'Close', 'Strategy']]
+            trade_log['Date'] = trade_log.index
+            trade_log = trade_log[['Date', 'Signal', 'Close', 'Strategy']]
+            st.write(trade_log)
 
 else:
     st.error("Please upload a CSV file to proceed.")
