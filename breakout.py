@@ -190,7 +190,7 @@ selected_strategy = st.sidebar.selectbox(
     "Select a strategy to backtest",
     ["Breakout Strategy", "Moving Average Strategy", "Fibonacci Pullback Strategy","RSI Strategy","Volume Price Strategy","MACD Strategy","Ichimoku Cloud Strategy"]
 )
-
+st.sidebar("Compare All")
 if uploaded_file is not None:
     # Load the CSV file into a DataFrame
     data = pd.read_csv(uploaded_file)
