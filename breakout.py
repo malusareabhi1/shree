@@ -126,6 +126,18 @@ def calculate_performance_metrics(df):
             "Calmar Ratio": 0
         }
 
+    # Ensure there is data to process
+    if len(df) < 2:  # We need at least 2 data points for returns and performance calculation
+        return {
+            "Total Profit": 0,
+            "Annualized Return": 0,
+            "Annualized Volatility": 0,
+            "Sharpe Ratio": 0,
+            "Sortino Ratio": 0,
+            "Max Drawdown": 0,
+            "Calmar Ratio": 0
+        }
+
     # Calculate daily returns
     df['Daily Return'] = df['Strategy'].pct_change()
     df.dropna(inplace=True)
