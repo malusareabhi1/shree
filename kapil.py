@@ -408,6 +408,7 @@ elif selected == "Doctor Strategy":
             
                     # Track the trade for 10-minute exit and trailing logic
                     trades.append(trade)
+                    st.dataframe(trade_log_df.columns)  # 👈 First, inspect which columns are present
             
                     # Logic for trailing stop loss and profit booking
                     for trade in trades:
@@ -587,7 +588,7 @@ elif selected == "Doctor Strategy":
 
             # Create a DataFrame
             trade_log_df = pd.DataFrame(trades)
-            st.dataframe(trade_log_df[['Entry_Time', 'Entry_Price', 'Exit_Time', 'Exit_Price', 'PnL_After_Brokerage', 'Signal_Reason']])
+            #st.dataframe(trade_log_df[['Entry_Time', 'Entry_Price', 'Exit_Time', 'Exit_Price', 'PnL_After_Brokerage', 'Signal_Reason']])
             
             # Ensure the CSV string is generated correctly
             csv = trade_log_df.to_csv(index=False)  # `csv` should hold the CSV data as a string
