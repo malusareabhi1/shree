@@ -363,7 +363,7 @@ elif selected == "Doctor Strategy":
 
             # Step 5: Check IV Condition (only if IV data available)
             # Note: You should fetch IV data externally (example: using API), this is just a placeholder
-            iv_data = 16  # Placeholder value, replace with actual API fetch for IV
+            iv_data = 9.18  # Placeholder value, replace with actual API fetch for IV
 
             # Step 6: Trade Execution Based on Cross and IV Condition
             df['Signal'] = None
