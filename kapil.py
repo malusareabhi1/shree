@@ -363,16 +363,14 @@ elif selected == "Doctor Strategy":
 
             # Step 5: Check IV Condition (only if IV data available)
             # Note: You should fetch IV data externally (example: using API), this is just a placeholder
-            iv_data = 9.18  # Placeholder value, replace with actual API fetch for IV
+            iv_data = 16  # Placeholder value, replace with actual API fetch for IV
 
             # Step 6: Trade Execution Based on Cross and IV Condition
             df['Signal'] = None
-            df['Signal_Reason'] = None  # Add this new column
             for idx in range(1, len(df)):
                 if df['Ref_Candle_Up'].iloc[idx] and iv_data >= 16:
                     if df['Close'].iloc[idx] > df['Close'].iloc[idx - 1]:  # Confirm Next Candle Cross
                         df.at[idx, 'Signal'] = 'BUY'
-                        df.at[idx, 'Signal_Reason'] = "Ref Candle Up & IV >= 16 & Confirmed Next Candle"
 
             # Step 7: Stop Loss Logic (10% below entry price)
             df['Stop_Loss'] = df['Close'] * 0.90
@@ -401,25 +399,11 @@ elif selected == "Doctor Strategy":
                         'Brokerage'     : 20 ,   # ₹20 per trade
                         'PnL': None,
                         'Turnover':None,
-                        'Exit_Reason': None,  # Add the Exit_Reason field
-                        'PnL_After_Brokerage':None,
-                        #'Signal_Reason': df['Signal_Reason'].iloc[idx]  # ✅ Add this line
-                        'Signal_Reason': '20 SMA Cross + IV >= 16'  # ✅ Add this line
+                        'Exit_Reason': None  # Add the Exit_Reason field
                     }
-                    
-                    if 'PnL' not in trade_log_df.columns:
-                        trade_log_df['PnL'] = trade_log_df['Exit_Price'] - trade_log_df['Entry_Price']
-                    
-                    if 'Brokerage' not in trade_log_df.columns:
-                        trade_log_df['Brokerage'] = 0  # or your brokerage formula
-                    
-                    trade_log_df['PnL_After_Brokerage'] = trade_log_df['PnL'] - trade_log_df['Brokerage']
             
                     # Track the trade for 10-minute exit and trailing logic
                     trades.append(trade)
-                    st.dataframe(trade_log_df.columns)  # 👈 First, inspect which columns are present
-                    # Debug print
-                    st.write("Columns available in trade_log_df:", trade_log_df.columns.tolist())
             
                     # Logic for trailing stop loss and profit booking
                     for trade in trades:
@@ -599,7 +583,6 @@ elif selected == "Doctor Strategy":
 
             # Create a DataFrame
             trade_log_df = pd.DataFrame(trades)
-            #st.dataframe(trade_log_df[['Entry_Time', 'Entry_Price', 'Exit_Time', 'Exit_Price', 'PnL_After_Brokerage', 'Signal_Reason']])
             
             # Ensure the CSV string is generated correctly
             csv = trade_log_df.to_csv(index=False)  # `csv` should hold the CSV data as a string
@@ -613,28 +596,12 @@ elif selected == "Doctor Strategy":
                 mime="text/csv",
                 key="download_button"
             )
-            # ──     assume you already have: trade_log_df = pd.DataFrame(trades) ──
-            if 'Turnover' not in trade_log_df.columns:
-                trade_log_df['Turnover'] = trade_log_df['Entry_Price'] + trade_log_df['Exit_Price']
-            if 'PnL_After_Brokerage' not in trade_log_df.columns:
-                if 'PnL' in trade_log_df.columns and 'Brokerage' in trade_log_df.columns:
-                    trade_log_df['PnL_After_Brokerage'] = trade_log_df['PnL'] - trade_log_df['Brokerage']
-                else:
-                    st.error("Missing 'PnL' or 'Brokerage' column. Cannot compute 'PnL_After_Brokerage'.")
-                    trade_log_df['PnL_After_Brokerage'] = 0  # Optional fallback
-        
+            # ── assume you already have: trade_log_df = pd.DataFrame(trades) ──
+
             # 1️⃣ Compute summary stats
             total_trades = len(trade_log_df)
-            #wins        = trade_log_df[trade_log_df['PnL_After_Brokerage'] > 0]
-            if 'PnL_After_Brokerage' in trade_log_df.columns:
-                wins = trade_log_df[trade_log_df['PnL_After_Brokerage'] > 0]
-            else:
-                wins = pd.DataFrame()  # Empty fallback
-            #losses      = trade_log_df[trade_log_df['PnL_After_Brokerage'] < 0]
-            if 'PnL_After_Brokerage' in trade_log_df.columns:
-                losses = trade_log_df[trade_log_df['PnL_After_Brokerage'] < 0]
-            else:
-                losses = pd.DataFrame()
+            wins        = trade_log_df[trade_log_df['PnL_After_Brokerage'] > 0]
+            losses      = trade_log_df[trade_log_df['PnL_After_Brokerage'] < 0]
             
             num_wins    = len(wins)
             num_losses  = len(losses)
@@ -689,11 +656,6 @@ elif selected == "Doctor Strategy":
                 mime="text/csv",
                 key="download_with_summary"
             )
-
-
-  
-    
-
 
 
 elif selected == "KITE API":
