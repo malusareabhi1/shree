@@ -890,6 +890,3 @@ elif selected == "Live Algo Trading":
 
 
 
-    else:
-        st.warning("📴 Please upload a valid CSV file to backtest the strategy.")  
-   
