@@ -434,14 +434,14 @@ elif selected == "Doctor Strategy":
                         #'Entry_Time': df.index[idx],
                         'Entry_Time': df['Date'].iloc[idx],
                         'Entry_Price': entry_price,
-                        'IV': iv_data,
+                        #'IV': iv_data,
                         'Stop_Loss': stop_loss,
                         'Profit_Target': profit_target,
                         'Exit_Time': None,
                         'Exit_Price': None,
                         'Brokerage'     : 20 ,   # ₹20 per trade
                         'PnL': None,
-                        'PnL_After_Brokerage':None,
+                        #'PnL_After_Brokerage':None,
                         'Turnover':None,
                         'Exit_Reason': None  # Add the Exit_Reason field
                     }
