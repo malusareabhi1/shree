@@ -441,6 +441,7 @@ elif selected == "Doctor Strategy":
                         'Exit_Price': None,
                         'Brokerage'     : 20 ,   # ₹20 per trade
                         'PnL': None,
+                        'PnL_After_Brokerage':None,
                         'Turnover':None,
                         'Exit_Reason': None  # Add the Exit_Reason field
                     }
