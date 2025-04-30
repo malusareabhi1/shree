@@ -359,7 +359,54 @@ elif selected == "Doctor Strategy":
             # Step 5: Check IV Condition (only if IV data available)
             # Note: You should fetch IV data externally (example: using API), this is just a placeholder
             iv_data = 16  # Placeholder value, replace with actual API fetch for IV
+            #___________________________________________________________________________________________________________________________
+            import requests
 
+            def get_live_nifty_iv():
+                url = "https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY"
+                headers = {
+                    "User-Agent": "Mozilla/5.0",
+                    "Accept-Language": "en-US,en;q=0.9",
+                    "Referer": "https://www.nseindia.com/option-chain"
+                }
+            
+                try:
+                    session = requests.Session()
+                    session.get("https://www.nseindia.com", headers=headers)  # Required to get cookies
+            
+                    response = session.get(url, headers=headers, timeout=5)
+                    data = response.json()
+            
+                    underlying = data['records']['underlyingValue']
+                    options = data['records']['data']
+            
+                    # Find ATM strike
+                    atm_option = min(options, key=lambda x: abs(x['strikePrice'] - underlying))
+            
+                    ce_iv = atm_option.get('CE', {}).get('impliedVolatility', None)
+                    pe_iv = atm_option.get('PE', {}).get('impliedVolatility', None)
+            
+                    return {
+                        'Underlying': underlying,
+                        'ATM Strike': atm_option['strikePrice'],
+                        'CE_IV': ce_iv,
+                        'PE_IV': pe_iv
+                    }
+            
+                except Exception as e:
+                    return {"error": str(e)}
+            
+            # Example usage
+            iv_data = get_live_nifty_iv()
+            ce_iv = iv_data.get('CE_IV')
+            pe_iv = iv_data.get('PE_IV')
+            
+            st.write(iv_data)
+
+            iv_data =  ce_iv
+
+
+            #_______________________________________________________________________________________________________________________________
             # Step 6: Trade Execution Based on Cross and IV Condition
             df['Signal'] = None
             for idx in range(1, len(df)):
