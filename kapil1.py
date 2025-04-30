@@ -527,7 +527,7 @@ elif selected == "Doctor Strategy":
             
                             # Check if the 'Date' column has any NaT (invalid) values and handle accordingly
                             if df['Date'].isnull().any():
-                                print("Warning: Some 'Date' values are invalid (NaT). They will be excluded.")
+                                st.write("Warning: Some 'Date' values are invalid (NaT). They will be excluded.")
                                 df = df.dropna(subset=['Date'])
             
                             # Localize to 'Asia/Kolkata' timezone only if the column is naive (no timezone)
@@ -627,7 +627,7 @@ elif selected == "Doctor Strategy":
 
             # Create a DataFrame
             trade_log_df = pd.DataFrame(trades)
-            st.write(trade_log_df.columns.tolist())
+            #st.write(trade_log_df.columns.tolist())
             
             # Ensure the CSV string is generated correctly
             csv = trade_log_df.to_csv(index=False)  # `csv` should hold the CSV data as a string
@@ -645,7 +645,7 @@ elif selected == "Doctor Strategy":
             if 'PnL_After_Brokerage' in trade_log_df.columns:
                 wins = trade_log_df[trade_log_df['PnL_After_Brokerage'] > 0]
             else:
-                print("Column 'PnL_After_Brokerage' not found in trade_log_df")
+                st.write("Column 'PnL_After_Brokerage' not found in trade_log_df")
     # Optionally handle fallback here
             # 1️⃣ Compute summary stats
             total_trades = len(trade_log_df)
