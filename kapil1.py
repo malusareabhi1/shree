@@ -434,7 +434,7 @@ elif selected == "Doctor Strategy":
                         #'Entry_Time': df.index[idx],
                         'Entry_Time': df['Date'].iloc[idx],
                         'Entry_Price': entry_price,
-                        #'IV': iv_data,
+                        'IV': iv_data,
                         'Stop_Loss': stop_loss,
                         'Profit_Target': profit_target,
                         'Exit_Time': None,
