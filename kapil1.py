@@ -627,6 +627,7 @@ elif selected == "Doctor Strategy":
 
             # Create a DataFrame
             trade_log_df = pd.DataFrame(trades)
+            st.write(trade_log_df.columns.tolist())
             
             # Ensure the CSV string is generated correctly
             csv = trade_log_df.to_csv(index=False)  # `csv` should hold the CSV data as a string
