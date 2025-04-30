@@ -1,53 +1,46 @@
 import requests
-import pandas as pd
-import streamlit as st
-def get_live_iv_from_nse(symbol="NIFTY"):
-    """
-    Fetches live Implied Volatility (IV) data from NSE Option Chain for the given index.
-    
-    Parameters:
-        symbol (str): "NIFTY" or "BANKNIFTY"
-    
-    Returns:
-        pd.DataFrame: DataFrame with Expiry, Strike, CE IV, PE IV
-    """
-    url = f"https://www.nseindia.com/api/option-chain-indices?symbol={symbol}"
+from bs4 import BeautifulSoup
+import json
+import time
+
+def get_nifty_option_chain():
+    url = "https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY"
     headers = {
         "User-Agent": "Mozilla/5.0",
         "Accept-Language": "en-US,en;q=0.9",
-        "Referer": f"https://www.nseindia.com/option-chain"
+        "Referer": "https://www.nseindia.com/option-chain"
     }
 
     session = requests.Session()
-    session.get("https://www.nseindia.com", headers=headers)  # Set cookies
+    session.get("https://www.nseindia.com", headers=headers)  # Needed to get cookies
 
-    response = session.get(url, headers=headers, timeout=10)
-    if response.status_code != 200:
-        raise Exception("Failed to fetch option chain data.")
-
+    response = session.get(url, headers=headers)
     data = response.json()
 
-    records = []
-    for item in data["records"]["data"]:
-        strike = item.get("strikePrice")
-        expiry = item.get("expiryDate")
-        ce_iv = item.get("CE", {}).get("impliedVolatility")
-        pe_iv = item.get("PE", {}).get("impliedVolatility")
+    # Example: extract IVs for ATM strike (based on current underlying price)
+    underlying_price = data['records']['underlyingValue']
+    atm_strike = min(data['records']['data'], key=lambda x: abs(x['strikePrice'] - underlying_price))
+    
+    ce_iv = atm_strike['CE']['impliedVolatility']
+    pe_iv = atm_strike['PE']['impliedVolatility']
 
-        if ce_iv is not None and pe_iv is not None:
-            records.append({
-                "Expiry": expiry,
-                "Strike": strike,
-                "CE_IV": ce_iv,
-                "PE_IV": pe_iv
-            })
+    return {
+        'Underlying': underlying_price,
+        'Strike': atm_strike['strikePrice'],
+        'CE_IV': ce_iv,
+        'PE_IV': pe_iv
+    }
 
-    return pd.DataFrame(records)
+# Continuous check for IV every 60 seconds
+def monitor_iv():
+    while True:
+        iv_data = get_nifty_option_chain()
+        print(iv_data)
+        print(f"Current Nifty IV: {iv_data}")  # Print or process the IV data
+        time.sleep(30)  # Wait for 60 seconds before checking again
 
-# Example usage:
-if __name__ == "__main__":
-    df_iv = get_live_iv_from_nse("NIFTY")
-    #print(df_iv.head())
-    st.write(df_iv.head())
-    st.write(df_iv)
-    st.write(df_iv)
+# Call the function to start monitoring
+monitor_iv()
+
+#iv_data = get_nifty_option_chain()
+#print(iv_data)
