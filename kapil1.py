@@ -706,6 +706,260 @@ elif selected == "Doctor Strategy":
                 key="download_with_summary"
             )
 
+elif selected == "Live Algo Trading":
+    st.title("🤖 Live Algo Trading (Paper/Real Mode) Hello ")
+    from dotenv import load_dotenv
+
+    # ─── LOAD ENVIRONMENT VARIABLES ───────────────────────────────────────────────
+    load_dotenv()
+    TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+    CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+    
+    # ─── TELEGRAM ALERT FUNCTION ──────────────────────────────────────────────────
+    def send_telegram(msg: str):
+        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+        payload = {"chat_id": CHAT_ID, "text": msg, "parse_mode": "HTML"}
+        try:
+            requests.post(url, data=payload)
+        except Exception as e:
+            st.error(f"Telegram Error: {e}")
+    
+    # ─── PAGE CONFIG ──────────────────────────────────────────────────────────────
+    #st.set_page_config(page_title="📈 Nifty EMA20 Breakout", layout="wide")
+    st.title("📊 Nifty 5-min EMA20 + Volume Breakout Monitor")
+    
+    # ─── STRATEGY TEST STARTED ─────────────────────────────────────────────────────
+    start_msg = "🟢 Strategy Test Started"
+    st.info(start_msg)
+    send_telegram(start_msg)
+    
+    # ─── FETCH DATA ───────────────────────────────────────────────────────────────
+    @st.cache_data(ttl=60)
+    def fetch_data(ticker: str) -> pd.DataFrame:
+        df = yf.download(ticker, interval="5m", period="15d", progress=False)
+        df.reset_index(inplace=True)
+        #df.reset_index(inplace=True)          # moves the old index into a 'Date' column
+        df['Date'] = pd.to_datetime(df['Datetime'], errors='coerce')
+        #st.write("Columns after read:", df.columns.tolist())
+        df.index = pd.to_datetime(df.index)
+       
+        if df.index.tz is None:
+            df = df.tz_localize("UTC").tz_convert("Asia/Kolkata")
+        else:
+            df = df.tz_convert("Asia/Kolkata")
+    
+        df = df.between_time("09:15", "15:30")
+    
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+    
+        df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
+        df["VMA20"] = df["Volume"].rolling(20).mean()
+        
+        return df
+    
+    symbol = "^NSEI"
+    df = fetch_data(symbol)
+    st.write("Columns after read:", df.columns.tolist())
+    if not df.empty:
+        if len(df) > 0:
+            latest = df.iloc[-1]
+            now = latest.name 
+    st.write(letest)
+    st.write(now)
+    #latest = df.iloc[-1]
+    if len(df) >= 2:
+        prev = df.iloc[-2]  # Access second-to-last row
+    #prev = df.iloc[-2]
+    
+    # ─── MARKET OPEN/CLOSE MESSAGE ────────────────────────────────────────────────
+    #now = latest.name
+    now = datetime.now()
+    if now.hour == 9 and now.minute == 15:
+        market_msg = "📈 Market Opened at 09:15 But My Doctor Stratergy will Start 09:30 "
+        st.success(market_msg)
+        send_telegram(market_msg)
+
+    if now.hour == 14 and now.minute == 30:
+        market_close_msg = "📉 Doctor Stratergy will  not take Trade after 02:30"
+        st.warning(market_close_msg)
+        send_telegram(market_close_msg)
+
+     
+
+    if now.hour == 15 and now.minute == 30:
+        market_close_msg = "📉 Market Closed at 15:30 Bye ! See you Tomorrow 9:30"
+        st.warning(market_close_msg)
+        send_telegram(market_close_msg)
+
+
+
+    # ─── STRATEGY LOGIC ───────────────────────────────────────────────────────────
+    def generate_signals(df: pd.DataFrame, iv_data: float, iv_threshold: float) -> pd.DataFrame:
+        # 0a) See what columns you have:
+        st.write("Columns before normalize:", df.columns.tolist())
+        
+        # 0b) Normalize your date column to 'Date'
+        if 'Date' not in df.columns:
+            if 'date' in df.columns:                 # lowercase
+                df = df.rename(columns={'date':'Date'})
+            elif 'timestamp' in df.columns:         # maybe it's timestamp?
+                df = df.rename(columns={'timestamp':'Date'})
+            else:
+                raise KeyError("No 'Date' (or 'date' / 'timestamp') column found in your DataFrame")
+        
+        # 0c) Convert to datetime
+        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+        if df['Date'].isna().any():
+            raise ValueError("Some 'Date' values could not be parsed as datetime")
+        
+        # 1) Now safe to sort
+        df = df.sort_values('Date').reset_index(drop=True)
+    
+        # … the rest of your logic …
+        df['SMA_20']   = df['Close'].rolling(20).mean()
+        df['Upper_BB'] = df['SMA_20'] + 2 * df['Close'].rolling(20).std()
+        df['Lower_BB'] = df['SMA_20'] - 2 * df['Close'].rolling(20).std()
+        df['Ref_Candle_Up'] = (
+            (df['Close'] > df['SMA_20']) &
+            (df['Close'].shift(1) > df['SMA_20'].shift(1))
+        )
+        
+        # Vectorized BUY signal:
+        df['Signal'] = np.where(
+            (df['Ref_Candle_Up']) &
+            (iv_data  >= iv_threshold) &
+            (df['Close'] > df['Close'].shift(1)),
+            'BUY', None
+        )
+        return df
+        #_________________________________________________________________________________________________________________
+        def get_live_iv(symbol, expiry_date, strike_price, option_type):
+            # Initialize the NSE object
+            nse = Nse()
+        
+            # Get Option chain data (you'll need the symbol, expiry, strike, and type)
+            option_data = nse.get_stock_option_chain(symbol)
+        
+            # Extract IV data (example; adapt depending on actual data structure)
+            for option in option_data['records']['data']:
+                if option['expiryDate'] == expiry_date and option['strikePrice'] == strike_price:
+                    if option_type == 'CE':  # Call option
+                        iv_value = option['CE']['impliedVolatility']
+                    elif option_type == 'PE':  # Put option
+                        iv_value = option['PE']['impliedVolatility']
+                    return iv_value
+            
+            return None
+        
+        # Example Usage
+        symbol = 'NIFTY'
+        expiry_date = '2025-04-30'  # expiry date
+        strike_price = 18000  # example strike price
+        option_type = 'CE'  # 'CE' for Call, 'PE' for Put
+        
+        iv_value = get_live_iv(symbol, expiry_date, strike_price, option_type)
+        if iv_value:
+            st.write(f"The live IV for {symbol} {expiry_date} {strike_price} {option_type} is: {iv_value}")
+        else:
+            st.write("IV data not available")
+    
+    signal = "No Signal"
+    # Check if DataFrame has enough data
+    if len(df) >= 2:
+        latest = df.iloc[-1]  # Get the latest row
+        prev = df.iloc[-2]    # Get the previous row
+    st.write(df.shape)  # Shows the number of rows and columns
+    st.write(df.columns)  # Lists all the columns
+    if (prev["Close"] < prev["EMA20"]) and (latest["Close"] > prev["EMA20"]) and (latest["Volume"] > latest["VMA20"]):
+        signal = "BUY"
+        entry_price = round(latest["Close"], 2)
+        msg = (
+            f"📥 <b>LIVE BUY SIGNAL</b>\n"
+            f"<b>Symbol:</b> {symbol}\n"
+            f"<b>Entry:</b> ₹{entry_price}\n"
+            f"<b>Volume:</b> {latest['Volume']:,}\n"
+            f"<b>Time:</b> {latest.name.strftime('%H:%M')}"
+        )
+        send_telegram(msg)
+
+    
+    
+    # ─── DISPLAY ──────────────────────────────────────────────────────────────────
+    st.subheader("📊 Last 5 Candles")
+    st.dataframe(df.tail(5))
+    
+    col1, col2, col3 = st.columns(3)
+    col1.metric("🔹 Close", f"₹{latest['Close']:.2f}")
+    col2.metric("🔸 EMA20", f"₹{latest['EMA20']:.2f}")
+    col3.metric("📌 Signal", signal)
+    #---------------------------------------------------------------------------------------
+     #____________________________________________________________________________________________________________________   
+
+    live_iv_value=17.06
+    signals_df = generate_signals(df, iv_data=live_iv_value, iv_threshold=16)
+    st.write(signals_df[['Date','Close','Signal']].dropna(subset=['Signal']))
+    #_________________________________________________________________________________________________________________
+    import plotly.graph_objects as go
+    from datetime import datetime
+    
+    # ─── filter for today's date ──────────────────────────────────────
+    # assume df.index is timezone-aware in IST
+    today = datetime.now().astimezone(df.index.tz).date()
+    df_today = df[df.index.date == today]
+    
+    # Calculate 20 EMA
+    df_today['EMA20'] = df_today['Close'].ewm(span=20, adjust=False).mean()
+    
+    st.subheader("🕯️ Today's 5-Min Candle Chart with 20 EMA")
+    
+    # Plot the candlestick chart with 20 EMA
+    fig = go.Figure(data=[
+        go.Candlestick(
+            x=df_today.index,
+            open=df_today["Open"],
+            high=df_today["High"],
+            low=df_today["Low"],
+            close=df_today["Close"],
+            increasing_line_color="green",
+            decreasing_line_color="red",
+            name="Candles"
+        ),
+        go.Scatter(
+            x=df_today.index,
+            y=df_today['EMA20'],
+            mode='lines',
+            line=dict(color='blue', width=2),
+            name='20 EMA'
+        )
+    ])
+    
+    fig.update_layout(
+        xaxis_rangeslider_visible=False,
+        xaxis_title="Time",
+        yaxis_title="Price (₹)",
+        template="plotly_dark",
+        height=500
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
+    
+    #---------------------------------------------------------------------------------------
+    st.subheader("📈 Price vs EMA20")
+    st.line_chart(df[["Close", "EMA20"]])
+    
+    # ─── STRATEGY TEST STOPPED ────────────────────────────────────────────────────
+    stop_msg = "🔴 Strategy Test Ended (for current run)"
+    st.info(stop_msg)
+    send_telegram(stop_msg)
+    
+    # ─── AUTO REFRESH ─────────────────────────────────────────────────────────────
+    st.markdown("⏱️ Auto-refresh every 30 seconds")
+    with st.spinner("⏳ Refreshing in 30 seconds..."):
+        time.sleep(30)
+        st.rerun()
+
+
 
   
     
