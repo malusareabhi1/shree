@@ -404,7 +404,7 @@ elif selected == "Doctor Strategy":
             st.write(iv_data)
 
             iv_data =  ce_iv
-
+            iv_data =  17
 
             #_______________________________________________________________________________________________________________________________
             # Step 6: Trade Execution Based on Cross and IV Condition
