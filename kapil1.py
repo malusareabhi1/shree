@@ -642,7 +642,11 @@ elif selected == "Doctor Strategy":
                 key="download_button"
             )
             # ── assume you already have: trade_log_df = pd.DataFrame(trades) ──
-
+            if 'PnL_After_Brokerage' in trade_log_df.columns:
+                wins = trade_log_df[trade_log_df['PnL_After_Brokerage'] > 0]
+            else:
+                print("Column 'PnL_After_Brokerage' not found in trade_log_df")
+    # Optionally handle fallback here
             # 1️⃣ Compute summary stats
             total_trades = len(trade_log_df)
             wins        = trade_log_df[trade_log_df['PnL_After_Brokerage'] > 0]
