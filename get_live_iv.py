@@ -1,46 +1,33 @@
 import requests
-from bs4 import BeautifulSoup
-import json
-import time
+import pandas as pd
 
-def get_nifty_option_chain():
+def fetch_nifty_option_chain():
     url = "https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY"
     headers = {
         "User-Agent": "Mozilla/5.0",
         "Accept-Language": "en-US,en;q=0.9",
         "Referer": "https://www.nseindia.com/option-chain"
     }
-
     session = requests.Session()
-    session.get("https://www.nseindia.com", headers=headers)  # Needed to get cookies
+    session.get("https://www.nseindia.com", headers=headers)  # set cookies
 
     response = session.get(url, headers=headers)
     data = response.json()
 
-    # Example: extract IVs for ATM strike (based on current underlying price)
-    underlying_price = data['records']['underlyingValue']
-    atm_strike = min(data['records']['data'], key=lambda x: abs(x['strikePrice'] - underlying_price))
-    
-    ce_iv = atm_strike['CE']['impliedVolatility']
-    pe_iv = atm_strike['PE']['impliedVolatility']
+    records = []
+    for d in data['records']['data']:
+        if 'CE' in d and 'PE' in d:
+            strike = d['strikePrice']
+            ce_iv = d['CE'].get('impliedVolatility')
+            pe_iv = d['PE'].get('impliedVolatility')
+            records.append({'Strike': strike, 'CE_IV': ce_iv, 'PE_IV': pe_iv})
+    return pd.DataFrame(records)
+import streamlit as st
+from streamlit_autorefresh import st_autorefresh
 
-    return {
-        'Underlying': underlying_price,
-        'Strike': atm_strike['strikePrice'],
-        'CE_IV': ce_iv,
-        'PE_IV': pe_iv
-    }
+# Auto-refresh every 5 min (300000 ms)
+st_autorefresh(interval=300000, key="iv_refresh")
 
-# Continuous check for IV every 60 seconds
-def monitor_iv():
-    while True:
-        iv_data = get_nifty_option_chain()
-        print(iv_data)
-        print(f"Current Nifty IV: {iv_data}")  # Print or process the IV data
-        time.sleep(30)  # Wait for 60 seconds before checking again
-
-# Call the function to start monitoring
-monitor_iv()
-
-#iv_data = get_nifty_option_chain()
-#print(iv_data)
+st.title("🔍 Live Nifty Option Chain IV")
+df_iv = fetch_nifty_option_chain()
+st.dataframe(df_iv)
