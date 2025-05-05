@@ -33,7 +33,7 @@ def get_candlestick_chart(df, title="Nifty 5-Minute Candlestick Chart"):
     return fig
 
 # Streamlit App
-st.title("📊 Live Nifty 5-Minute Trend Candlestick Chart")
+st.title("📊 Live Nifty 5-Minute ")
 
 symbol = "^NSEI"  # Nifty 50 Index symbol in Yahoo Finance
 
