@@ -3,7 +3,7 @@ import streamlit as st
 import yfinance as yf
 import plotly.graph_objects as go
 
-st.title("📊 Live NIFTY 5‑Minute Candlestick")
+st.title("📊 Live NIFTY 5‑Minute Candle")
 
 def fetch_5min_data(symbol):
     df = yf.download(tickers=symbol, interval="5m", period="1d", progress=False)
