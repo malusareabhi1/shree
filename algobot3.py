@@ -1579,6 +1579,14 @@ elif selected == "Live Algo Trading":
     else:
         st.plotly_chart(plot_candles_with_sma(df), use_container_width=True)
 
+    current_price = float(df["Close"].iloc[-1])
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("📈 Trend", trend)
+    col2.metric("💰 Price", f"{price:.2f} ₹")
+    col3.metric("🔺 High", f"{high:.2f} ₹")
+    col4.metric("🔻 Low", f"{low:.2f} ₹")
+    st.divider()
+
 
     #_____________________________________________________________________________________________________________________________
 
