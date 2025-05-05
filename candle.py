@@ -1,60 +1,39 @@
-
+import pandas as pd  # Add this import
 import streamlit as st
 import yfinance as yf
 import plotly.graph_objects as go
-import time
 
-# Function to fetch live 5-minute data for Nifty for 1 day
+st.title("📊 Live NIFTY 5‑Minute Candlestick")
+
 def fetch_5min_data(symbol):
-    try:
-        # Fetch data for today (1-day period) with 5-minute intervals
-        df = yf.download(tickers=symbol, interval="5m", period="1d")
-        df.dropna(inplace=True)  # Remove any missing data
-        return df
-    except Exception as e:
-        st.error(f"⚠️ Error fetching data: {e}")
-        return None
+    df = yf.download(tickers=symbol, interval="5m", period="1d", progress=False)
+    if isinstance(df.columns, pd.MultiIndex):  # This checks if the columns are a MultiIndex
+        df.columns = df.columns.get_level_values(0)
+    for col in ["Open","High","Low","Close"]:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+    df.dropna(subset=["Open","High","Low","Close"], inplace=True)
+    return df
 
-# Function to plot the candlestick chart
-def get_candlestick_chart(df, title="Nifty 5-Minute Candlestick Chart"):
+def plot_candles(df):
     fig = go.Figure(data=[go.Candlestick(
         x=df.index,
-        open=df['Open'],
-        high=df['High'],
-        low=df['Low'],
-        close=df['Close']
+        open=df["Open"],
+        high=df["High"],
+        low=df["Low"],
+        close=df["Close"],
     )])
     fig.update_layout(
-        title=title,
-        xaxis_title='Time',
-        yaxis_title='Price',
+        title="NIFTY 5‑Minute Candles (Today)",
+        xaxis_title="Time",
+        yaxis_title="Price",
         xaxis_rangeslider_visible=False
     )
     return fig
 
-# Streamlit App
-st.title("📊 Live Nifty 5-Minute ")
+symbol = "^NSEI"
+df = fetch_5min_data(symbol)
 
-symbol = "^NSEI"  # Nifty 50 Index symbol in Yahoo Finance
-
-# Display the live data and chart with a refresh every 30 seconds
-while True:
-    df = fetch_5min_data(symbol)  # Fetch data for Nifty
-    # 1) If yfinance returned a MultiIndex (e.g. level 0 = field, level 1 = ticker), flatten it:
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.get_level_values(0)
-    
-    # 2) Ensure OHLC are numeric:
-    for col in ["Open", "High", "Low", "Close"]:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
-    
-    # 3) Drop any rows where OHLC couldn’t be converted:
-    df.dropna(subset=["Open", "High", "Low", "Close"], inplace=True)
-    st.write(df.head(5))
-    if df is not None and not df.empty:
-        st.plotly_chart(get_candlestick_chart(df, title="Live Nifty 5-Minute Candlestick Chart"), use_container_width=True)
-    else:
-        st.warning("No data available for the Nifty 5-Minute chart.")
-    
-    time.sleep(30)  # Refresh every 30 seconds
-    #st.experimental_rerun()  # Re-run the app to fetch fresh data
+if df.empty:
+    st.warning("No data available for today’s 5‑min bars.")
+else:
+    st.plotly_chart(plot_candles(df), use_container_width=True)
