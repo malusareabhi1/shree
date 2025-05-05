@@ -14,6 +14,18 @@ timeframes = {
     "1-Week": {"interval": "1wk", "period": "1y"},
     "1-Month": {"interval": "1mo", "period": "5y"},
 }
+# Function to plot 5-minute candlestick chart
+def get_candlestick_chart(df, title="5-Minute Candlestick Chart"):
+    fig = go.Figure(data=[go.Candlestick(
+        x=df.index,
+        open=df['Open'],
+        high=df['High'],
+        low=df['Low'],
+        close=df['Close']
+    )])
+    fig.update_layout(title=title, xaxis_title='Time', yaxis_title='Price', xaxis_rangeslider_visible=False)
+    return fig
+
 
 # Trend Calculation
 def get_trend(df):
@@ -41,6 +53,10 @@ def calculate_trend_for_timeframe(interval, period):
     except Exception as e:
         return f"Error: {str(e)}", 0, 0, 0
 
+if df is not None and not df.empty:
+    st.plotly_chart(get_candlestick_chart(df, title="Nifty 5-Minute Trend"), use_container_width=True)
+else:
+    st.warning("No data available for the Nifty 5-Minute chart.")
 # Display in Streamlit
 for label, tf in timeframes.items():
     st.subheader(f"🕒 {label} Trend")
