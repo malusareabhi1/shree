@@ -40,6 +40,16 @@ symbol = "^NSEI"  # Nifty 50 Index symbol in Yahoo Finance
 # Display the live data and chart with a refresh every 30 seconds
 while True:
     df = fetch_5min_data(symbol)  # Fetch data for Nifty
+    # 1) If yfinance returned a MultiIndex (e.g. level 0 = field, level 1 = ticker), flatten it:
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+    
+    # 2) Ensure OHLC are numeric:
+    for col in ["Open", "High", "Low", "Close"]:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+    
+    # 3) Drop any rows where OHLC couldn’t be converted:
+    df.dropna(subset=["Open", "High", "Low", "Close"], inplace=True)
     st.write(df.head(5))
     if df is not None and not df.empty:
         st.plotly_chart(get_candlestick_chart(df, title="Live Nifty 5-Minute Candlestick Chart"), use_container_width=True)
