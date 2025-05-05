@@ -32,3 +32,4 @@ else:
 
     # Display the chart in Streamlit
     st.plotly_chart(fig)
+    
