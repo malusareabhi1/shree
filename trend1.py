@@ -1,39 +1,21 @@
 import streamlit as st
 import yfinance as yf
-import plotly.graph_objects as go
 
-# Fetch live NIFTY data for the last 7 days
-symbol = "^NSEI"  # Nifty 50 symbol
-st.title("Live NIFTY Daily Candlestick Chart")
+st.title("📈 Current NIFTY 50 Price")
+
+# Nifty 50 index symbol on Yahoo Finance
+symbol = "^NSEI"
 
 try:
-    df = yf.download(symbol, period="7d", interval="1d")
+    # Fetch latest data (1d interval for today)
+    data = yf.download(symbol, period="1d", interval="1m")
     
-    if df.empty:
-        st.error("❌ Failed to load NIFTY data.")
+    if data.empty:
+        st.error("❌ Could not fetch NIFTY 50 data.")
     else:
-        # Display raw data for debugging
-        st.write(df.tail())
-
-        # Create Candlestick chart
-        fig = go.Figure(data=[go.Candlestick(x=df.index,
-                                            open=df['Open'],
-                                            high=df['High'],
-                                            low=df['Low'],
-                                            close=df['Close'],
-                                            name='Candlestick')])
-
-        # Customize layout
-        fig.update_layout(
-            title="NIFTY Daily Candlestick Chart",
-            xaxis_title="Date",
-            yaxis_title="Price (INR)",
-            xaxis_rangeslider_visible=False,
-            template="plotly_dark"
-        )
-
-        # Display the chart in Streamlit
-        st.plotly_chart(fig)
+        # Get the most recent closing price
+        current_price = data["Close"].iloc[-1]
+        st.metric("NIFTY 50", f"{current_price:.2f} ₹")
 
 except Exception as e:
-    st.error(f"Error: {e}")
+    st.error(f"Error fetching data: {e}")
