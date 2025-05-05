@@ -51,11 +51,15 @@ for label, tf in timeframes.items():
     col3.metric("🔺 High", f"{high:.2f} ₹")
     col4.metric("🔻 Low", f"{low:.2f} ₹")
     st.divider()
-    import time
+
+import time
 
     # Refresh every 30 seconds
     st.write("🔄 Auto-refreshing in 30 seconds...")
     time.sleep(30)
     st.experimental_rerun()
+
+    
+    
 
 
