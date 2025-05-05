@@ -54,10 +54,10 @@ for label, tf in timeframes.items():
 
 import time
 
-    # Refresh every 30 seconds
-    st.write("🔄 Auto-refreshing in 30 seconds...")
-    time.sleep(30)
-    st.experimental_rerun()
+# Refresh every 30 seconds
+st.write("🔄 Auto-refreshing in 30 seconds...")
+time.sleep(30)
+st.experimental_rerun()
 
     
     
