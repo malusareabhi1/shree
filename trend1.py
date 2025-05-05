@@ -1,87 +1,34 @@
 import streamlit as st
 import yfinance as yf
-import pandas as pd
-from ta.trend import EMAIndicator
+import plotly.graph_objects as go
 
-st.set_page_config(page_title="Nifty/BankNifty Trend", layout="wide")
-st.title("📈 Nifty / BankNifty Trend Analyzer")
+# Fetch live NIFTY data for the last 7 days
+symbol = "^NSEBANK"  # NIFTY Bank symbol
+df = yf.download(symbol, period="7d", interval="1d")
 
-# Sidebar
-symbol = st.sidebar.selectbox("Select Index", ("^NSEI", "^NSEBANK"))  # Nifty / Bank Nifty
-timeframe = st.sidebar.selectbox("Select Timeframe", ("Intraday (5 min)", "Daily", "Weekly", "Monthly"))
-
-# Map intervals
-interval_map = {
-    "Intraday (5 min)": ("5m", "2d"),
-    "Daily": ("1d", "3mo"),
-    "Weekly": ("1d", "6mo"),
-    "Monthly": ("1d", "1y")
-}
-
-interval, period = interval_map[timeframe]
-
-# Fetch data
-@st.cache_data
-def get_data(symbol, interval, period):
-    try:
-        df = yf.download(tickers=symbol, interval=interval, period=period)
-        return df
-    except Exception as e:
-        st.error(f"Data load failed: {e}")
-        return pd.DataFrame()
-
-df = get_data(symbol, interval, period)
-
-# Exit if data load failed
+# Check if data is loaded
 if df.empty:
-    st.error("Failed to load data. Check internet or symbol.")
-    st.stop()
-
-# Resample if Weekly/Monthly
-if "Weekly" in timeframe:
-    df = df.resample("W").agg({"Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"})
-elif "Monthly" in timeframe:
-    df = df.resample("M").agg({"Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"})
-
-# Drop missing
-df.dropna(inplace=True)
-
-# Add EMA
-# Ensure 'Close' column is clean
-# Check if 'Close' column exists and is not empty
-if 'Close' in df.columns and not df['Close'].empty:
-    try:
-        # Convert to numeric safely
-        df['Close'] = pd.to_numeric(df['Close'], errors='coerce')
-
-        # Drop NA values
-        df.dropna(subset=['Close'], inplace=True)
-
-        if len(df) >= 50:
-            df["EMA20"] = EMAIndicator(close=df["Close"], window=20).ema_indicator()
-            df["EMA50"] = EMAIndicator(close=df["Close"], window=50).ema_indicator()
-
-            latest = df.iloc[-1]
-            current_price = latest["Close"]
-            ema20 = latest["EMA20"]
-            ema50 = latest["EMA50"]
-
-            if pd.notna(ema20) and pd.notna(ema50):
-                if ema20 > ema50:
-                    st.success("📈 Current Trend: UP")
-                else:
-                    st.error("📉 Current Trend: DOWN")
-
-                st.metric("Latest Close", f"{current_price:.2f}")
-                st.metric("EMA 20", f"{ema20:.2f}")
-                st.metric("EMA 50", f"{ema50:.2f}")
-
-                st.line_chart(df[["Close", "EMA20", "EMA50"]])
-            else:
-                st.warning("EMA values could not be computed. Try a longer date range.")
-        else:
-            st.warning("Not enough data to compute EMA (need at least 50 rows).")
-    except Exception as e:
-        st.error(f"Error during EMA calculation: {e}")
+    st.error("❌ Failed to load NIFTY data.")
 else:
-    st.error("Data not loaded properly. 'Close' column is missing or empty.")
+    # Display raw data for debugging
+    st.write(df.tail())
+
+    # Candlestick chart
+    fig = go.Figure(data=[go.Candlestick(x=df.index,
+                                        open=df['Open'],
+                                        high=df['High'],
+                                        low=df['Low'],
+                                        close=df['Close'],
+                                        name='Candlestick')])
+
+    # Customize layout
+    fig.update_layout(
+        title="NIFTY Daily Candlestick Chart",
+        xaxis_title="Date",
+        yaxis_title="Price (INR)",
+        xaxis_rangeslider_visible=False,
+        template="plotly_dark"
+    )
+
+    # Display the chart in Streamlit
+    st.plotly_chart(fig)
