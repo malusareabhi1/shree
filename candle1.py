@@ -20,6 +20,8 @@ def fetch_5min_data(symbol):
     df = yf.download(tickers=symbol, interval="5m", period="5d", progress=False)
     if isinstance(df.columns, pd.MultiIndex):  # This checks if the columns are a MultiIndex
         df.columns = df.columns.get_level_values(0)
+     # Ensure datetime index is timezone-aware in UTC and then convert to IST
+    df.index = df.index.tz_localize("UTC").tz_convert("Asia/Kolkata")    
     for col in ["Open","High","Low","Close"]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
     df.dropna(subset=["Open","High","Low","Close"], inplace=True)
