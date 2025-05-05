@@ -1590,52 +1590,8 @@ elif selected == "Live Algo Trading":
     col3.metric("🔺 High", f"{high:.2f} ₹")
     col4.metric("🔻 Low", f"{low:.2f} ₹")
     st.divider()
-    import requests
-    import pandas as pd
     
-    def get_nse_option_chain(symbol="NIFTY"):
-        url_map = {
-            "NIFTY": "https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY",
-            "BANKNIFTY": "https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY"
-        }
-        url = url_map.get(symbol.upper())
-        if not url:
-            raise ValueError("Invalid symbol")
     
-        headers = {
-            "User-Agent": "Mozilla/5.0",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Referer": "https://www.nseindia.com"
-        }
-    
-        session = requests.Session()
-        session.get("https://www.nseindia.com", headers=headers)  # To get cookies
-        response = session.get(url, headers=headers)
-    
-        data = response.json()["records"]["data"]
-        rows = []
-        for row in data:
-            if "CE" in row:
-                ce = row["CE"]
-                rows.append({
-                    "strikePrice": ce["strikePrice"],
-                    "IV": ce.get("impliedVolatility"),
-                    "type": "CE"
-                })
-            if "PE" in row:
-                pe = row["PE"]
-                rows.append({
-                    "strikePrice": pe["strikePrice"],
-                    "IV": pe.get("impliedVolatility"),
-                    "type": "PE"
-                })
-        
-        df = pd.DataFrame(rows)
-        return df
-    while True:
-        df_iv = get_nse_option_chain("NIFTY")  # use the code I shared earlier
-        print(df_iv)
-        time.sleep(300)  # 5 minutes
         
     
 
