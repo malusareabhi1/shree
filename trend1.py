@@ -17,10 +17,12 @@ try:
         current_price = float(data["Close"].dropna().iloc[-1])
         # Day high
         day_high = float(data["High"].max())
+        day_low = float(data["Low"].min())
 
         # Display metrics
-        st.metric("🔹 Current Price", f"{current_price:.2f} ₹")
-        st.metric("🔺 Day High", f"{day_high:.2f} ₹")
+        st.metric("🔹 Current Price", f"{current_price:.2f} ")
+        st.metric("🔺 Day High", f"{day_high:.2f} ")
+        col3.metric("🔻 Day Low", f"{day_low:.2f} ")
 
 except Exception as e:
     st.error(f"⚠️ Error fetching data: {e}")
