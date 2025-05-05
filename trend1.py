@@ -5,6 +5,13 @@ st.title("📈 Current NIFTY 50 Price")
 
 # Yahoo Finance symbol for NIFTY 50 index
 symbol = "^NSEI"
+# Define timeframes
+timeframes = {
+    "5-Min": {"interval": "5m", "period": "1d"},
+    "1-Day": {"interval": "1d", "period": "30d"},
+    "1-Week": {"interval": "1wk", "period": "1y"},
+    "1-Month": {"interval": "1mo", "period": "5y"},
+}
 # Function to get current trend
 def get_trend(df):
     df["EMA5"] = df["Close"].ewm(span=5, adjust=False).mean()
@@ -16,6 +23,19 @@ def get_trend(df):
         return "🔻 Downtrend"
     else:
         return "➡️ Sideways"
+
+# Separated calculation function
+def calculate_trend_for_timeframe(interval, period):
+    try:
+        df = yf.download(symbol, interval=interval, period=period, progress=False)
+        df.dropna(inplace=True)
+        trend = get_trend(df)
+        current_price = df["Close"].iloc[-1]
+        high = df["High"].max()
+        low = df["Low"].min()
+        return trend, current_price, high, low
+    except Exception as e:
+        return "Error", 0, 0, 0
 
 try:
     # Fetch intraday data for today
@@ -42,6 +62,18 @@ try:
         col3.metric("🔻 Day Low", f"{day_low:.2f} ₹")
         st.subheader("📊 Trend Analysis")
         st.success(f"Market Trend: {trend}")
+
+       # Display each timeframe trend separately
+        for label, tf in timeframes.items():
+            st.subheader(f"🕒 {label} Trend")
+            trend, price, high, low = calculate_trend_for_timeframe(tf["interval"], tf["period"])
+            col1, col2, col3, col4 = st.columns(4)
+            col1.metric("📈 Trend", trend)
+            col2.metric("💰 Price", f"{price:.2f} ₹")
+            col3.metric("🔺 High", f"{high:.2f} ₹")
+            col4.metric("🔻 Low", f"{low:.2f} ₹")
+            st.divider()
+
 
 
 
