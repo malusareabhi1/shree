@@ -29,7 +29,7 @@ try:
         # Day high
         day_high = float(data["High"].max())
         day_low = float(data["Low"].min())
-        trend = get_trend(df)
+        trend = get_trend(data)
 
         # Display metrics
         #st.metric("🔹 Current Price", f"{current_price:.2f} ")
