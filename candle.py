@@ -40,7 +40,7 @@ symbol = "^NSEI"  # Nifty 50 Index symbol in Yahoo Finance
 # Display the live data and chart with a refresh every 30 seconds
 while True:
     df = fetch_5min_data(symbol)  # Fetch data for Nifty
-    st.write(df.head(10))
+    st.write(df.head(5))
     if df is not None and not df.empty:
         st.plotly_chart(get_candlestick_chart(df, title="Live Nifty 5-Minute Candlestick Chart"), use_container_width=True)
     else:
