@@ -22,7 +22,14 @@ try:
         # Display metrics
         st.metric("🔹 Current Price", f"{current_price:.2f} ")
         st.metric("🔺 Day High", f"{day_high:.2f} ")
-        col3.metric("🔻 Day Low", f"{day_low:.2f} ")
+        st.metric("🔻 Day Low", f"{day_low:.2f} ")
+        # Display metrics in three columns
+        col1, col2, col3 = st.columns(3)
+        col1.metric("💰 Current Price", f"{current_price:.2f} ₹")
+        col2.metric("🔺 Day High", f"{day_high:.2f} ₹")
+        col3.metric("🔻 Day Low", f"{day_low:.2f} ₹")
+
+
 
 except Exception as e:
     st.error(f"⚠️ Error fetching data: {e}")
