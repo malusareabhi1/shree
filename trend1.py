@@ -21,7 +21,7 @@ symbol = symbol_map[index_choice]
 # --- Fetch Data ---
 @st.cache_data(ttl=300)
 def get_data(symbol):
-    df = yf.download(symbol, period="5d", interval="5m")
+    df = yf.download(symbol, period="15d", interval="5m")
     df.dropna(inplace=True)
     return df
 
