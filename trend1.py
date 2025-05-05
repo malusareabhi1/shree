@@ -48,37 +48,40 @@ df.dropna(inplace=True)
 
 # Add EMA
 # Ensure 'Close' column is clean
-df = df[pd.to_numeric(df['Close'], errors='coerce').notnull()]
-df['Close'] = pd.to_numeric(df['Close'])
+# Check if 'Close' column exists and is not empty
+if 'Close' in df.columns and not df['Close'].empty:
+    try:
+        # Convert to numeric safely
+        df['Close'] = pd.to_numeric(df['Close'], errors='coerce')
 
-# Drop NA to avoid indicator crash
-df.dropna(subset=["Close"], inplace=True)
+        # Drop NA values
+        df.dropna(subset=['Close'], inplace=True)
 
-# Only calculate EMA if enough rows
-if len(df) >= 50:
-    df["EMA20"] = EMAIndicator(close=df["Close"], window=20).ema_indicator()
-    df["EMA50"] = EMAIndicator(close=df["Close"], window=50).ema_indicator()
+        if len(df) >= 50:
+            df["EMA20"] = EMAIndicator(close=df["Close"], window=20).ema_indicator()
+            df["EMA50"] = EMAIndicator(close=df["Close"], window=50).ema_indicator()
 
-    latest = df.iloc[-1]
-    current_price = latest["Close"]
-    ema20 = latest["EMA20"]
-    ema50 = latest["EMA50"]
+            latest = df.iloc[-1]
+            current_price = latest["Close"]
+            ema20 = latest["EMA20"]
+            ema50 = latest["EMA50"]
 
-    # Trend Logic
-    if pd.notna(ema20) and pd.notna(ema50):
-        if ema20 > ema50:
-            st.success("📈 Current Trend: UP")
+            if pd.notna(ema20) and pd.notna(ema50):
+                if ema20 > ema50:
+                    st.success("📈 Current Trend: UP")
+                else:
+                    st.error("📉 Current Trend: DOWN")
+
+                st.metric("Latest Close", f"{current_price:.2f}")
+                st.metric("EMA 20", f"{ema20:.2f}")
+                st.metric("EMA 50", f"{ema50:.2f}")
+
+                st.line_chart(df[["Close", "EMA20", "EMA50"]])
+            else:
+                st.warning("EMA values could not be computed. Try a longer date range.")
         else:
-            st.error("📉 Current Trend: DOWN")
-
-        # Show Metrics
-        st.metric("Latest Close", f"{current_price:.2f}")
-        st.metric("EMA 20", f"{ema20:.2f}")
-        st.metric("EMA 50", f"{ema50:.2f}")
-
-        # Chart
-        st.line_chart(df[["Close", "EMA20", "EMA50"]])
-    else:
-        st.warning("EMA values could not be computed. Try a longer date range.")
+            st.warning("Not enough data to compute EMA (need at least 50 rows).")
+    except Exception as e:
+        st.error(f"Error during EMA calculation: {e}")
 else:
-    st.warning("Not enough data to compute EMA (need at least 50 rows).")
+    st.error("Data not loaded properly. 'Close' column is missing or empty.")
