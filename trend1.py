@@ -1,56 +1,76 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
-import matplotlib.pyplot as plt
+from ta.trend import EMAIndicator
 
-st.set_page_config(page_title="Index Trend Checker", layout="centered")
-st.title("📈 Nifty / BankNifty Trend Checker")
+st.set_page_config(page_title="Nifty/BankNifty Trend", layout="wide")
+st.title("📈 Nifty / BankNifty Trend Analyzer")
 
-# Select index
-index_option = st.selectbox("Select Index", ["NIFTY 50", "BANKNIFTY"])
+# Sidebar
+symbol = st.sidebar.selectbox("Select Index", ("^NSEI", "^NSEBANK"))  # Nifty / Bank Nifty
+timeframe = st.sidebar.selectbox("Select Timeframe", ("Intraday (5 min)", "Daily", "Weekly", "Monthly"))
 
-symbol_map = {
-    "NIFTY 50": "^NSEI",
-    "BANKNIFTY": "^NSEBANK"
+# Map intervals
+interval_map = {
+    "Intraday (5 min)": ("5m", "2d"),
+    "Daily": ("1d", "3mo"),
+    "Weekly": ("1d", "6mo"),
+    "Monthly": ("1d", "1y")
 }
-symbol = symbol_map[index_option]
 
-# Download daily data
-df = yf.download(tickers=symbol, period="90d", interval="1d", progress=False)
+interval, period = interval_map[timeframe]
 
+# Fetch data
+@st.cache_data
+def get_data(symbol, interval, period):
+    try:
+        df = yf.download(tickers=symbol, interval=interval, period=period)
+        return df
+    except Exception as e:
+        st.error(f"Data load failed: {e}")
+        return pd.DataFrame()
+
+df = get_data(symbol, interval, period)
+
+# Exit if data load failed
 if df.empty:
-    st.error("Failed to load data. Please check internet connection or try later.")
+    st.error("Failed to load data. Check internet or symbol.")
     st.stop()
 
-# Calculate EMAs
-df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
-df["EMA50"] = df["Close"].ewm(span=50, adjust=False).mean()
+# Resample if Weekly/Monthly
+if "Weekly" in timeframe:
+    df = df.resample("W").agg({"Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"})
+elif "Monthly" in timeframe:
+    df = df.resample("M").agg({"Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"})
 
-# Determine current trend
-latest_ema20 = df["EMA20"].iloc[-1]
-latest_ema50 = df["EMA50"].iloc[-1]
-current_price = df["Close"].iloc[-1]
+# Drop missing
+df.dropna(inplace=True)
 
-if latest_ema20 > latest_ema50:
-    trend = "🔼 Uptrend"
-    st.success(f"Current Trend: {trend}")
+# Add EMA
+df["EMA20"] = EMAIndicator(close=df["Close"], window=20).ema_indicator()
+df["EMA50"] = EMAIndicator(close=df["Close"], window=50).ema_indicator()
+
+# Get latest values
+latest = df.iloc[-1]
+current_price = latest["Close"]
+ema20 = latest["EMA20"]
+ema50 = latest["EMA50"]
+
+# Check valid values
+if pd.isna(current_price) or pd.isna(ema20) or pd.isna(ema50):
+    st.error("Insufficient data to determine trend.")
+    st.dataframe(df.tail())
 else:
-    trend = "🔽 Downtrend"
-    st.error(f"Current Trend: {trend}")
+    # Determine trend
+    if ema20 > ema50:
+        st.success("📈 Current Trend: UP")
+    else:
+        st.error("📉 Current Trend: DOWN")
 
-# Display current status
-st.metric("Latest Close", f"{current_price:.2f}")
-st.metric("EMA20", f"{latest_ema20:.2f}")
-st.metric("EMA50", f"{latest_ema50:.2f}")
+    # Metrics
+    st.metric("Latest Close", f"{current_price:.2f}")
+    st.metric("EMA 20", f"{ema20:.2f}")
+    st.metric("EMA 50", f"{ema50:.2f}")
 
-# Plot
-st.subheader("Price & EMA Chart")
-fig, ax = plt.subplots(figsize=(10, 4))
-ax.plot(df["Close"], label="Close", color="black")
-ax.plot(df["EMA20"], label="EMA 20", color="blue", linestyle="--")
-ax.plot(df["EMA50"], label="EMA 50", color="red", linestyle="--")
-ax.set_title(f"{index_option} Trend (Daily)")
-ax.set_xlabel("Date")
-ax.set_ylabel("Price")
-ax.legend()
-st.pyplot(fig)
+    # Chart
+    st.line_chart(df[["Close", "EMA20", "EMA50"]])
