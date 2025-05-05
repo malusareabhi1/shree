@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 st.title("📊 Live NIFTY 5‑Minute Candle")
 
 def fetch_5min_data(symbol):
-    df = yf.download(tickers=symbol, interval="5m", period="1d", progress=False)
+    df = yf.download(tickers=symbol, interval="5m", period="5d", progress=False)
     if isinstance(df.columns, pd.MultiIndex):  # This checks if the columns are a MultiIndex
         df.columns = df.columns.get_level_values(0)
     for col in ["Open","High","Low","Close"]:
