@@ -47,30 +47,38 @@ elif "Monthly" in timeframe:
 df.dropna(inplace=True)
 
 # Add EMA
-df["EMA20"] = EMAIndicator(close=df["Close"], window=20).ema_indicator()
-df["EMA50"] = EMAIndicator(close=df["Close"], window=50).ema_indicator()
+# Ensure 'Close' column is clean
+df = df[pd.to_numeric(df['Close'], errors='coerce').notnull()]
+df['Close'] = pd.to_numeric(df['Close'])
 
-# Get latest values
-latest = df.iloc[-1]
-current_price = latest["Close"]
-ema20 = latest["EMA20"]
-ema50 = latest["EMA50"]
+# Drop NA to avoid indicator crash
+df.dropna(subset=["Close"], inplace=True)
 
-# Check valid values
-if pd.isna(current_price) or pd.isna(ema20) or pd.isna(ema50):
-    st.error("Insufficient data to determine trend.")
-    st.dataframe(df.tail())
-else:
-    # Determine trend
-    if ema20 > ema50:
-        st.success("📈 Current Trend: UP")
+# Only calculate EMA if enough rows
+if len(df) >= 50:
+    df["EMA20"] = EMAIndicator(close=df["Close"], window=20).ema_indicator()
+    df["EMA50"] = EMAIndicator(close=df["Close"], window=50).ema_indicator()
+
+    latest = df.iloc[-1]
+    current_price = latest["Close"]
+    ema20 = latest["EMA20"]
+    ema50 = latest["EMA50"]
+
+    # Trend Logic
+    if pd.notna(ema20) and pd.notna(ema50):
+        if ema20 > ema50:
+            st.success("📈 Current Trend: UP")
+        else:
+            st.error("📉 Current Trend: DOWN")
+
+        # Show Metrics
+        st.metric("Latest Close", f"{current_price:.2f}")
+        st.metric("EMA 20", f"{ema20:.2f}")
+        st.metric("EMA 50", f"{ema50:.2f}")
+
+        # Chart
+        st.line_chart(df[["Close", "EMA20", "EMA50"]])
     else:
-        st.error("📉 Current Trend: DOWN")
-
-    # Metrics
-    st.metric("Latest Close", f"{current_price:.2f}")
-    st.metric("EMA 20", f"{ema20:.2f}")
-    st.metric("EMA 50", f"{ema50:.2f}")
-
-    # Chart
-    st.line_chart(df[["Close", "EMA20", "EMA50"]])
+        st.warning("EMA values could not be computed. Try a longer date range.")
+else:
+    st.warning("Not enough data to compute EMA (need at least 50 rows).")
