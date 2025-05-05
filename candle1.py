@@ -80,7 +80,7 @@ def plot_candles_with_sma(df):
 
 symbol = "^NSEI"
 df = fetch_5min_data(symbol)
-st.write(df.head(5))
+st.write(df.head(25))
 trend = get_trend(df)
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("📈 Trend", trend)
