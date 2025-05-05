@@ -1590,6 +1590,10 @@ elif selected == "Live Algo Trading":
     col3.metric("🔺 High", f"{high:.2f} ₹")
     col4.metric("🔻 Low", f"{low:.2f} ₹")
     st.divider()
+    while True:
+    df_iv = get_nse_option_chain("NIFTY")  # use the code I shared earlier
+    print(df_iv)
+    time.sleep(300)  # 5 minutes
 
 
     #_____________________________________________________________________________________________________________________________
