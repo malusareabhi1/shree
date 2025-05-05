@@ -31,8 +31,18 @@ if df.empty:
     st.error("Failed to fetch data.")
 else:
     # --- Calculate Trend ---
-    df["EMA20"] = ta.trend.ema_indicator(df["Close"], window=20)
-    df["EMA50"] = ta.trend.ema_indicator(df["Close"], window=50)
+    from ta.trend import EMAIndicator
+
+    # Ensure enough data exists
+    if len(df) < 60:
+        st.warning("Not enough data to calculate EMAs. Try again later.")
+        st.stop()
+    
+    # Calculate EMAs
+    df["EMA20"] = EMAIndicator(close=df["Close"], window=20).ema_indicator()
+    df["EMA50"] = EMAIndicator(close=df["Close"], window=50).ema_indicator()
+    #df["EMA20"] = ta.trend.ema_indicator(df["Close"], window=20)
+    #df["EMA50"] = ta.trend.ema_indicator(df["Close"], window=50)
 
     latest = df.iloc[-1]
     prev = df.iloc[-2]
