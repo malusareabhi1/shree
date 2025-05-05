@@ -1570,7 +1570,11 @@ elif selected == "Live Algo Trading":
     symbol = "^NSEI"
     df = fetch_5min_data(symbol)
     #st.write(df.head(25))
+    #trend = get_trend(df)
     trend = get_trend(df)
+    current_price = float(df["Close"].iloc[-1])
+    high = float(df["High"].max())
+    low = float(df["Low"].min())
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("📈 Trend", trend)
     
