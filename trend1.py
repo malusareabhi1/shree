@@ -15,7 +15,12 @@ try:
     else:
         # Safely get the latest close price as float
         current_price = float(data["Close"].dropna().iloc[-1])
-        st.metric("NIFTY 50", f"{current_price:.2f} ₹")
+        # Day high
+        day_high = float(data["High"].max())
+
+        # Display metrics
+        st.metric("🔹 Current Price", f"{current_price:.2f} ₹")
+        st.metric("🔺 Day High", f"{day_high:.2f} ₹")
 
 except Exception as e:
-    st.error(f"Error fetching data: {e}")
+    st.error(f"⚠️ Error fetching data: {e}")
