@@ -3,18 +3,18 @@ import yfinance as yf
 
 st.title("📈 Current NIFTY 50 Price")
 
-# Nifty 50 index symbol on Yahoo Finance
+# Yahoo Finance symbol for NIFTY 50 index
 symbol = "^NSEI"
 
 try:
-    # Fetch latest data (1d interval for today)
+    # Fetch intraday data for today
     data = yf.download(symbol, period="1d", interval="1m")
-    
+
     if data.empty:
-        st.error("❌ Could not fetch NIFTY 50 data.")
+        st.error("❌ Failed to fetch NIFTY 50 data.")
     else:
-        # Get the most recent closing price
-        current_price = data["Close"].iloc[-1]
+        # Safely get the latest close price as float
+        current_price = float(data["Close"].dropna().iloc[-1])
         st.metric("NIFTY 50", f"{current_price:.2f} ₹")
 
 except Exception as e:
