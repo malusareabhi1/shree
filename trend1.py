@@ -65,6 +65,7 @@ def calculate_trend_for_timeframe(interval, period):
         return f"Error: {str(e)}", 0, 0, 0
 
 df = fetch_5min_data(symbol)
+st.write(df.head)
 if df is not None and not df.empty:
     st.plotly_chart(get_candlestick_chart(df, title="Nifty 5-Minute Trend"), use_container_width=True)
 else:
