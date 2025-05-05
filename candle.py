@@ -45,4 +45,4 @@ while True:
         st.warning("No data available for the Nifty 5-Minute chart.")
     
     time.sleep(30)  # Refresh every 30 seconds
-    st.experimental_rerun()  # Re-run the app to fetch fresh data
+    #st.experimental_rerun()  # Re-run the app to fetch fresh data
