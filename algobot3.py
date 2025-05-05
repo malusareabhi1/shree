@@ -1516,43 +1516,7 @@ elif selected == "Live Algo Trading":
     send_telegram(start_msg)
     
     # ─── FETCH DATA ───────────────────────────────────────────────────────────────
-    @st.cache_data(ttl=60)
-    def fetch_data(ticker: str) -> pd.DataFrame:
-        df = yf.download(ticker, interval="5m", period="15d", progress=False)
-        df.reset_index(inplace=True)
-        #df.reset_index(inplace=True)          # moves the old index into a 'Date' column
-        df['Date'] = pd.to_datetime(df['Datetime'], errors='coerce')
-        #st.write("Columns after read:", df.columns.tolist())
-        df.index = pd.to_datetime(df.index)
-       
-        if df.index.tz is None:
-            df = df.tz_localize("UTC").tz_convert("Asia/Kolkata")
-        else:
-            df = df.tz_convert("Asia/Kolkata")
     
-        df = df.between_time("09:15", "15:30")
-    
-        if isinstance(df.columns, pd.MultiIndex):
-            df.columns = df.columns.get_level_values(0)
-    
-        df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
-        df["VMA20"] = df["Volume"].rolling(20).mean()
-        
-        return df
-    
-    symbol = "^NSEI"
-    df = fetch_data(symbol)
-    st.write("Columns after read:", df.columns.tolist())
-    if not df.empty:
-        if len(df) > 0:
-            latest = df.iloc[-1]
-            now = latest.name 
-    st.write(letest)
-    st.write(now)
-    #latest = df.iloc[-1]
-    if len(df) >= 2:
-        prev = df.iloc[-2]  # Access second-to-last row
-    #prev = df.iloc[-2]
     
     # ─── MARKET OPEN/CLOSE MESSAGE ────────────────────────────────────────────────
     #now = latest.name
