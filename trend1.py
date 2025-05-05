@@ -1,6 +1,7 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
+import plotly.graph_objects as go  # Make sure this is imported
 
 st.set_page_config(page_title="NIFTY Trend Viewer", layout="wide")
 st.title("📊 NIFTY Multi-Timeframe Trend Analysis")
