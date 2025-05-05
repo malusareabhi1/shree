@@ -5,6 +5,17 @@ import plotly.graph_objects as go
 
 st.title("📊 Live NIFTY 5‑Minute Candle")
 
+# Trend Calculation
+def get_trend(df):
+    df["EMA5"] = df["Close"].ewm(span=5, adjust=False).mean()
+    df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
+    if df["EMA5"].iloc[-1] > df["EMA20"].iloc[-1]:
+        return "🔼 Uptrend"
+    elif df["EMA5"].iloc[-1] < df["EMA20"].iloc[-1]:
+        return "🔻 Downtrend"
+    else:
+        return "➡️ Sideways"
+
 def fetch_5min_data(symbol):
     df = yf.download(tickers=symbol, interval="5m", period="5d", progress=False)
     if isinstance(df.columns, pd.MultiIndex):  # This checks if the columns are a MultiIndex
@@ -67,6 +78,9 @@ def plot_candles_with_sma(df):
 
 symbol = "^NSEI"
 df = fetch_5min_data(symbol)
+trend = get_trend(df)
+col1, col2, col3, col4 = st.columns(4)
+col1.metric("📈 Trend", trend)
 
 if df.empty:
     st.warning("No data available for today’s 5‑min bars.")
