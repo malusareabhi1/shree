@@ -10,6 +10,31 @@ symbol = st.sidebar.text_input("Enter Stock Symbol (e.g., BHARTIARTL.NS):", "BHA
 start_date = st.sidebar.date_input("Start Date", datetime.date.today() - datetime.timedelta(days=180))
 end_date = st.sidebar.date_input("End Date", datetime.date.today())
 
+def plot_candles_with_sma(df):
+    df['20-SMA'] = df['Close'].rolling(window=20).mean()
+    fig = go.Figure(data=[go.Candlestick(
+        x=df.index,
+        open=df["Open"],
+        high=df["High"],
+        low=df["Low"],
+        close=df["Close"],
+        name="Candlesticks"
+    )])
+    fig.add_trace(go.Scatter(
+        x=df.index,
+        y=df['20-SMA'],
+        mode='lines',
+        name='20-SMA',
+        line=dict(color='orange', width=2)
+    ))
+    fig.update_layout(
+        title=f"{symbol} 5‑Minute Candles with 20-SMA (Today)",
+        xaxis_title="Time",
+        yaxis_title="Price",
+        xaxis_rangeslider_visible=False
+    )
+    return fig
+
 # Fetch data
 df = yf.download(symbol, start=start_date, end=end_date)
 
@@ -48,7 +73,9 @@ fig.add_trace(go.Scatter(x=df.index, y=df['BB_lower'], name='BB Lower', line=dic
 
 fig.update_layout(title=f"{symbol} Price Chart", xaxis_title='Date', yaxis_title='Price', xaxis_rangeslider_visible=False, height=700)
 st.plotly_chart(fig, use_container_width=True)
-
+# Display candlestick chart
+st.plotly_chart(plot_candles_with_sma(df), use_container_width=True)
+st.divider()
 # RSI Plot
 st.subheader("📉 RSI Indicator")
 rsi_fig = go.Figure()
