@@ -204,6 +204,36 @@ if selected == "Dashboard":
 
 elif selected == "Volatility Scanner":
     st.title("📈 NIFTY 50 Volatility Scanner (Last 14 Days)")
+    st.markdown("""A Volatility Scanner is a tool used to identify which stocks (or assets) are experiencing the most price movement—how "volatile" they are—over a given period.
+
+        🔍 What is Volatility?
+        Volatility measures how much the price of a stock fluctuates. More technically, it’s often calculated as the standard deviation of returns.
+        
+        High volatility means the stock's price moves up and down a lot — this can offer more trading opportunities, but also more risk.
+        
+        Low volatility means the price is more stable.
+        
+        📊 What Your Volatility Scanner Does:
+        Your Streamlit app:
+        
+        Downloads 15 days of daily price data for NIFTY 50 stocks.
+        
+        Calculates daily returns (percentage changes in closing price).
+        
+        Computes the standard deviation of those returns for each stock.
+        
+        Sorts the list to show the top 5 most volatile stocks.
+        
+        🧠 Why Use a Volatility Scanner?
+        Traders use it to find stocks with high price movement for intraday or swing trading.
+        
+        Investors might use it to avoid risky (high-volatility) stocks.
+        
+        Option traders especially care about volatility, as it affects premiums.
+                
+            
+            
+                """)
 
     # Nifty 50 stock symbols (add ".NS" for NSE)
     nifty_50 = [
@@ -243,36 +273,8 @@ elif selected == "Volatility Scanner":
         st.dataframe(vol_df.head(15), use_container_width=True)
     else:
         st.error("No volatility data could be calculated.")
-        st.markdown("""A Volatility Scanner is a tool used to identify which stocks (or assets) are experiencing the most price movement—how "volatile" they are—over a given period.
-
-        🔍 What is Volatility?
-        Volatility measures how much the price of a stock fluctuates. More technically, it’s often calculated as the standard deviation of returns.
         
-        High volatility means the stock's price moves up and down a lot — this can offer more trading opportunities, but also more risk.
         
-        Low volatility means the price is more stable.
-        
-        📊 What Your Volatility Scanner Does:
-        Your Streamlit app:
-        
-        Downloads 15 days of daily price data for NIFTY 50 stocks.
-        
-        Calculates daily returns (percentage changes in closing price).
-        
-        Computes the standard deviation of those returns for each stock.
-        
-        Sorts the list to show the top 5 most volatile stocks.
-        
-        🧠 Why Use a Volatility Scanner?
-        Traders use it to find stocks with high price movement for intraday or swing trading.
-        
-        Investors might use it to avoid risky (high-volatility) stocks.
-        
-        Option traders especially care about volatility, as it affects premiums.
-                
-            
-            
-                """)
 
 
             
