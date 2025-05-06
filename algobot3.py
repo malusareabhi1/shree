@@ -34,7 +34,7 @@ with st.sidebar:
     ],
     icons=[
         "bar-chart", "search", "cpu", "cpu","cpu", "cpu","cpu","cpu", "arrow-repeat",
-        "search", "clipboard-data", "wallet2", "graph-up", "info-circle", "file-earmark","file-earmark", "code-slash", "code-slash", "code-slash","journal-text","search"
+        "search", "clipboard-data", "wallet2", "graph-up", "info-circle", "search","file-earmark","file-earmark", "code-slash", "code-slash", "code-slash","journal-text","search"
     ],
     menu_icon="cast",
     default_index=0,
