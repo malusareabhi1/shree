@@ -37,6 +37,9 @@ def plot_candles_with_sma(df):
 
 # Fetch data
 df = yf.download(symbol, start=start_date, end=end_date)
+# Flatten MultiIndex columns (e.g., ('Open', 'BHARTIARTL.NS') → 'Open')
+df.columns = [col[0] if isinstance(col, tuple) else col for col in df.columns]
+
 
 if df.empty:
     st.error("No data found. Please check symbol or date.")
