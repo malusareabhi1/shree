@@ -3,7 +3,7 @@ import yfinance as yf
 import pandas as pd
 import plotly.graph_objects as go
 import datetime
-
+#Added Interval Also
 # Sidebar Inputs
 st.sidebar.title("📊 TradingView-style Stock Dashboard")
 symbol = st.sidebar.text_input("Enter Stock Symbol (e.g., BHARTIARTL.NS):", "BHARTIARTL.NS").upper()
