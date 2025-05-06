@@ -9,7 +9,17 @@ nifty_50 = [
     'HINDUNILVR.NS', 'HCLTECH.NS', 'WIPRO.NS', 'SUNPHARMA.NS', 'TECHM.NS',
     'BAJFINANCE.NS', 'ADANIENT.NS', 'ADANIPORTS.NS', 'NESTLEIND.NS', 'ULTRACEMCO.NS'
 ]
+#import pandas as pd
 
+# Fetch NIFTY 200 stock list from NSE
+url = "https://nsearchives.nseindia.com/content/indices/ind_nifty200list.csv"
+df = pd.read_csv(url)
+
+# Extract symbols and append ".NS" suffix for use with yfinance
+nifty_200 = [symbol + ".NS" for symbol in df['Symbol'].tolist()]
+
+# Example output
+st.write("nifty_200 =", nifty_200)
 def get_volatility(symbol):
     try:
         df = yf.download(symbol, period="1mo", interval="1d", progress=False)
