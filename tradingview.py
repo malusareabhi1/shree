@@ -25,9 +25,14 @@ if df.empty:
 # ---------------------------------------
 # 📈 Indicators
 # Bollinger Bands
-df["20_SMA"] = df["Close"].rolling(window=20).mean()
-df["BB_upper"] = df["20_SMA"] + 2 * df["Close"].rolling(window=20).std()
-df["BB_lower"] = df["20_SMA"] - 2 * df["Close"].rolling(window=20).std()
+# Ensure 20 SMA is calculated first
+df["20_SMA"] = df["Close"].rolling(window=20, min_periods=1).mean()
+rolling_std = df["Close"].rolling(window=20, min_periods=1).std()
+
+# Now safely assign BB bands
+df["BB_upper"] = df["20_SMA"] + 2 * rolling_std
+df["BB_lower"] = df["20_SMA"] - 2 * rolling_std
+
 
 # RSI
 delta = df["Close"].diff()
