@@ -81,8 +81,9 @@ st.plotly_chart(fig, use_container_width=True)
 #st.plotly_chart(plot_candles_with_sma(df), use_container_width=True)
 #st.divider()
 # RSI Plot
-st.subheader("📉 RSI Indicator")
+
 rsi_fig = go.Figure()
 rsi_fig.add_trace(go.Scatter(x=df.index, y=df['RSI'], line=dict(color='purple'), name='RSI'))
 rsi_fig.update_layout(yaxis=dict(range=[0, 100]), height=300)
 st.plotly_chart(rsi_fig, use_container_width=True)
+st.subheader("📉 RSI Indicator")
