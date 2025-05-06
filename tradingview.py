@@ -9,6 +9,11 @@ st.sidebar.title("📊 TradingView-style Stock Dashboard")
 symbol = st.sidebar.text_input("Enter Stock Symbol (e.g., BHARTIARTL.NS):", "BHARTIARTL.NS").upper()
 start_date = st.sidebar.date_input("Start Date", datetime.date.today() - datetime.timedelta(days=180))
 end_date = st.sidebar.date_input("End Date", datetime.date.today())
+interval = st.sidebar.selectbox(
+    "Select Interval",
+    options=["1m", "5m", "15m", "30m", "1h", "1d", "1wk"],
+    index=1  # default to 5m
+)
 
 def plot_candles_with_sma(df):
     df['20-SMA'] = df['Close'].rolling(window=20).mean()
@@ -36,7 +41,8 @@ def plot_candles_with_sma(df):
     return fig
 
 # Fetch data
-df = yf.download(symbol, start=start_date, end=end_date)
+#df = yf.download(symbol, start=start_date, end=end_date)
+df = yf.download(symbol, start=start_date, end=end_date, interval=interval)
 # Flatten MultiIndex columns (e.g., ('Open', 'BHARTIARTL.NS') → 'Open')
 df.columns = [col[0] if isinstance(col, tuple) else col for col in df.columns]
 
