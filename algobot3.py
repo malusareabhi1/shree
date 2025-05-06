@@ -224,30 +224,7 @@ elif selected == "ORB Strategy":
     
     # -------------------------------------------------------------------------------------------------
     # Opening Range Breakout
-    df = fetch_5min_data(symbol)
-    opening_range = df.between_time("09:15", "09:30")
-    if len(opening_range) < 3:
-        st.warning("Not enough data yet for Opening Range (need 3 candles).")
-    else:
-        or_high = opening_range["High"].max()
-        or_low = opening_range["Low"].min()
-        or_close_time = opening_range.index[-1]
     
-        # Identify breakout after 9:30
-        post_or = df[df.index > or_close_time]
-        breakout_signal = ""
-        for idx, row in post_or.iterrows():
-            if row["Close"] > or_high and row["Volume"] > opening_range["Volume"].mean():
-                breakout_signal = f"🔼 Long Signal at {idx.time()} (Price: {row['Close']:.2f})"
-                break
-            elif row["Close"] < or_low and row["Volume"] > opening_range["Volume"].mean():
-                breakout_signal = f"🔽 Short Signal at {idx.time()} (Price: {row['Close']:.2f})"
-                break
-    
-        st.subheader("📊 Opening Range Breakout (ORB)")
-        st.write(f"Opening Range High: {or_high:.2f} | Low: {or_low:.2f}")
-        st.success(breakout_signal if breakout_signal else "❌ No breakout detected yet.")
-
     # Trend Calculation
     def get_trend(df):
         df["EMA5"] = df["Close"].ewm(span=5, adjust=False).mean()
@@ -300,7 +277,31 @@ elif selected == "ORB Strategy":
     
     # -------------------------------------------------------------------------------------------------
     # Main Execution
-   
+
+    df = fetch_5min_data(symbol)
+    opening_range = df.between_time("09:15", "09:30")
+    if len(opening_range) < 3:
+        st.warning("Not enough data yet for Opening Range (need 3 candles).")
+    else:
+        or_high = opening_range["High"].max()
+        or_low = opening_range["Low"].min()
+        or_close_time = opening_range.index[-1]
+    
+        # Identify breakout after 9:30
+        post_or = df[df.index > or_close_time]
+        breakout_signal = ""
+        for idx, row in post_or.iterrows():
+            if row["Close"] > or_high and row["Volume"] > opening_range["Volume"].mean():
+                breakout_signal = f"🔼 Long Signal at {idx.time()} (Price: {row['Close']:.2f})"
+                break
+            elif row["Close"] < or_low and row["Volume"] > opening_range["Volume"].mean():
+                breakout_signal = f"🔽 Short Signal at {idx.time()} (Price: {row['Close']:.2f})"
+                break
+    
+        st.subheader("📊 Opening Range Breakout (ORB)")
+        st.write(f"Opening Range High: {or_high:.2f} | Low: {or_low:.2f}")
+        st.success(breakout_signal if breakout_signal else "❌ No breakout detected yet.")
+
     
     if df.empty:
         st.warning(f"No data available for symbol: {symbol}")
