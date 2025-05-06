@@ -15,7 +15,13 @@ period = "1d"
 def get_intraday_data(symbol):
     df = yf.download(symbol, interval=interval, period=period, progress=False)
     df.dropna(inplace=True)
-    df["20EMA"] = EMAIndicator(df["Close"], window=20).ema_indicator()
+    if len(df) >= 20:
+        df["20EMA"] = EMAIndicator(df["Close"], window=20).ema_indicator()
+        df["VolumeAvg"] = df["Volume"].rolling(window=5).mean()
+    else:
+        st.warning("Not enough data for EMA calculation. Try after 9:45 AM or check symbol.")
+        st.stop()
+
     df["VolumeAvg"] = df["Volume"].rolling(window=5).mean()
     return df
 
