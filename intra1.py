@@ -52,3 +52,26 @@ col1.metric("Current Price", round(price, 2))
 col2.metric("Volume", f"{int(volume):,}")
 col3.metric("Signal", signal)
 
+fig = go.Figure()
+
+# Candlestick
+fig.add_trace(go.Candlestick(
+    x=df.index, open=df["Open"], high=df["High"],
+    low=df["Low"], close=df["Close"], name="Candles"
+))
+
+# EMA line
+fig.add_trace(go.Scatter(
+    x=df.index, y=df["20EMA"], mode="lines",
+    name="20 EMA", line=dict(color="blue")
+))
+
+# Opening range lines
+fig.add_hline(y=open_high, line=dict(color="green", dash="dash"), name="Opening High")
+fig.add_hline(y=open_low, line=dict(color="red", dash="dash"), name="Opening Low")
+
+fig.update_layout(title=f"{symbol} - Intraday Chart", height=600)
+
+st.plotly_chart(fig, use_container_width=True)
+
+
