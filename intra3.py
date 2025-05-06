@@ -15,6 +15,18 @@ nifty50_stocks = [
     "NESTLEIND", "ONGC", "POWERGRID", "RELIANCE", "SBILIFE", "SBIN", "SUNPHARMA", "TCS", "TATACONSUM",
     "TATAMOTORS", "TATASTEEL", "TECHM", "TITAN", "UPL", "ULTRACEMCO", "WIPRO"
 ]
+# Fetch 5-minute data
+def fetch_5min_data(symbol):
+    df = yf.download(tickers=symbol, interval="5m", period="1d", progress=False)
+    if df.empty:
+        return df
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+    df.index = df.index.tz_convert("Asia/Kolkata")
+    for col in ["Open", "High", "Low", "Close"]:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+    df.dropna(subset=["Open", "High", "Low", "Close"], inplace=True)
+    return df
 
 # Function to fetch and process data
 def detect_orb(symbol):
