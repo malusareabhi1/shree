@@ -204,6 +204,7 @@ if selected == "Dashboard":
 
 elif selected == "TradingView":
     import datetime
+    from datetime import datetime, timedelta
     st.sidebar.title("📊 TradingView-style Stock Dashboard")
     symbol = st.text_input("Enter Stock Symbol (e.g., BHARTIARTL.NS):", "BHARTIARTL.NS").upper()
     start_date = st.sidebar.date_input("Start Date", date.today() - timedelta(days=180))
