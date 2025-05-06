@@ -1,12 +1,12 @@
-import streamlit as st
-import yfinance as yf
-import pandas as pd
-import plotly.graph_objects as go
-from ta.trend import EMAIndicator
-st.set_page_config(layout="wide")
-st.title("📈 Intraday Opening Range Breakout Strategy")
-
-#elif selected == "Live Algo Trading":
+    import streamlit as st
+    import yfinance as yf
+    import pandas as pd
+    import plotly.graph_objects as go
+    from ta.trend import EMAIndicator
+    st.set_page_config(layout="wide")
+    st.title("📈 Intraday Opening Range Breakout Strategy")
+    
+    #elif selected == "Live Algo Trading":
     st.title("🤖 Live Algo Trading (Paper/Real Mode)")
     from dotenv import load_dotenv
     #_____________________________________________________________________________________________________________________________
@@ -109,6 +109,7 @@ st.title("📈 Intraday Opening Range Breakout Strategy")
     col4.metric("🔻 Low", f"{low:.2f} ₹")
     st.divider()
     time.sleep(30)
+    
     
     
 
