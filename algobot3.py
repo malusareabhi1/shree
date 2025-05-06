@@ -428,6 +428,31 @@ elif selected == "ORB Screener":
     else:
         st.info("No breakout signals found yet.")
 
+    st.markdown(""" 🧠 Concept of ORB
+Opening Range (OR):
+
+Defined as the high and low of the first N minutes after the market opens (commonly 15 minutes, i.e., 9:15 AM to 9:30 AM in India).
+
+OR High = max(High) in this period
+
+OR Low = min(Low) in this period
+
+Breakout Conditions (Post OR period):
+
+Long Entry: When price closes above OR High with confirming volume.
+
+Short Entry: When price closes below OR Low with confirming volume.
+
+Volume Confirmation (optional but improves accuracy):
+
+The breakout candle should have higher-than-average volume (e.g., > mean volume of OR candles).
+
+Trend Filter (optional):
+
+Use EMAs (e.g., EMA 5/20) to trade only in the direction of the prevailing trend.
+
+""")
+
 elif selected == "Volatility Scanner":
     st.title("📈 NIFTY 50 Volatility Scanner (Last 14 Days)")
     st.markdown("""A Volatility Scanner is a tool used to identify which stocks (or assets) are experiencing the most price movement—how "volatile" they are—over a given period.
