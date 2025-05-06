@@ -224,6 +224,7 @@ elif selected == "ORB Strategy":
     
     # -------------------------------------------------------------------------------------------------
     # Opening Range Breakout
+    df = fetch_5min_data(symbol)
     opening_range = df.between_time("09:15", "09:30")
     if len(opening_range) < 3:
         st.warning("Not enough data yet for Opening Range (need 3 candles).")
@@ -299,7 +300,7 @@ elif selected == "ORB Strategy":
     
     # -------------------------------------------------------------------------------------------------
     # Main Execution
-    df = fetch_5min_data(symbol)
+   
     
     if df.empty:
         st.warning(f"No data available for symbol: {symbol}")
