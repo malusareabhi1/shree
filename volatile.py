@@ -2,6 +2,8 @@ import yfinance as yf
 import pandas as pd
 import streamlit as st
 
+st.title("📈 NIFTY 50 Volatility Scanner (Last 14 Days)")
+
 # Nifty 50 stock symbols (add ".NS" for NSE)
 nifty_50 = [
     'RELIANCE.NS', 'TCS.NS', 'INFY.NS', 'HDFCBANK.NS', 'ICICIBANK.NS', 'LT.NS',
@@ -18,19 +20,25 @@ nifty_50 = [
 
 volatilities = []
 
-# Check volatility for each stock
-for symbol in nifty_50:
-    try:
-        df = yf.download(symbol, period='15d', interval='1d')
-        df['returns'] = df['Close'].pct_change()
-        volatility = df['returns'].std()
-        volatilities.append((symbol, volatility))
-    except Exception as e:
-        print(f"Error for {symbol}: {e}")
+with st.spinner("📊 Fetching data and calculating volatility..."):
+    for symbol in nifty_50:
+        try:
+            df = yf.download(symbol, period='15d', interval='1d', progress=False)
+            if not df.empty and 'Close' in df.columns:
+                df['returns'] = df['Close'].pct_change()
+                volatility = df['returns'].std()
+                volatilities.append((symbol, volatility))
+            else:
+                st.warning(f"No data for {symbol}")
+        except Exception as e:
+            st.exception(f"Error fetching {symbol}: {e}")
 
-# Sort by highest volatility
-vol_df = pd.DataFrame(volatilities, columns=['Symbol', 'Volatility'])
-vol_df = vol_df.sort_values(by='Volatility', ascending=False)
+if volatilities:
+    # Sort by highest volatility
+    vol_df = pd.DataFrame(volatilities, columns=['Symbol', 'Volatility'])
+    vol_df = vol_df.sort_values(by='Volatility', ascending=False)
 
-st.write("🔍 Most Volatile NIFTY 50 Stocks (Last 14 Days):")
-st.write(vol_df.head(5))
+    st.subheader("🔍 Top 5 Most Volatile NIFTY 50 Stocks (Last 14 Days)")
+    st.dataframe(vol_df.head(5), use_container_width=True)
+else:
+    st.error("No volatility data could be calculated.")
