@@ -46,18 +46,50 @@ def detect_orb(symbol):
         return None
 
 # Progress and detection
-orb_results = []
-progress = st.progress(0)
-for i, stock in enumerate(nifty50_stocks):
-    result = detect_orb(stock)
-    if result:
-        orb_results.append(result)
-    progress.progress((i + 1) / len(nifty50_stocks))
+# Create trade log table
+trade_log = []
 
-# Display Results
-if orb_results:
-    st.success("ORB Signals Found ✅")
-    result_df = pd.DataFrame(orb_results)
-    st.dataframe(result_df)
+for stock in nifty50_stocks:
+    symbol = stock + ".NS"
+    df = fetch_5min_data(symbol)
+    if df.empty:
+        continue
+
+    opening_range = df.between_time("09:15", "09:30")
+    if len(opening_range) < 3:
+        continue
+
+    or_high = opening_range["High"].max()
+    or_low = opening_range["Low"].min()
+    or_close_time = opening_range.index[-1]
+    post_or = df[df.index > or_close_time]
+
+    for idx, row in post_or.iterrows():
+        if row["Close"] > or_high and row["Volume"] > opening_range["Volume"].mean():
+            trade_log.append({
+                "Stock": stock,
+                "Signal": "🔼 Long",
+                "Time": idx.strftime("%H:%M"),
+                "Price": row["Close"],
+                "OR High": or_high,
+                "OR Low": or_low
+            })
+            break
+        elif row["Close"] < or_low and row["Volume"] > opening_range["Volume"].mean():
+            trade_log.append({
+                "Stock": stock,
+                "Signal": "🔽 Short",
+                "Time": idx.strftime("%H:%M"),
+                "Price": row["Close"],
+                "OR High": or_high,
+                "OR Low": or_low
+            })
+            break
+
+# Display table
+st.subheader("📋 ORB Trade Log (Live Signals)")
+if trade_log:
+    st.dataframe(pd.DataFrame(trade_log))
 else:
-    st.warning("No ORB signals detected in NIFTY 50 today.")
+    st.info("No breakout signals found yet.")
+
