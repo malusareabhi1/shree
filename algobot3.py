@@ -208,8 +208,19 @@ elif selected == "ORB Strategy":
     
     # -------------------------------------------------------------------------------------------------
     # Stock Selector
-    default_symbol = "RELIANCE.NS"  # You can change this to any default
-    symbol = st.text_input("Enter NSE Stock Symbol (e.g., RELIANCE.NS, TCS.NS, INFY.NS):", default_symbol).upper()
+    #default_symbol = "RELIANCE.NS"  # You can change this to any default
+    #symbol = st.text_input("Enter NSE Stock Symbol (e.g., RELIANCE.NS, TCS.NS, INFY.NS):", default_symbol).upper()
+    # NIFTY 50 Stock List
+    nifty50_stocks = [
+        "ADANIENT", "ADANIPORTS", "APOLLOHOSP", "ASIANPAINT", "AXISBANK", "BAJAJ-AUTO", "BAJFINANCE",
+        "BAJAJFINSV", "BPCL", "BHARTIARTL", "BRITANNIA", "CIPLA", "COALINDIA", "DIVISLAB", "DRREDDY",
+        "EICHERMOT", "GRASIM", "HCLTECH", "HDFCBANK", "HDFCLIFE", "HEROMOTOCO", "HINDALCO", "HINDUNILVR",
+        "ICICIBANK", "ITC", "INDUSINDBK", "INFY", "JSWSTEEL", "KOTAKBANK", "LT", "M&M", "MARUTI", "NTPC",
+        "NESTLEIND", "ONGC", "POWERGRID", "RELIANCE", "SBILIFE", "SBIN", "SUNPHARMA", "TCS", "TATACONSUM",
+        "TATAMOTORS", "TATASTEEL", "TECHM", "TITAN", "UPL", "ULTRACEMCO", "WIPRO"
+    ]
+    selected_stock = st.selectbox("Select a NIFTY 50 Stock", sorted(nifty50_stocks))
+    symbol = selected_stock + ".NS"
     
     # -------------------------------------------------------------------------------------------------
     # Trend Calculation
