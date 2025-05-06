@@ -14,24 +14,26 @@ period = "1d"
 @st.cache_data(ttl=60)
 def get_intraday_data(symbol):
     df = yf.download(symbol, interval=interval, period=period, progress=False)
-    df.dropna(inplace=True)
-    if len(df) >= 20:
-        df["20EMA"] = EMAIndicator(df["Close"], window=20).ema_indicator()
-        df["VolumeAvg"] = df["Volume"].rolling(window=5).mean()
-    else:
-        st.warning("Not enough data for EMA calculation. Try after 9:45 AM or check symbol.")
-        st.stop()
-
-    df["VolumeAvg"] = df["Volume"].rolling(window=5).mean()
+    if df.empty or "Close" not in df.columns:
+        return pd.DataFrame()
     return df
 
 df = get_intraday_data(symbol)
 
 if df.empty:
-    st.error("No data found.")
+    st.error("No data received. Please check symbol or wait for market to open.")
     st.stop()
 
-# Opening range: 9:15 - 9:30 => first 3 candles
+# Calculate indicators only if enough data is available
+if len(df) < 20:
+    st.warning("Not enough candles for 20 EMA. Try after 10:15 AM.")
+    st.stop()
+
+# Indicators
+df["20EMA"] = EMAIndicator(df["Close"], window=20).ema_indicator()
+df["VolumeAvg"] = df["Volume"].rolling(window=5).mean()
+
+# Opening range: 9:15 - 9:30 (first 3 candles)
 opening_range = df.iloc[0:3]
 open_high = opening_range["High"].max()
 open_low = opening_range["Low"].min()
@@ -43,18 +45,16 @@ vol_avg = latest["VolumeAvg"]
 ema20 = latest["20EMA"]
 
 # Signal logic
-signal = None
+signal = "🟡 No Trade"
 if price > open_high and price > ema20 and volume > vol_avg:
     signal = "📈 BUY SIGNAL"
 elif price < open_low and price < ema20 and volume > vol_avg:
     signal = "📉 SELL SIGNAL"
-else:
-    signal = "🟡 No Trade"
 
 # Show metrics
 col1, col2, col3 = st.columns(3)
 col1.metric("Price", round(price, 2))
-col2.metric("Volume", f"{volume:,}")
+col2.metric("Volume", f"{int(volume):,}")
 col3.metric("Signal", signal)
 
 # Chart
