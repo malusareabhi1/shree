@@ -4,82 +4,61 @@ import pandas as pd
 import plotly.graph_objects as go
 import datetime
 
-st.set_page_config(layout="wide")
-st.title("📊 NSE Stock Dashboard - TradingView Style")
+# Sidebar for Stock Selection
+st.sidebar.title("📈 Stock Chart Dashboard")
+symbol = st.sidebar.text_input("Enter Stock Symbol (e.g., BHARTIARTL.NS):", "BHARTIARTL.NS").upper()
+start_date = st.sidebar.date_input("Start Date", datetime.date.today() - datetime.timedelta(days=180))
+end_date = st.sidebar.date_input("End Date", datetime.date.today())
 
-# ---------------------------------------
-# 🏷️ Input
-symbol = st.text_input("Enter NSE Symbol (e.g., RELIANCE, TCS, BHARTIARTL)", "BHARTIARTL").upper()
-full_symbol = symbol + ".NS"
-start_date = st.date_input("Start Date", datetime.date(2023, 1, 1))
-end_date = datetime.date.today()
-
-# ---------------------------------------
-# 📥 Download Data
-df = yf.download(full_symbol, start=start_date, end=end_date)
-
+# Fetch Data
+df = yf.download(symbol, start=start_date, end=end_date)
 if df.empty:
-    st.warning("No data found for this symbol.")
+    st.error("No data available for this symbol or date range.")
     st.stop()
 
-# ---------------------------------------
-# 📈 Indicators
-# Bollinger Bands
-# Ensure 20 SMA is calculated first
-df["20_SMA"] = df["Close"].rolling(window=20, min_periods=1).mean()
-rolling_std = df["Close"].rolling(window=20, min_periods=1).std()
+# Indicators
+df['20_SMA'] = df['Close'].rolling(window=20).mean()
+df['BB_upper'] = df['20_SMA'] + 2 * df['Close'].rolling(window=20).std()
+df['BB_lower'] = df['20_SMA'] - 2 * df['Close'].rolling(window=20).std()
+df['RSI'] = 100 - (100 / (1 + df['Close'].pct_change().rolling(14).mean() / df['Close'].pct_change().rolling(14).std()))
 
-# Now safely assign BB bands
-df["BB_upper"] = df["20_SMA"] + 2 * rolling_std
-df["BB_lower"] = df["20_SMA"] - 2 * rolling_std
-
-
-# RSI
-delta = df["Close"].diff()
-gain = delta.where(delta > 0, 0)
-loss = -delta.where(delta < 0, 0)
-avg_gain = gain.rolling(window=14).mean()
-avg_loss = loss.rolling(window=14).mean()
-rs = avg_gain / avg_loss
-df["RSI"] = 100 - (100 / (1 + rs))
-
-# ---------------------------------------
-# 📊 Main Chart (Candlestick + BB + Volume)
+# Candlestick Chart
 fig = go.Figure()
 
-# Candlestick
 fig.add_trace(go.Candlestick(
     x=df.index,
-    open=df["Open"],
-    high=df["High"],
-    low=df["Low"],
-    close=df["Close"],
-    name="Candles"
+    open=df['Open'],
+    high=df['High'],
+    low=df['Low'],
+    close=df['Close'],
+    name='Candlestick'
 ))
 
-# Bollinger Bands
-fig.add_trace(go.Scatter(x=df.index, y=df["BB_upper"], name="BB Upper", line=dict(color="red", width=1)))
-fig.add_trace(go.Scatter(x=df.index, y=df["20_SMA"], name="20 SMA", line=dict(color="blue", width=1)))
-fig.add_trace(go.Scatter(x=df.index, y=df["BB_lower"], name="BB Lower", line=dict(color="green", width=1)))
+fig.add_trace(go.Scatter(
+    x=df.index, y=df['20_SMA'], line=dict(color='orange'), name='20 SMA'
+))
 
-# Volume Bars
-fig.add_trace(go.Bar(x=df.index, y=df["Volume"], name="Volume", marker_color="rgba(100, 100, 255, 0.4)", yaxis='y2'))
+fig.add_trace(go.Scatter(
+    x=df.index, y=df['BB_upper'], line=dict(color='lightblue'), name='BB Upper', opacity=0.5
+))
+fig.add_trace(go.Scatter(
+    x=df.index, y=df['BB_lower'], line=dict(color='lightblue'), name='BB Lower', opacity=0.5
+))
 
+# Layout
 fig.update_layout(
-    title=f"{symbol} - Daily Candlestick with Bollinger Bands",
+    title=f"{symbol} Price Chart with Bollinger Bands and 20-SMA",
+    xaxis_title="Date",
+    yaxis_title="Price",
     xaxis_rangeslider_visible=False,
-    yaxis=dict(title="Price"),
-    yaxis2=dict(overlaying='y', side='right', title="Volume", showgrid=False),
-    legend=dict(orientation="h")
+    height=700
 )
 
 st.plotly_chart(fig, use_container_width=True)
 
-# ---------------------------------------
-# RSI Chart
+# RSI Plot
+st.subheader("📉 RSI Indicator")
 rsi_fig = go.Figure()
-rsi_fig.add_trace(go.Scatter(x=df.index, y=df["RSI"], name="RSI (14)", line=dict(color="purple")))
-rsi_fig.add_shape(type='line', x0=df.index[0], x1=df.index[-1], y0=70, y1=70, line=dict(dash='dash', color="red"))
-rsi_fig.add_shape(type='line', x0=df.index[0], x1=df.index[-1], y0=30, y1=30, line=dict(dash='dash', color="green"))
-rsi_fig.update_layout(title="Relative Strength Index (RSI)", yaxis=dict(range=[0, 100]))
+rsi_fig.add_trace(go.Scatter(x=df.index, y=df['RSI'], line=dict(color='purple'), name='RSI'))
+rsi_fig.update_layout(yaxis=dict(range=[0, 100]), height=300)
 st.plotly_chart(rsi_fig, use_container_width=True)
