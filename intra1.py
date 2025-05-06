@@ -73,5 +73,7 @@ fig.add_hline(y=open_low, line=dict(color="red", dash="dash"), name="Opening Low
 fig.update_layout(title=f"{symbol} - Intraday Chart", height=600)
 
 st.plotly_chart(fig, use_container_width=True)
+st.caption("Auto-refresh every 1 min. Strategy: Opening Range Breakout + EMA + Volume Spike")
+
 
 
