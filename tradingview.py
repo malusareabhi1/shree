@@ -42,6 +42,7 @@ if df.empty:
     st.error("No data found. Please check symbol or date.")
     st.stop()
 
+st.write(df.head())
 # Technical Indicators
 df['20_SMA'] = df['Close'].rolling(window=20).mean()
 df['BB_std'] = df['Close'].rolling(window=20).std()
@@ -74,8 +75,8 @@ fig.add_trace(go.Scatter(x=df.index, y=df['BB_lower'], name='BB Lower', line=dic
 fig.update_layout(title=f"{symbol} Price Chart", xaxis_title='Date', yaxis_title='Price', xaxis_rangeslider_visible=False, height=700)
 st.plotly_chart(fig, use_container_width=True)
 # Display candlestick chart
-st.plotly_chart(plot_candles_with_sma(df), use_container_width=True)
-st.divider()
+#st.plotly_chart(plot_candles_with_sma(df), use_container_width=True)
+#st.divider()
 # RSI Plot
 st.subheader("📉 RSI Indicator")
 rsi_fig = go.Figure()
