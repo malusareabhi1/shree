@@ -46,3 +46,9 @@ if price > open_high and price > ema and volume > vol_avg:
     signal = "📈 BUY SIGNAL"
 elif price < open_low and price < ema and volume > vol_avg:
     signal = "📉 SELL SIGNAL"
+
+col1, col2, col3 = st.columns(3)
+col1.metric("Current Price", round(price, 2))
+col2.metric("Volume", f"{int(volume):,}")
+col3.metric("Signal", signal)
+
