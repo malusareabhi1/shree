@@ -30,6 +30,8 @@ if len(df) < 20:
 
 # 20 EMA
 try:
+    # Make sure df["Close"] is a 1D Series (not a 2D DataFrame)
+    st.write(df["Close"].shape)  # Debugging step: print shape of 'Close'
     df["20EMA"] = EMAIndicator(df["Close"], window=20).ema_indicator()
     df["VolumeAvg"] = df["Volume"].rolling(window=5).mean()
 except Exception as e:
