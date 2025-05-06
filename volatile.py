@@ -1,24 +1,36 @@
+import yfinance as yf
 import pandas as pd
-import requests
-from io import StringIO
 import streamlit as st
-url = "https://nsearchives.nseindia.com/content/indices/ind_nifty200list.csv"
-headers = {
-    "User-Agent": "Mozilla/5.0"
-}
 
-response = requests.get(url, headers=headers)
-data = response.text
+# Nifty 50 stock symbols (add ".NS" for NSE)
+nifty_50 = [
+    'RELIANCE.NS', 'TCS.NS', 'INFY.NS', 'HDFCBANK.NS', 'ICICIBANK.NS', 'LT.NS',
+    'SBIN.NS', 'HINDUNILVR.NS', 'ITC.NS', 'KOTAKBANK.NS', 'AXISBANK.NS',
+    'BAJFINANCE.NS', 'BHARTIARTL.NS', 'MARUTI.NS', 'SUNPHARMA.NS',
+    'NESTLEIND.NS', 'ULTRACEMCO.NS', 'TITAN.NS', 'ASIANPAINT.NS', 'WIPRO.NS',
+    'HCLTECH.NS', 'NTPC.NS', 'POWERGRID.NS', 'ADANIENT.NS', 'TATASTEEL.NS',
+    'TECHM.NS', 'COALINDIA.NS', 'ONGC.NS', 'UPL.NS', 'JSWSTEEL.NS',
+    'BPCL.NS', 'GRASIM.NS', 'DRREDDY.NS', 'DIVISLAB.NS', 'BAJAJFINSV.NS',
+    'HDFCLIFE.NS', 'SBILIFE.NS', 'EICHERMOT.NS', 'INDUSINDBK.NS', 'HEROMOTOCO.NS',
+    'BAJAJ-AUTO.NS', 'CIPLA.NS', 'BRITANNIA.NS', 'APOLLOHOSP.NS', 'HINDALCO.NS',
+    'ADANIPORTS.NS', 'SHREECEM.NS', 'M&M.NS'
+]
 
-df = pd.read_csv(StringIO(data))
-st.write(df.columns)  # Debug: See what columns are actually present
+volatilities = []
 
-# Adjust the column name if needed
-if 'Symbol' in df.columns:
-    nifty_200 = [symbol + ".NS" for symbol in df['Symbol']]
-elif 'SYMBOL' in df.columns:
-    nifty_200 = [symbol + ".NS" for symbol in df['SYMBOL']]
-else:
-    raise ValueError("Column 'Symbol' not found in CSV")
+# Check volatility for each stock
+for symbol in nifty_50:
+    try:
+        df = yf.download(symbol, period='15d', interval='1d')
+        df['returns'] = df['Close'].pct_change()
+        volatility = df['returns'].std()
+        volatilities.append((symbol, volatility))
+    except Exception as e:
+        print(f"Error for {symbol}: {e}")
 
-st.write(nifty_200)
+# Sort by highest volatility
+vol_df = pd.DataFrame(volatilities, columns=['Symbol', 'Volatility'])
+vol_df = vol_df.sort_values(by='Volatility', ascending=False)
+
+st.write("🔍 Most Volatile NIFTY 50 Stocks (Last 14 Days):")
+st.write(vol_df.head(5))
