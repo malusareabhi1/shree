@@ -45,7 +45,7 @@ if df.empty:
     st.error("No data found. Please check symbol or date.")
     st.stop()
 
-st.write(df.head())
+#st.write(df.head())
 # Technical Indicators
 df['20_SMA'] = df['Close'].rolling(window=20).mean()
 df['BB_std'] = df['Close'].rolling(window=20).std()
