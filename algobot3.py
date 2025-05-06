@@ -33,7 +33,7 @@ with st.sidebar:
         "Intraday Stock Finder","ORB Strategy", "Trade Log", "Account Info", "Candle Chart", "Strategy Detail","Strategy2.0 Detail", "Project Detail", "KITE API", "API","Alpha Vantage API","Live Algo Trading","Volatility Scanner"
     ],
     icons=[
-        "bar-chart", "search", "cpu","cpu", "cpu","cpu","cpu", "arrow-repeat",
+        "bar-chart", "search", "cpu", "cpu","cpu", "cpu","cpu","cpu", "arrow-repeat",
         "search", "clipboard-data", "wallet2", "graph-up", "info-circle", "file-earmark","file-earmark", "code-slash", "code-slash", "code-slash","journal-text","search"
     ],
     menu_icon="cast",
