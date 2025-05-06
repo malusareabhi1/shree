@@ -32,6 +32,15 @@ if len(df) < 20:
 try:
     # Make sure df["Close"] is a 1D Series (not a 2D DataFrame)
     st.write(df["Close"].shape)  # Debugging step: print shape of 'Close'
+    st.write("DataFrame info:", df.info())  # Check structure
+    st.write("Shape of Close column:", df["Close"].shape)  # Ensure it's 1D
+    
+    # Ensure df["Close"] is a 1D Series, not a 2D DataFrame
+    df["Close"] = df["Close"].squeeze()  # Convert to 1D Series if needed
+    
+    # Calculate EMA
+    df["20EMA"] = EMAIndicator(close=df["Close"], window=20).ema_indicator()
+
     df["20EMA"] = EMAIndicator(df["Close"], window=20).ema_indicator()
     st.write(df["Close"].shape)  # Should print (N,) where N is the number of rows
 
