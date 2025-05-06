@@ -41,7 +41,7 @@ try:
     # Calculate EMA
     df["20EMA"] = EMAIndicator(close=df["Close"], window=20).ema_indicator()
 
-    df["20EMA"] = EMAIndicator(df["Close"], window=20).ema_indicator()
+    #df["20EMA"] = EMAIndicator(df["Close"], window=20).ema_indicator()
     st.write(df["Close"].shape)  # Should print (N,) where N is the number of rows
 
     df["VolumeAvg"] = df["Volume"].rolling(window=5).mean()
