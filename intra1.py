@@ -10,7 +10,7 @@ st.set_page_config(layout="wide")
 st.title("📈 Intraday Opening Range Breakout Strategy")
 
 # Live Algo Trading Block
-st.title("🤖 Live Algo Trading (Paper/Real Mode)")
+#st.title("🤖 Live Algo Trading (Paper/Real Mode)")
 st.title("📊 Live NIFTY 5‑Minute Candle")
 
 # -------------------------------------------------------------------------------------------------
