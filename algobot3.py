@@ -1590,6 +1590,7 @@ elif selected == "Live Algo Trading":
     col3.metric("🔺 High", f"{high:.2f} ₹")
     col4.metric("🔻 Low", f"{low:.2f} ₹")
     st.divider()
+    time.sleep(30)
     
     
         
