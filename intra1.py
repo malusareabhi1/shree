@@ -22,3 +22,16 @@ if df.empty:
 opening_range = df.iloc[0:3]
 open_high = opening_range["High"].max()
 open_low = opening_range["Low"].min()
+
+# Drop NaNs and check for sufficient rows
+if len(df) < 20:
+    st.warning("Not enough data for 20 EMA. Try after 10:15 AM.")
+    st.stop()
+
+# 20 EMA
+try:
+    df["20EMA"] = EMAIndicator(df["Close"], window=20).ema_indicator()
+    df["VolumeAvg"] = df["Volume"].rolling(window=5).mean()
+except Exception as e:
+    st.error(f"Indicator calculation error: {e}")
+    st.stop()
