@@ -203,7 +203,7 @@ if selected == "Dashboard":
         st.warning("Please login to Kite Connect first.")
 
 elif selected == "TradingView":
-    import datetime
+    #import datetime
     from datetime import datetime, timedelta
     st.sidebar.title("📊 TradingView-style Stock Dashboard")
     symbol = st.text_input("Enter Stock Symbol (e.g., BHARTIARTL.NS):", "BHARTIARTL.NS").upper()
