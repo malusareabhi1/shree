@@ -38,7 +38,7 @@ if volatilities:
     vol_df = pd.DataFrame(volatilities, columns=['Symbol', 'Volatility'])
     vol_df = vol_df.sort_values(by='Volatility', ascending=False)
 
-    st.subheader("🔍 Top 5 Most Volatile NIFTY 50 Stocks (Last 14 Days)")
-    st.dataframe(vol_df.head(5), use_container_width=True)
+    st.subheader("🔍 Top 15 Most Volatile NIFTY 50 Stocks (Last 14 Days)")
+    st.dataframe(vol_df.head(15), use_container_width=True)
 else:
     st.error("No volatility data could be calculated.")
