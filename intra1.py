@@ -35,3 +35,14 @@ try:
 except Exception as e:
     st.error(f"Indicator calculation error: {e}")
     st.stop()
+latest = df.iloc[-1]
+price = latest["Close"]
+volume = latest["Volume"]
+vol_avg = latest["VolumeAvg"]
+ema = latest["20EMA"]
+
+signal = "🟡 No Trade"
+if price > open_high and price > ema and volume > vol_avg:
+    signal = "📈 BUY SIGNAL"
+elif price < open_low and price < ema and volume > vol_avg:
+    signal = "📉 SELL SIGNAL"
