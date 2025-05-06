@@ -1,7 +1,7 @@
 import pandas as pd
 import requests
 from io import StringIO
-
+import streamlit as st
 url = "https://nsearchives.nseindia.com/content/indices/ind_nifty200list.csv"
 headers = {
     "User-Agent": "Mozilla/5.0"
@@ -11,7 +11,7 @@ response = requests.get(url, headers=headers)
 data = response.text
 
 df = pd.read_csv(StringIO(data))
-print(df.columns)  # Debug: See what columns are actually present
+st.write(df.columns)  # Debug: See what columns are actually present
 
 # Adjust the column name if needed
 if 'Symbol' in df.columns:
@@ -21,4 +21,4 @@ elif 'SYMBOL' in df.columns:
 else:
     raise ValueError("Column 'Symbol' not found in CSV")
 
-print(nifty_200)
+st.write(nifty_200)
