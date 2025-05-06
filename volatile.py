@@ -1,7 +1,7 @@
 import yfinance as yf
 import pandas as pd
 import numpy as np
-
+import streamlit as st
 # List of NIFTY 50 stocks (you can expand this as needed)
 nifty_50 = [
     'RELIANCE.NS', 'TCS.NS', 'INFY.NS', 'HDFCBANK.NS', 'ICICIBANK.NS',
@@ -30,5 +30,5 @@ for stock in nifty_50:
 vol_df = pd.DataFrame(volatility_data, columns=['Stock', 'Volatility'])
 vol_df.sort_values(by='Volatility', ascending=False, inplace=True)
 
-print("📈 Most Volatile NIFTY 50 Stocks (Last 1 Month):")
-print(vol_df.head(5))
+st.write("📈 Most Volatile NIFTY 50 Stocks (Last 1 Month):")
+st.write(vol_df.head(5))
