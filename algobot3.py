@@ -282,7 +282,7 @@ elif selected == "Get Stock Data":
                     df.columns = ['_'.join(col).strip() if col[1] else col[0] for col in df.columns]
     
                 # Show the raw column names to debug
-                st.write("📊 Columns:", df.columns.tolist())
+                #st.write("📊 Columns:", df.columns.tolist())
     
                 # Rename columns for consistency
                 rename_map = {}
