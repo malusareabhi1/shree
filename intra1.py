@@ -19,3 +19,6 @@ df = get_intraday_data(symbol)
 if df.empty:
     st.error("❌ No data received. Check symbol or wait for market to open.")
     st.stop()
+opening_range = df.iloc[0:3]
+open_high = opening_range["High"].max()
+open_low = opening_range["Low"].min()
