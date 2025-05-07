@@ -154,18 +154,3 @@ if __name__ == "__main__":
     # =====================
    
     
-    
-    
-    # Show Signal Table
-    st.subheader("📊 Signal Table (Last 10 rows)")
-    st.dataframe(df_result.tail(10)[['Date', 'Close', 'SMA_20', 'Upper_BB', 'Lower_BB', 'Signal']])
-    
-    # Show Trade Log
-    st.subheader("📘 Trade Log")
-    if trade_log:
-        trade_df = pd.DataFrame(trade_log)
-        st.dataframe(trade_df)
-        st.success(f"💰 Total PnL: ₹{round(trade_df['PnL'].sum(), 2)}")
-    else:
-        st.info("No trades triggered today.")
-    
