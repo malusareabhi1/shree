@@ -1761,16 +1761,13 @@ elif selected == "Candle Chart":
 
     symbol = "^NSEI"
     df = fetch_5min_data(symbol)
-    # ✅ Rename to 'Date' if that's what your function expects
-    df.rename(columns={"Datetime": "Date"}, inplace=True)
+    # Check actual column names
+    st.write("Columns before rename:", df.columns.tolist())
     
-    # ✅ Ensure 'Date' is datetime
-    df['Date'] = pd.to_datetime(df['Date'])
-    #df['Date'] = pd.to_datetime(df['Date'])  # Now this line works
-    #st.write(df.columns.tolist())
+    # Rename 'Datetime' to 'Date' so your function works
+    if 'Datetime' in df.columns:
+        df.rename(columns={"Datetime": "Date"}, inplace=True)
 
-    #st.write(df.head(25))
-    #trend = get_trend(df)
     trend = get_trend(df)
     current_price = float(df["Close"].iloc[-1])
     high = float(df["High"].max())
