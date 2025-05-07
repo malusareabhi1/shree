@@ -28,6 +28,10 @@ def get_nifty_data():
             df.columns = df.columns.get_level_values(0)
              # Ensure datetime index is timezone-aware in UTC and then convert to IST
             df.index = df.index.tz_convert("Asia/Kolkata")
+        # Reset index to bring datetime into a column
+            df.reset_index(inplace=True)
+            df.rename(columns={"index": "Date"}, inplace=True)  # Ensure column name is 'Date'
+        
             for col in ["Open","High","Low","Close"]:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
             df.dropna(subset=["Open","High","Low","Close"], inplace=True)
