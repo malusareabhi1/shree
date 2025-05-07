@@ -206,7 +206,7 @@ if selected == "Dashboard":
 elif selected == "Paper Trade":
     # ✅ MUST BE FIRST Streamlit command
     #st.set_page_config(page_title="Doctor Strategy Live", layout="wide")
-    st_autorefresh(interval=30_000, key="data_refresh")
+    #st_autorefresh(interval=30_000, key="data_refresh")
     
     
     # ✅ Now safe to use any other Streamlit commands
