@@ -22,7 +22,7 @@ else:
     ])
 
 def get_nifty_data():
-    df = yf.download(tickers=symbol, interval=interval, period="5d", progress=False)
+    df = yf.download(tickers=symbol, interval=interval, period="15d", progress=False)
    
     if isinstance(df.columns, pd.MultiIndex):  # This checks if the columns are a MultiIndex
             df.columns = df.columns.get_level_values(0)
