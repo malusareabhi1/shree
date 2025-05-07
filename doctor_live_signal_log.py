@@ -130,6 +130,56 @@ def doctor_strategy_signals(df, iv_threshold=16, capital=50000):
 
     return df, trades
 
+def plot_candles(df):
+        fig = go.Figure(data=[go.Candlestick(
+            x=df.index,
+            open=df["Open"],
+            high=df["High"],
+            low=df["Low"],
+            close=df["Close"],
+        )])
+        fig.update_layout(
+            title="NIFTY 5‑Minute Candles (Today)",
+            xaxis_title="Time",
+            yaxis_title="Price",
+            xaxis_rangeslider_visible=False
+        )
+        return fig
+    
+    # Function to plot candlesticks with 20-SMA
+    def plot_candles_with_sma(df):
+        # Calculate the 20-period SMA
+        df['20-SMA'] = df['Close'].rolling(window=20).mean()
+    
+        # Create the candlestick chart
+        fig = go.Figure(data=[go.Candlestick(
+            x=df.index,
+            open=df["Open"],
+            high=df["High"],
+            low=df["Low"],
+            close=df["Close"],
+            name="Candlesticks"
+        )])
+    
+        # Add the 20-period SMA as a line on top of the chart
+        fig.add_trace(go.Scatter(
+            x=df.index,
+            y=df['20-SMA'],
+            mode='lines',
+            name='20-SMA',
+            line=dict(color='orange', width=2)
+        ))
+    
+        # Update the layout of the chart
+        fig.update_layout(
+            title="NIFTY 5‑Minute Candles with 20-SMA (Today)",
+            xaxis_title="Time",
+            yaxis_title="Price",
+            xaxis_rangeslider_visible=False
+        )
+    
+        return fig
+
 
 
 if __name__ == "__main__":
@@ -137,6 +187,10 @@ if __name__ == "__main__":
     df.rename(columns={df.columns[0]: "Date"}, inplace=True)
     st.write("DATA")
     st.write(df.head(5))
+    if df.empty:
+        st.warning("No data available for today’s 5‑min bars.")
+    else:
+        st.plotly_chart(plot_candles_with_sma(df), use_container_width=True)
     #st.write(df.columns)
     # Assuming your df_5min has 'Date', 'Open', 'High', 'Low', 'Close'
     df_result, trade_log = doctor_strategy_signals(df)
