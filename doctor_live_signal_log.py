@@ -145,9 +145,9 @@ def plot_candles(df):
             xaxis_rangeslider_visible=False
         )
         return fig
-    
-    # Function to plot candlesticks with 20-SMA
-    def plot_candles_with_sma(df):
+
+# Function to plot candlesticks with 20-SMA
+def plot_candles_with_sma(df):
         # Calculate the 20-period SMA
         df['20-SMA'] = df['Close'].rolling(window=20).mean()
     
@@ -179,9 +179,12 @@ def plot_candles(df):
         )
     
         return fig
+    
 
 
 
+    
+    
 if __name__ == "__main__":
     df = get_nifty_data()
     df.rename(columns={df.columns[0]: "Date"}, inplace=True)
