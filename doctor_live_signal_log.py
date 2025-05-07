@@ -85,7 +85,7 @@ def update_log(df_latest, existing_log):
 if __name__ == "__main__":
     df = get_nifty_data()
     st.write(df)
-    #df = apply_doctor_strategy(df)
+    df = apply_doctor_strategy(df)
     #signal_log = update_log(df, signal_log)
     #signal_log.to_csv(log_file, index=False)
     #print(signal_log.tail())
