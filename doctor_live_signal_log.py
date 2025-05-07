@@ -130,6 +130,7 @@ def doctor_strategy_signals(df, iv_threshold=16, capital=50000):
 
 if __name__ == "__main__":
     df = get_nifty_data()
+    df.rename(columns={df.columns[0]: "Date"}, inplace=True)
     st.write(df.head(5))
     st.write(df.columns)
     # Assuming your df_5min has 'Date', 'Open', 'High', 'Low', 'Close'
