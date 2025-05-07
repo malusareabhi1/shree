@@ -1761,6 +1761,8 @@ elif selected == "Candle Chart":
 
     symbol = "^NSEI"
     df = fetch_5min_data(symbol)
+    df.rename(columns={"Datetime": "Date"}, inplace=True)
+    df['Date'] = pd.to_datetime(df['Date'])  # Now this line works
     #st.write(df.head(25))
     #trend = get_trend(df)
     trend = get_trend(df)
