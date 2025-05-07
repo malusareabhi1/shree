@@ -33,7 +33,7 @@ def get_nifty_data():
             for col in ["Open","High","Low","Close"]:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
             df.dropna(subset=["Open","High","Low","Close"], inplace=True)
-        return df
+    return df
 
 def apply_doctor_strategy(df):
     df = df.copy()
