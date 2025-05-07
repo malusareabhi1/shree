@@ -151,9 +151,7 @@ if __name__ == "__main__":
     st.set_page_config(page_title="Doctor Strategy Live", layout="wide")
     st.title("🩺 Doctor Strategy - NIFTY 5m Bollinger Bot")
     
-    df = get_nifty_data()
-    df.rename(columns={df.columns[0]: "Date"}, inplace=True)
-    df_result, trade_log = doctor_strategy_signals(df, iv_threshold, capital)
+    
     
     # Show Signal Table
     st.subheader("📊 Signal Table (Last 10 rows)")
