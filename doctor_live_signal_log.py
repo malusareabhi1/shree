@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import pytz
 import os
+import streamlit as st
 
 # Configuration
 symbol = "^NSEI"  # NIFTY 50 index symbol for Yahoo Finance
@@ -78,7 +79,8 @@ def update_log(df_latest, existing_log):
 
 if __name__ == "__main__":
     df = get_nifty_data()
+    st.write(df)
     #df = apply_doctor_strategy(df)
-    signal_log = update_log(df, signal_log)
-    signal_log.to_csv(log_file, index=False)
-    print(signal_log.tail())
+    #signal_log = update_log(df, signal_log)
+    #signal_log.to_csv(log_file, index=False)
+    #print(signal_log.tail())
