@@ -23,9 +23,7 @@ else:
 
 def get_nifty_data():
     df = yf.download(tickers=symbol, interval=interval, period="5d", progress=False)
-    df.reset_index(inplace=True)
-    df["Date"] = df["Datetime"].dt.tz_localize(None)
-    df.drop(columns=["Datetime"], inplace=True)
+   
     if isinstance(df.columns, pd.MultiIndex):  # This checks if the columns are a MultiIndex
             df.columns = df.columns.get_level_values(0)
              # Ensure datetime index is timezone-aware in UTC and then convert to IST
