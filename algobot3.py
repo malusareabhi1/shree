@@ -1783,6 +1783,7 @@ elif selected == "Candle Chart":
     col4.metric("🔻 Low", f"{low:.2f} ₹")
     st.divider()
     # Assuming your df_5min has 'Date', 'Open', 'High', 'Low', 'Close'
+    st.write(df.head(5))
     df_result, trade_log = doctor_strategy_signals(df)
     
     # Show signals on chart
