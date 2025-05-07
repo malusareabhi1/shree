@@ -1614,6 +1614,8 @@ elif selected == "Candle Chart":
             df.columns = df.columns.get_level_values(0)
          # Ensure datetime index is timezone-aware in UTC and then convert to IST
         df.index = df.index.tz_convert("Asia/Kolkata")
+        # Reset index and rename it to "Date"
+        df = df.reset_index().rename(columns={"index": "Date", "Datetime": "Date"})
         for col in ["Open","High","Low","Close"]:
             df[col] = pd.to_numeric(df[col], errors="coerce")
         df.dropna(subset=["Open","High","Low","Close"], inplace=True)
