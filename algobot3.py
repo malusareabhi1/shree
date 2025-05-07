@@ -15,6 +15,7 @@ import threading
 from datetime import datetime, timedelta
 import os
 import pytz  # ✅ Add this for details ssfsdfsdf 
+from streamlit_autorefresh import st_autorefresh
 
 
 
