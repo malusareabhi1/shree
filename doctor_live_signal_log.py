@@ -30,28 +30,34 @@ def get_nifty_data():
 def apply_doctor_strategy(df):
     df = df.copy()
 
+    # Minimum 20 rows required for Bollinger Band calculation
+    if len(df) < 20:
+        return df
+
     # Indicators
     df["SMA_20"] = df["Close"].rolling(window=20).mean()
     df["STD_20"] = df["Close"].rolling(window=20).std()
 
-    # Ensure no NaNs before computing BB
+    # Drop rows with NaNs in required columns (only after creating them)
     df.dropna(subset=["SMA_20", "STD_20"], inplace=True)
 
     # Bollinger Bands
     df["Upper_BB"] = df["SMA_20"] + 2 * df["STD_20"]
     df["Lower_BB"] = df["SMA_20"] - 2 * df["STD_20"]
 
-    # Entry Conditions
-    df["Crossed_SMA_Up"] = (df["Close"] > df["SMA_20"]) & (df["Close"].shift(1) < df["SMA_20"].shift(1))
+    # Example strategy logic
     df["Ref_Candle_Up"] = (df["Close"] > df["SMA_20"]) & (df["Close"].shift(1) > df["SMA_20"].shift(1))
 
     df["Signal"] = None
+    iv_threshold = 16  # placeholder: replace with your live IV logic
+
     for i in range(1, len(df)):
         if df["Ref_Candle_Up"].iloc[i] and iv_threshold >= 16:
             if df["Close"].iloc[i] > df["Close"].iloc[i - 1]:
                 df.at[i, "Signal"] = "BUY"
 
     return df
+
 
 def update_log(df_latest, existing_log):
     new_signals = df_latest[df_latest["Signal"].notna()]
