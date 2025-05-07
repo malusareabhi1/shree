@@ -145,4 +145,26 @@ if __name__ == "__main__":
     #st.write(df)
     st.write("Tradelog")
     #st.write(trade_log.head(5))
+    # =====================
+    # Streamlit Dashboard
+    # =====================
+    st.set_page_config(page_title="Doctor Strategy Live", layout="wide")
+    st.title("🩺 Doctor Strategy - NIFTY 5m Bollinger Bot")
+    
+    df = get_nifty_data()
+    df.rename(columns={df.columns[0]: "Date"}, inplace=True)
+    df_result, trade_log = doctor_strategy_signals(df, iv_threshold, capital)
+    
+    # Show Signal Table
+    st.subheader("📊 Signal Table (Last 10 rows)")
+    st.dataframe(df_result.tail(10)[['Date', 'Close', 'SMA_20', 'Upper_BB', 'Lower_BB', 'Signal']])
+    
+    # Show Trade Log
+    st.subheader("📘 Trade Log")
+    if trade_log:
+        trade_df = pd.DataFrame(trade_log)
+        st.dataframe(trade_df)
+        st.success(f"💰 Total PnL: ₹{round(trade_df['PnL'].sum(), 2)}")
+    else:
+        st.info("No trades triggered today.")
     
