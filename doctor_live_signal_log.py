@@ -28,12 +28,12 @@ def get_nifty_data():
     df.drop(columns=["Datetime"], inplace=True)
     if isinstance(df.columns, pd.MultiIndex):  # This checks if the columns are a MultiIndex
             df.columns = df.columns.get_level_values(0)
-         # Ensure datetime index is timezone-aware in UTC and then convert to IST
-        df.index = df.index.tz_convert("Asia/Kolkata")
-        for col in ["Open","High","Low","Close"]:
-            df[col] = pd.to_numeric(df[col], errors="coerce")
-        df.dropna(subset=["Open","High","Low","Close"], inplace=True)
-    return df
+             # Ensure datetime index is timezone-aware in UTC and then convert to IST
+            df.index = df.index.tz_convert("Asia/Kolkata")
+            for col in ["Open","High","Low","Close"]:
+                df[col] = pd.to_numeric(df[col], errors="coerce")
+            df.dropna(subset=["Open","High","Low","Close"], inplace=True)
+        return df
 
 def apply_doctor_strategy(df):
     df = df.copy()
