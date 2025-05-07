@@ -8,6 +8,8 @@ from streamlit_autorefresh import st_autorefresh
 import plotly.graph_objects as go
 # ✅ MUST BE FIRST Streamlit command
 st.set_page_config(page_title="Doctor Strategy Live", layout="wide")
+st_autorefresh(interval=30_000, key="data_refresh")
+
 
 # ✅ Now safe to use any other Streamlit commands
 st.title("Doctor Strategy Live Signal Dashboard")
