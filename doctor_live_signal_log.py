@@ -131,8 +131,9 @@ def doctor_strategy_signals(df, iv_threshold=16, capital=50000):
 if __name__ == "__main__":
     df = get_nifty_data()
     df.rename(columns={df.columns[0]: "Date"}, inplace=True)
+    st.write("DATA")
     st.write(df.head(5))
-    st.write(df.columns)
+    #st.write(df.columns)
     # Assuming your df_5min has 'Date', 'Open', 'High', 'Low', 'Close'
     df_result, trade_log = doctor_strategy_signals(df)
     
@@ -141,6 +142,7 @@ if __name__ == "__main__":
     
     # Show trade summary
     st.dataframe(pd.DataFrame(trade_log))
-    st.write(df)
+    #st.write(df)
+    st.write("Tradelog")
     st.write(trade_log)
     
