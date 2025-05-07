@@ -141,8 +141,8 @@ if __name__ == "__main__":
     st.dataframe(df_result[['Date', 'Close', 'SMA_20', 'Signal']].dropna(subset=['Signal']))
     
     # Show trade summary
-    st.dataframe(pd.DataFrame(trade_log))
+    st.write.dataframe(pd.DataFrame(trade_log))
     #st.write(df)
     st.write("Tradelog")
-    st.write(trade_log)
+    st.write(trade_log.head(5))
     
