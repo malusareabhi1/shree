@@ -66,6 +66,12 @@ def apply_doctor_strategy(df):
 
 
 def update_log(df_latest, existing_log):
+    if "Date" not in df.columns:
+        print("⚠️ Column 'Date' not found in dataframe.")
+        return existing_log
+
+    if "Date" not in existing_log.columns:
+        existing_log["Date"] = []  # Initialize if not already present
     new_signals = df_latest[df_latest["Signal"].notna()]
     for _, row in new_signals.iterrows():
         if row["Date"].strftime("%Y-%m-%d %H:%M:%S") not in existing_log["Date"].astype(str).values:
