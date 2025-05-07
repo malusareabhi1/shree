@@ -32,14 +32,20 @@ def apply_doctor_strategy(df):
 
     # Indicators
     df["SMA_20"] = df["Close"].rolling(window=20).mean()
-    df["Upper_BB"] = df["SMA_20"] + 2 * df["Close"].rolling(window=20).std()
-    df["Lower_BB"] = df["SMA_20"] - 2 * df["Close"].rolling(window=20).std()
+    df["STD_20"] = df["Close"].rolling(window=20).std()
 
-    # Entry Condition
+    # Ensure no NaNs before computing BB
+    df.dropna(subset=["SMA_20", "STD_20"], inplace=True)
+
+    # Bollinger Bands
+    df["Upper_BB"] = df["SMA_20"] + 2 * df["STD_20"]
+    df["Lower_BB"] = df["SMA_20"] - 2 * df["STD_20"]
+
+    # Entry Conditions
     df["Crossed_SMA_Up"] = (df["Close"] > df["SMA_20"]) & (df["Close"].shift(1) < df["SMA_20"].shift(1))
     df["Ref_Candle_Up"] = (df["Close"] > df["SMA_20"]) & (df["Close"].shift(1) > df["SMA_20"].shift(1))
-    df["Signal"] = None
 
+    df["Signal"] = None
     for i in range(1, len(df)):
         if df["Ref_Candle_Up"].iloc[i] and iv_threshold >= 16:
             if df["Close"].iloc[i] > df["Close"].iloc[i - 1]:
