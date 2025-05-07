@@ -86,7 +86,7 @@ if __name__ == "__main__":
     df = get_nifty_data()
     st.write(df.head(5))
     df = apply_doctor_strategy(df)
-    st.write(df.head(5))
+    st.write(df)
     #signal_log = update_log(df, signal_log)
     #signal_log.to_csv(log_file, index=False)
     #print(signal_log.tail())
