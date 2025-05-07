@@ -4,7 +4,11 @@ from datetime import datetime, timedelta
 import pytz
 import os
 import streamlit as st
+# ✅ MUST BE FIRST Streamlit command
+st.set_page_config(page_title="Doctor Strategy Live", layout="wide")
 
+# ✅ Now safe to use any other Streamlit commands
+st.title("Doctor Strategy Live Signal Dashboard")
 # Configuration
 symbol = "^NSEI"  # NIFTY 50 index symbol for Yahoo Finance
 interval = "5m"
@@ -148,8 +152,7 @@ if __name__ == "__main__":
     # =====================
     # Streamlit Dashboard
     # =====================
-    st.set_page_config(page_title="Doctor Strategy Live", layout="wide")
-    st.title("🩺 Doctor Strategy - NIFTY 5m Bollinger Bot")
+   
     
     
     
