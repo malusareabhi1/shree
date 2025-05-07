@@ -1671,93 +1671,93 @@ elif selected == "Candle Chart":
     
 
     def doctor_strategy_signals(df, iv_threshold=16, capital=50000):
-    """
-    Applies Doctor Strategy on a 5-minute OHLC DataFrame and returns trades with signals and PnL.
-
-    Parameters:
-        df (pd.DataFrame): Must contain 'Date', 'Open', 'High', 'Low', 'Close'
-        iv_threshold (float): IV threshold for trade confirmation
-        capital (float): Capital allocated per trade
-
-    Returns:
-        pd.DataFrame: Original DataFrame with Signal column
-        list of dicts: Trade log with entry/exit and PnL
-    """
-
-    # Ensure Date column is timezone-aware
-    df['Date'] = pd.to_datetime(df['Date'])
-    if df['Date'].dt.tz is None:
-        df['Date'] = df['Date'].dt.tz_localize("UTC").dt.tz_convert("Asia/Kolkata")
-    else:
-        df['Date'] = df['Date'].dt.tz_convert("Asia/Kolkata")
-
-    df = df[df['Date'].dt.time.between(pd.to_datetime('09:30:00').time(), pd.to_datetime('13:30:00').time())]
-    df = df.sort_values('Date').reset_index(drop=True)
-
-    # Bollinger Bands and SMA 20
-    df['SMA_20'] = df['Close'].rolling(window=20).mean()
-    df['Upper_BB'] = df['SMA_20'] + 2 * df['Close'].rolling(window=20).std()
-    df['Lower_BB'] = df['SMA_20'] - 2 * df['Close'].rolling(window=20).std()
-
-    # Entry Logic
-    df['Crossed_SMA_Up'] = (df['Close'] > df['SMA_20']) & (df['Close'].shift(1) < df['SMA_20'].shift(1))
-    df['Ref_Candle_Up'] = (df['Close'] > df['SMA_20']) & (df['Close'].shift(1) > df['SMA_20'].shift(1))
-
-    df['Signal'] = None
-    for i in range(1, len(df)):
-        if df['Ref_Candle_Up'].iloc[i] and iv_threshold >= 16:
-            if df['Close'].iloc[i] > df['Close'].iloc[i - 1]:
-                df.at[i, 'Signal'] = 'BUY'
-
-    # Trade simulation
-    trades = []
-    for i in range(len(df)):
-        if df['Signal'].iloc[i] == 'BUY':
-            entry_time = df['Date'].iloc[i]
-            entry_price = df['Close'].iloc[i]
-            stop_loss = entry_price * 0.90
-            profit_target = entry_price * 1.05
-            exit_time = None
-            exit_price = None
-            exit_reason = None
-            pnl = None
-
-            for j in range(i + 1, min(i + 12, len(df))):  # 10-minute window after entry
-                price = df['Close'].iloc[j]
-                if price >= profit_target:
-                    exit_time = df['Date'].iloc[j]
-                    exit_price = profit_target
-                    exit_reason = "Target Hit"
-                    break
-                elif price <= stop_loss:
-                    exit_time = df['Date'].iloc[j]
-                    exit_price = stop_loss
-                    exit_reason = "Stop Loss Hit"
-                    break
-            else:
-                # Time-based exit
-                if i + 10 < len(df):
-                    exit_time = df['Date'].iloc[i + 10]
-                    exit_price = df['Close'].iloc[i + 10]
-                    exit_reason = "Time Exit"
-
-            if exit_price:
-                turnover = entry_price + exit_price
-                pnl = (exit_price - entry_price) * (capital // entry_price) - 20  # ₹20 brokerage
-                trades.append({
-                    "Entry_Time": entry_time,
-                    "Entry_Price": entry_price,
-                    "Exit_Time": exit_time,
-                    "Exit_Price": exit_price,
-                    "Stop_Loss": stop_loss,
-                    "Profit_Target": profit_target,
-                    "Exit_Reason": exit_reason,
-                    "Brokerage": 20,
-                    "PnL": round(pnl, 2),
-                    "Turnover": round(turnover, 2)
-                })
-
-    return df, trades
+        """
+        Applies Doctor Strategy on a 5-minute OHLC DataFrame and returns trades with signals and PnL.
+    
+        Parameters:
+            df (pd.DataFrame): Must contain 'Date', 'Open', 'High', 'Low', 'Close'
+            iv_threshold (float): IV threshold for trade confirmation
+            capital (float): Capital allocated per trade
+    
+        Returns:
+            pd.DataFrame: Original DataFrame with Signal column
+            list of dicts: Trade log with entry/exit and PnL
+        """
+    
+        # Ensure Date column is timezone-aware
+        df['Date'] = pd.to_datetime(df['Date'])
+        if df['Date'].dt.tz is None:
+            df['Date'] = df['Date'].dt.tz_localize("UTC").dt.tz_convert("Asia/Kolkata")
+        else:
+            df['Date'] = df['Date'].dt.tz_convert("Asia/Kolkata")
+    
+        df = df[df['Date'].dt.time.between(pd.to_datetime('09:30:00').time(), pd.to_datetime('13:30:00').time())]
+        df = df.sort_values('Date').reset_index(drop=True)
+    
+        # Bollinger Bands and SMA 20
+        df['SMA_20'] = df['Close'].rolling(window=20).mean()
+        df['Upper_BB'] = df['SMA_20'] + 2 * df['Close'].rolling(window=20).std()
+        df['Lower_BB'] = df['SMA_20'] - 2 * df['Close'].rolling(window=20).std()
+    
+        # Entry Logic
+        df['Crossed_SMA_Up'] = (df['Close'] > df['SMA_20']) & (df['Close'].shift(1) < df['SMA_20'].shift(1))
+        df['Ref_Candle_Up'] = (df['Close'] > df['SMA_20']) & (df['Close'].shift(1) > df['SMA_20'].shift(1))
+    
+        df['Signal'] = None
+        for i in range(1, len(df)):
+            if df['Ref_Candle_Up'].iloc[i] and iv_threshold >= 16:
+                if df['Close'].iloc[i] > df['Close'].iloc[i - 1]:
+                    df.at[i, 'Signal'] = 'BUY'
+    
+        # Trade simulation
+        trades = []
+        for i in range(len(df)):
+            if df['Signal'].iloc[i] == 'BUY':
+                entry_time = df['Date'].iloc[i]
+                entry_price = df['Close'].iloc[i]
+                stop_loss = entry_price * 0.90
+                profit_target = entry_price * 1.05
+                exit_time = None
+                exit_price = None
+                exit_reason = None
+                pnl = None
+    
+                for j in range(i + 1, min(i + 12, len(df))):  # 10-minute window after entry
+                    price = df['Close'].iloc[j]
+                    if price >= profit_target:
+                        exit_time = df['Date'].iloc[j]
+                        exit_price = profit_target
+                        exit_reason = "Target Hit"
+                        break
+                    elif price <= stop_loss:
+                        exit_time = df['Date'].iloc[j]
+                        exit_price = stop_loss
+                        exit_reason = "Stop Loss Hit"
+                        break
+                else:
+                    # Time-based exit
+                    if i + 10 < len(df):
+                        exit_time = df['Date'].iloc[i + 10]
+                        exit_price = df['Close'].iloc[i + 10]
+                        exit_reason = "Time Exit"
+    
+                if exit_price:
+                    turnover = entry_price + exit_price
+                    pnl = (exit_price - entry_price) * (capital // entry_price) - 20  # ₹20 brokerage
+                    trades.append({
+                        "Entry_Time": entry_time,
+                        "Entry_Price": entry_price,
+                        "Exit_Time": exit_time,
+                        "Exit_Price": exit_price,
+                        "Stop_Loss": stop_loss,
+                        "Profit_Target": profit_target,
+                        "Exit_Reason": exit_reason,
+                        "Brokerage": 20,
+                        "PnL": round(pnl, 2),
+                        "Turnover": round(turnover, 2)
+                    })
+    
+        return df, trades
 
     symbol = "^NSEI"
     df = fetch_5min_data(symbol)
