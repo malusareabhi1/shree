@@ -144,5 +144,5 @@ if __name__ == "__main__":
     st.dataframe(pd.DataFrame(trade_log))
     #st.write(df)
     st.write("Tradelog")
-    st.write(trade_log.head(5))
+    #st.write(trade_log.head(5))
     
