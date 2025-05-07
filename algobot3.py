@@ -392,7 +392,7 @@ elif selected == "Paper Trade":
         df.rename(columns={df.columns[0]: "Date"}, inplace=True)
         df.reset_index(drop=True, inplace=True)  # 🔴 This removes the numbering column
         st.write("DATA")
-        st.dataframe(df.head(5), use_container_width=True, hide_index=True)
+        st.dataframe(df.head(), use_container_width=True, hide_index=True)
         #st.write(df.head(5))
         if df.empty:
             st.warning("No data available for today’s 5‑min bars.")
