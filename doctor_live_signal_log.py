@@ -136,4 +136,5 @@ if __name__ == "__main__":
     # Show trade summary
     st.dataframe(pd.DataFrame(trade_log))
     st.write(df)
+    st.write(trade_log)
     
