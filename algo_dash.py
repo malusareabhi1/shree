@@ -54,10 +54,19 @@ if section == "Live Trading":
 
     is_live = st.toggle("Activate Live Trading")
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("🔢 Trades Today", "14", "+3")
-    col2.metric("💰 Total PnL", "₹12,350", "+₹1,200")
-    col3.metric("📊 Win Rate", "68%", "↑")
+    # Convert trade log to DataFrame
+    trade_df = pd.DataFrame(st.session_state.trade_log)
+    
+    # Live Calculations
+    trades_today = len(trade_df)
+    total_pnl = trade_df.apply(lambda row: 100 if row["Side"] == "Buy" else -50, axis=1).sum()  # Example PnL logic
+    wins = trade_df[trade_df["Side"] == "Buy"]  # Simplified: Buy = Win, Sell = Loss
+    win_rate = (len(wins) / trades_today * 100) if trades_today > 0 else 0
+    
+    # Display live metrics
+    col1.metric("🔢 Trades Today", f"{trades_today}")
+    col2.metric("💰 Total PnL", f"₹{total_pnl:,.2f}", delta=f"{total_pnl:+,.0f}")
+    col3.metric("📊 Win Rate", f"{win_rate:.0f}%", delta="↑" if win_rate >= 50 else "↓")
 
     # Live Chart Section
     st.subheader("📉 Live Price Chart")
