@@ -22,7 +22,18 @@ if section == "Live Trading":
     st.subheader("🚀 Live Trading Control")
 
     strategy = st.selectbox("Select Strategy", ["Doctor Strategy", "ORB", "Momentum", "Mean Reversion"])
-    symbol = st.selectbox("Select Symbol", ["NIFTY", "BANKNIFTY", "RELIANCE", "INFY", "TCS", "ICICIBANK"])
+    selected_symbol = st.selectbox("Select Live Symbol", ["NIFTY 50", "RELIANCE", "INFY", "TCS", "HDFC BANK", "ICICI BANK"])
+    
+    symbol_map = {
+        "NIFTY 50": "^NSEI",
+        "RELIANCE": "RELIANCE.NS",
+        "INFY": "INFY.NS",
+        "TCS": "TCS.NS",
+        "HDFC BANK": "HDFCBANK.NS",
+        "ICICI BANK": "ICICIBANK.NS"
+    }
+    ticker = symbol_map[selected_symbol]
+
     is_live = st.toggle("Activate Live Trading")
 
     col1, col2, col3 = st.columns(3)
@@ -30,44 +41,37 @@ if section == "Live Trading":
     col2.metric("💰 Total PnL", "₹12,350", "+₹1,200")
     col3.metric("📊 Win Rate", "68%", "↑")
 
-    # Placeholder for live chart
-    st.subheader(f"📉 Live Price Chart: {symbol}")
+    # Live Chart Section
+    st.subheader("📉 Live Price Chart")
 
-    # Simulated symbol-specific data
-    price_baseline = {
-        "NIFTY": 22000,
-        "BANKNIFTY": 47000,
-        "RELIANCE": 2800,
-        "INFY": 1450,
-        "TCS": 3700,
-        "ICICIBANK": 1050
-    }
-    start_price = price_baseline.get(symbol, 15000)
+    try:
+        import yfinance as yf
+        data = yf.download(tickers=ticker, period="1d", interval="1m", progress=False)
+        if not data.empty:
+            df = data.reset_index()[["Datetime", "Close"]]
+            df.columns = ["time", "price"]
 
-    df = pd.DataFrame({
-        "time": pd.date_range(end=pd.Timestamp.now(), periods=100, freq="T"),
-        "price": np.cumsum(np.random.randn(100)) + start_price
-    })
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x=df["time"], y=df["price"], mode="lines", name=selected_symbol))
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.warning("⚠️ No data received for selected symbol.")
+    except Exception as e:
+        st.error(f"Error fetching data: {e}")
 
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df["time"], y=df["price"], mode="lines", name=f"{symbol} Price"))
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Session state for persistent logging
     if "trade_log" not in st.session_state:
         st.session_state.trade_log = []
 
-    if is_live:
-        st.success(f"Live trading is active for {symbol}")
-
+    if is_live and not data.empty:
+        st.success("Live trading is active")
         status_placeholder = st.empty()
         log_placeholder = st.empty()
 
-        for i in range(10):  # Simulate 10 live updates
+        for i in range(10):  # Simulated 10 updates
             live_price = round(df['price'].iloc[-1] + np.random.randn(), 2)
             current_time = pd.Timestamp.now().strftime("%H:%M:%S")
 
-            # ==== Basic Doctor Strategy Simulation ====
+            # Simple signal logic
             signal = "Hold"
             if live_price > df['price'].iloc[-1] + 2:
                 signal = "Buy"
@@ -79,7 +83,7 @@ if section == "Live Trading":
             if signal in ["Buy", "Sell"]:
                 st.session_state.trade_log.append({
                     "Time": current_time,
-                    "Symbol": symbol,
+                    "Symbol": selected_symbol,
                     "Side": signal,
                     "Qty": 50,
                     "Price": live_price,
@@ -91,12 +95,10 @@ if section == "Live Trading":
 
             time.sleep(2)
 
-    # Trade Log
     st.subheader("📘 Trade Log")
-    trade_log_df = pd.DataFrame(st.session_state.trade_log)
-    st.dataframe(trade_log_df, use_container_width=True)
-
-    st.download_button("Download Log", trade_log_df.to_csv(index=False).encode(), "trade_log.csv")
+    log_df = pd.DataFrame(st.session_state.trade_log)
+    st.dataframe(log_df, use_container_width=True)
+    st.download_button("Download Log", log_df.to_csv(index=False).encode(), "trade_log.csv")
 
     if st.button("🛑 Stop Trading"):
         st.warning("Trading stopped manually.")
