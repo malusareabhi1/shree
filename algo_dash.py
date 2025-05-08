@@ -65,10 +65,11 @@ if section == "Live Trading":
     try:
         import yfinance as yf
         data = yf.download(tickers=ticker, period="1d", interval="1m", progress=False)
-        if not data.empty:
-            df = data.reset_index()[["Datetime", "Close"]]
+        if not data.empty and isinstance(data.index, pd.DatetimeIndex):
+            df = data.reset_index()
+            df["Datetime"] = pd.to_datetime(df["Datetime"])  # Ensure datetime
+            df = df[["Datetime", "Close"]]
             df.columns = ["time", "price"]
-            df.index = df.index.tz_convert("Asia/Kolkata")
 
             fig = go.Figure()
             fig.add_trace(go.Scatter(x=df["time"], y=df["price"], mode="lines", name=selected_symbol))
