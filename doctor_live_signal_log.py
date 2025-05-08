@@ -136,11 +136,11 @@ def doctor_strategy_signals(df, iv_threshold=16, capital=50000):
 
 def plot_candles(df):
         fig = go.Figure(data=[go.Candlestick(
-            x=df.index,
+            x=df.index,x=df['Date'],
             open=df["Open"],
             high=df["High"],
             low=df["Low"],
-            close=df["Close"],
+            close=df["Close"], name="Candles"
         )])
         # Add Reference Candle marker
         ref_candle_df = df[df['Ref_Candle_Up'] == True]
