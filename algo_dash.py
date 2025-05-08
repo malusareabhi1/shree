@@ -36,12 +36,13 @@ trade_log_df = pd.DataFrame(columns=["Time", "Symbol", "Side", "Qty", "Price", "
 st.title("💹 Algo Trading Dashboard")
 
 # Live Trading Section
+# Live Trading Section
 if section == "Live Trading":
     st.subheader("🚀 Live Trading Control")
 
     strategy = st.selectbox("Select Strategy", ["Doctor Strategy", "ORB", "Momentum", "Mean Reversion"])
     selected_symbol = st.selectbox("Select Live Symbol", ["NIFTY 50", "RELIANCE", "INFY", "TCS", "HDFC BANK", "ICICI BANK"])
-    
+
     symbol_map = {
         "NIFTY 50": "^NSEI",
         "RELIANCE": "RELIANCE.NS",
@@ -52,18 +53,28 @@ if section == "Live Trading":
     }
     ticker = symbol_map[selected_symbol]
 
-    is_live = st.toggle("Activate Live Trading")
+    is_live = st.checkbox("Activate Live Trading")
 
-    # Convert trade log to DataFrame
+    # Convert trade log to DataFrame, ensuring 'Side' column exists
+    if "trade_log" not in st.session_state:
+        st.session_state.trade_log = []
+
     trade_df = pd.DataFrame(st.session_state.trade_log)
-    
-    # Live Calculations
-    trades_today = len(trade_df)
-    total_pnl = trade_df.apply(lambda row: 100 if row["Side"] == "Buy" else -50, axis=1).sum()  # Example PnL logic
-    wins = trade_df[trade_df["Side"] == "Buy"]  # Simplified: Buy = Win, Sell = Loss
-    win_rate = (len(wins) / trades_today * 100) if trades_today > 0 else 0
-    
+
+    # Ensure required columns exist in the DataFrame
+    if not trade_df.empty and "Side" in trade_df.columns:
+        # Live Calculations
+        trades_today = len(trade_df)
+        total_pnl = trade_df.apply(lambda row: 100 if row["Side"] == "Buy" else -50, axis=1).sum()  # Example PnL logic
+        wins = trade_df[trade_df["Side"] == "Buy"]  # Simplified: Buy = Win, Sell = Loss
+        win_rate = (len(wins) / trades_today * 100) if trades_today > 0 else 0
+    else:
+        trades_today = 0
+        total_pnl = 0
+        win_rate = 0
+
     # Display live metrics
+    col1, col2, col3 = st.columns(3)
     col1.metric("🔢 Trades Today", f"{trades_today}")
     col2.metric("💰 Total PnL", f"₹{total_pnl:,.2f}", delta=f"{total_pnl:+,.0f}")
     col3.metric("📊 Win Rate", f"{win_rate:.0f}%", delta="↑" if win_rate >= 50 else "↓")
@@ -72,9 +83,9 @@ if section == "Live Trading":
     st.subheader("📉 Live Price Chart")
 
     try:
-        import yfinance as yf
         data = yf.download(tickers=ticker, period="1d", interval="1m", progress=False)
-        if not data.empty and isinstance(data.index, pd.DatetimeIndex):
+        
+        if not data.empty:
             df = data.reset_index()
             df["Datetime"] = pd.to_datetime(df["Datetime"])  # Ensure datetime
             df = df[["Datetime", "Close"]]
@@ -87,9 +98,6 @@ if section == "Live Trading":
             st.warning("⚠️ No data received for selected symbol.")
     except Exception as e:
         st.error(f"Error fetching data: {e}")
-
-    if "trade_log" not in st.session_state:
-        st.session_state.trade_log = []
 
     if is_live and not data.empty:
         st.success("Live trading is active")
