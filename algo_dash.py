@@ -190,13 +190,18 @@ if section == "Live Trading":
             elif live_price < df['price'].iloc[-1] - 2:
                 signal = "Sell"
 
-            send_telegram_message(
-                f"🟢 *Trade Executed: BUY NIFTY*\n\n"
-                f"• Entry: {live_price:.2f} at {current_time.strftime('%H:%M')}\n"
-                f"• Exit: {live_price:.2f} at {current_time.strftime('%H:%M')}\n"
-                f"• Reason: {exit_reason}\n"
-                f"• PnL: ₹{pnl:.2f}"
-            )
+            if signal in ["Buy", "Sell"]:
+                exit_reason = "Signal Triggered"
+                pnl = round(random.uniform(-100, 200), 2)  # Simulate a trade result
+            
+                send_telegram_message(
+                    f"📢 *Trade Executed: {signal.upper()} {selected_symbol}*\n\n"
+                    f"• Entry: ₹{live_price:.2f} at {current_time}\n"
+                    f"• Reason: {exit_reason}\n"
+                    f"• PnL: ₹{pnl:.2f}"
+                )
+
+           
 
             status_placeholder.markdown(f"### 📢 Signal: **{signal}** at ₹{live_price} ({current_time})")
 
