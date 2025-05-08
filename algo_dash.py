@@ -22,6 +22,7 @@ if section == "Live Trading":
     st.subheader("🚀 Live Trading Control")
 
     strategy = st.selectbox("Select Strategy", ["Doctor Strategy", "ORB", "Momentum", "Mean Reversion"])
+    symbol = st.selectbox("Select Symbol", ["NIFTY", "BANKNIFTY", "RELIANCE", "INFY", "TCS", "ICICIBANK"])
     is_live = st.toggle("Activate Live Trading")
 
     col1, col2, col3 = st.columns(3)
@@ -30,70 +31,75 @@ if section == "Live Trading":
     col3.metric("📊 Win Rate", "68%", "↑")
 
     # Placeholder for live chart
-    st.subheader("📉 Live Price Chart")
+    st.subheader(f"📉 Live Price Chart: {symbol}")
 
-    # Simulated data (replace with real-time feed)
+    # Simulated symbol-specific data
+    price_baseline = {
+        "NIFTY": 22000,
+        "BANKNIFTY": 47000,
+        "RELIANCE": 2800,
+        "INFY": 1450,
+        "TCS": 3700,
+        "ICICIBANK": 1050
+    }
+    start_price = price_baseline.get(symbol, 15000)
+
     df = pd.DataFrame({
         "time": pd.date_range(end=pd.Timestamp.now(), periods=100, freq="T"),
-        "price": np.cumsum(np.random.randn(100)) + 15000
+        "price": np.cumsum(np.random.randn(100)) + start_price
     })
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df["time"], y=df["price"], mode="lines", name="Price"))
+    fig.add_trace(go.Scatter(x=df["time"], y=df["price"], mode="lines", name=f"{symbol} Price"))
     st.plotly_chart(fig, use_container_width=True)
 
     # Session state for persistent logging
     if "trade_log" not in st.session_state:
         st.session_state.trade_log = []
-    
+
     if is_live:
-        st.success("Live trading is active")
-    
+        st.success(f"Live trading is active for {symbol}")
+
         status_placeholder = st.empty()
         log_placeholder = st.empty()
-    
+
         for i in range(10):  # Simulate 10 live updates
-            # Simulated live price
             live_price = round(df['price'].iloc[-1] + np.random.randn(), 2)
             current_time = pd.Timestamp.now().strftime("%H:%M:%S")
-    
+
             # ==== Basic Doctor Strategy Simulation ====
             signal = "Hold"
             if live_price > df['price'].iloc[-1] + 2:
                 signal = "Buy"
             elif live_price < df['price'].iloc[-1] - 2:
                 signal = "Sell"
-    
-            # Show live signal
+
             status_placeholder.markdown(f"### 📢 Signal: **{signal}** at ₹{live_price} ({current_time})")
-    
-            # Log the trade if actionable
+
             if signal in ["Buy", "Sell"]:
                 st.session_state.trade_log.append({
                     "Time": current_time,
-                    "Symbol": "NIFTY",
+                    "Symbol": symbol,
                     "Side": signal,
                     "Qty": 50,
                     "Price": live_price,
                     "Status": "Executed"
                 })
-    
-            # Refresh trade log table
+
             log_df = pd.DataFrame(st.session_state.trade_log)
             log_placeholder.dataframe(log_df, use_container_width=True)
-    
-            time.sleep(2)
 
+            time.sleep(2)
 
     # Trade Log
     st.subheader("📘 Trade Log")
+    trade_log_df = pd.DataFrame(st.session_state.trade_log)
     st.dataframe(trade_log_df, use_container_width=True)
 
     st.download_button("Download Log", trade_log_df.to_csv(index=False).encode(), "trade_log.csv")
 
     if st.button("🛑 Stop Trading"):
         st.warning("Trading stopped manually.")
-        # Add logic to stop background process
 
 # Backtest Section
 elif section == "Backtest":
