@@ -213,15 +213,21 @@ if __name__ == "__main__":
         st.plotly_chart(plot_candles_with_sma(df), use_container_width=True)
     #st.write(df.columns)
     # Filter reference candles
-    ref_df = df[df['Ref_Candle_Up'] == True]
-    st.write("Reference Candle Log")
-    # Show reference candle log
-    if not ref_df.empty:
-        st.subheader("Reference Candle Detected:")
-        for idx, row in ref_df.iterrows():
-            st.write(f"🕒 Time: {row['Date']}, Open: {row['Open']}, High: {row['High']}, Low: {row['Low']}, Close: {row['Close']}")
+    # Safely check if the reference candle column exists
+    # Safely check if the reference candle column exists
+    ref_column = 'Ref_Candle_Up'
+    
+    if ref_column in df.columns:
+        ref_df = df[df[ref_column] == True]
+    
+        if not ref_df.empty:
+            st.subheader("Reference Candle Detected:")
+            for idx, row in ref_df.iterrows():
+                st.write(f"🕒 Time: {row['Date']}, Open: {row['Open']}, High: {row['High']}, Low: {row['Low']}, Close: {row['Close']}")
+        else:
+            st.info("No Reference Candle found in the current dataset.")
     else:
-        st.info("No Reference Candle found in the current dataset.")
+        st.warning(f"'{ref_column}' column not found in the DataFrame.")    
     # Assuming your df_5min has 'Date', 'Open', 'High', 'Low', 'Close'
     df_result, trade_log = doctor_strategy_signals(df)
     
