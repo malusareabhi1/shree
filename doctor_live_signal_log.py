@@ -232,7 +232,11 @@ def plot_candles_with_sma(df):
 if __name__ == "__main__":
     #df = get_nifty_data()
     df =get_nifty_data_csv()
-    df.rename(columns={df.columns[0]: "Date"}, inplace=True)
+    if df is not None and not df.empty:
+        df.rename(columns={df.columns[0]: "Date"}, inplace=True)
+        # Proceed with your logic
+    else:
+        st.warning("No data loaded. Please upload a valid CSV file with data.")
     df.reset_index(drop=True, inplace=True)  # 🔴 This removes the numbering column
     st.write("DATA")
     st.dataframe(df.head(5), use_container_width=True, hide_index=True)
