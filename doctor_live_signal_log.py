@@ -237,11 +237,13 @@ if __name__ == "__main__":
         # Proceed with your logic
     else:
         st.warning("No data loaded. Please upload a valid CSV file with data.")
-   if df is not None and isinstance(df, pd.DataFrame) and not df.empty:
+
+    if df is not None and isinstance(df, pd.DataFrame) and not df.empty:
         df.reset_index(drop=True, inplace=True)
         # continue processing...
     else:
         st.warning("No valid data found. Please upload a valid CSV file.")
+   
     st.write("DATA")
     st.dataframe(df.head(5), use_container_width=True, hide_index=True)
     #st.write(df.head(5))
