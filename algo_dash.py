@@ -64,6 +64,18 @@ if section == "Live Trading":
         )
         return fig
 
+    def get_nifty_data():
+        df = yf.download(tickers=symbol, interval=interval, period="2d", progress=False)
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+        df.index = df.index.tz_convert("Asia/Kolkata")
+        df.reset_index(inplace=True)
+        df.rename(columns={"index": "Date"}, inplace=True)
+        for col in ["Open", "High", "Low", "Close"]:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+        df.dropna(subset=["Open", "High", "Low", "Close"], inplace=True)
+        return df
+
     strategy = st.selectbox("Select Strategy", ["Doctor Strategy", "ORB", "Momentum", "Mean Reversion"])
     selected_symbol = st.selectbox("Select Live Symbol", ["NIFTY 50", "RELIANCE", "INFY", "TCS", "HDFC BANK", "ICICI BANK"])
 
@@ -105,6 +117,7 @@ if section == "Live Trading":
 
     # Live Chart Section
     st.subheader("📉 Live Price Chart")
+    df = get_nifty_data()
 
     try:
         data = yf.download(tickers=ticker, period="1d", interval="1m", progress=False)
@@ -112,7 +125,6 @@ if section == "Live Trading":
             data.columns = data.columns.get_level_values(0)
                  # Ensure datetime index is timezone-aware in UTC and then convert to IST
             data.index = data.index.tz_convert("Asia/Kolkata")
-
         
         if not data.empty:
             df = data.reset_index()
