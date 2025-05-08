@@ -7,16 +7,42 @@ import plotly.graph_objects as go
 import os
 import pytz
 from streamlit_autorefresh import st_autorefresh
+# Load variables from .env
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")  # optionally, use .env for chat_id too
+
+bot_token= os.getenv("TELEGRAM_BOT_TOKEN")
+chat_id= os.getenv("TELEGRAM_CHAT_ID")  # optionally, use .env for chat_id too
+def send_telegram_message(message):
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": CHAT_ID,
+        "text": message,
+        "parse_mode": "Markdown"
+    }
+    try:
+        response = requests.post(url, data=payload)
+        return response.status_code == 200
+    except Exception as e:
+        print(f"Telegram error: {e}")
+        return False
+
 
 st.set_page_config(page_title="Doctor Strategy Dashboard", layout="wide")
 st.title("🩺 Doctor Strategy Live Signal Dashboard")
 
 # Configuration
+strategy="Doctor Strategy"
 symbol = "^NSEI"  # NIFTY 50 index symbol for Yahoo Finance
 interval = "5m"
 lookback_minutes = 1000
 iv_threshold = 16  # Placeholder; replace with live IV
 log_file = "doctor_signal_log.csv"
+send_telegram_message(f"✅ *Live Trading Activated*\n\nSymbol: {symbol}\nStrategy: {strategy}")
 
 # Load previous log if exists
 if os.path.exists(log_file):
