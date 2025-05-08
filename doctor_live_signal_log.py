@@ -142,6 +142,15 @@ def plot_candles(df):
             low=df["Low"],
             close=df["Close"],
         )])
+        # Add Reference Candle marker
+        ref_candle_df = df[df['Ref_Candle_Up'] == True]
+        fig.add_trace(go.Scatter(
+            x=ref_candle_df['Date'],
+            y=ref_candle_df['High'] + 10,  # Adjust marker position as needed
+            mode='markers',
+            marker=dict(color='blue', size=10, symbol='circle'),
+            name='Reference Candle'
+        ))
         fig.update_layout(
             title="NIFTY 5‑Minute Candles (Today)",
             xaxis_title="Time",
