@@ -40,13 +40,13 @@ st.title("💹 Algo Trading Dashboard")
 if section == "Live Trading":
     st.subheader("🚀 Live Trading Control")
     def plot_candles_with_sma(df):
-        df['20-SMA'] = df['Close'].rolling(window=20).mean()
+        df['20-SMA'] = df['price'].rolling(window=20).mean()
         fig = go.Figure(data=[go.Candlestick(
             x=df.index,
             open=df["Open"],
             high=df["High"],
             low=df["Low"],
-            close=df["Close"],
+            close=df["price"],
             name="Candlesticks"
         )])
         fig.add_trace(go.Scatter(
