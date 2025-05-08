@@ -50,6 +50,7 @@ if section == "Live Trading":
         if not data.empty:
             df = data.reset_index()[["Datetime", "Close"]]
             df.columns = ["time", "price"]
+            df.index = df.index.tz_convert("Asia/Kolkata")
 
             fig = go.Figure()
             fig.add_trace(go.Scatter(x=df["time"], y=df["price"], mode="lines", name=selected_symbol))
