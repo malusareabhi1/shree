@@ -128,6 +128,12 @@ if section == "Live Trading":
     except Exception as e:
         st.error(f"Error fetching data: {e}")
 
+    if df.empty:
+        st.warning("No data available for today’s 5‑min bars.")
+    else:
+        st.subheader("📊 Candlestick Chart")
+        st.plotly_chart(plot_candles_with_sma(df), use_container_width=True)
+
     if is_live and not data.empty:
         st.success("Live trading is active")
         status_placeholder = st.empty()
