@@ -150,6 +150,9 @@ else:
     st.plotly_chart(plot_candles_with_sma(df), use_container_width=True)
 
     df_result, trade_log = doctor_strategy_signals(df)
+    st.subheader("🧪 Ref Candle Up Log")
+    st.dataframe(df_result[['Date', 'Close', 'SMA_20', 'Ref_Candle_Up']].tail(50), use_container_width=True)
+
 
     st.subheader("📈 Signals")
     st.dataframe(df_result[['Date', 'Close', 'SMA_20', 'Signal']].dropna(subset=['Signal']), use_container_width=True)
