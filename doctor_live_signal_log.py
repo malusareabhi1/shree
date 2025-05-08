@@ -1,4 +1,22 @@
- st.title("Doctor Strategy Live Signal Dashboard")
+import streamlit as st
+from streamlit_option_menu import option_menu
+from datetime import datetime
+import pandas as pd
+import yfinance as yf
+import plotly.express as px
+import plotly.graph_objects as go
+#from utils import generate_mock_data
+import random
+import requests
+from kiteconnect import KiteConnect
+import time
+import threading
+#import datetime
+from datetime import datetime, timedelta
+import os
+import pytz  # ✅ Add this for details ssfsdfsdf 
+from streamlit_autorefresh import st_autorefresh
+st.title("Doctor Strategy Live Signal Dashboard")
     # Configuration
     symbol = "^NSEI"  # NIFTY 50 index symbol for Yahoo Finance
     interval = "5m"
@@ -203,3 +221,6 @@
         # =====================
         # Streamlit Dashboard
         # =====================
+
+
+ 
