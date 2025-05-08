@@ -45,6 +45,29 @@ def get_nifty_data():
             df.dropna(subset=["Open","High","Low","Close"], inplace=True)
     return df
 
+def get_nifty_data_csv():
+    # Read CSV instead of downloading
+    csv_file_path = "doctor_signal_log.csv"  # Adjust path if needed
+
+    try:
+        df = pd.read_csv(csv_file_path, parse_dates=["Date"])
+    except FileNotFoundError:
+        st.error(f"CSV file not found: {csv_file_path}")
+        return pd.DataFrame()  # Return empty DataFrame
+
+    # Ensure datetime column is timezone-aware in IST
+    if df['Date'].dt.tz is None:
+        df['Date'] = df['Date'].dt.tz_localize("Asia/Kolkata")
+
+    # Clean and type-cast OHLC columns if they exist
+    for col in ["Open", "High", "Low", "Close"]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+    df.dropna(subset=["Open", "High", "Low", "Close"], inplace=True)
+
+    return df
+
+
 def doctor_strategy_signals(df, iv_threshold=16, capital=50000):
     """
     Applies Doctor Strategy on a 5-minute OHLC DataFrame and returns trades with signals and PnL.
@@ -201,7 +224,8 @@ def plot_candles_with_sma(df):
     
     
 if __name__ == "__main__":
-    df = get_nifty_data()
+    #df = get_nifty_data()
+    df =get_nifty_data_csv()
     df.rename(columns={df.columns[0]: "Date"}, inplace=True)
     df.reset_index(drop=True, inplace=True)  # 🔴 This removes the numbering column
     st.write("DATA")
