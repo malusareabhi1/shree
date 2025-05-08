@@ -90,8 +90,8 @@ def doctor_strategy_signals(df, iv_threshold=16, capital=50000):
                     break
             else:
                 if i + 10 < len(df):
-                    exit_time = df['Date'].iloc[i + 20]
-                    exit_price = df['Close'].iloc[i + 20]
+                    exit_time = df['Date'].iloc[i + 10]
+                    exit_price = df['Close'].iloc[i + 10]
                     exit_reason = "Time Exit"
 
             if exit_price:
