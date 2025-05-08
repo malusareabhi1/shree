@@ -48,6 +48,7 @@ def get_nifty_data():
 def get_nifty_data_csv():
     # Read CSV instead of downloading
     uploaded_file = st.file_uploader("Upload CSV file", type="csv")
+
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
         st.success("File uploaded successfully")
@@ -65,9 +66,12 @@ def get_nifty_data_csv():
         df = df[df['Date'].dt.time.between(pd.to_datetime('09:30:00').time(), pd.to_datetime('13:30:00').time())]
 
         # Display the final DataFrame
-        st.write(df.head())    
+        st.write(df.head())
 
-    return df
+        return df
+    else:
+        st.warning("Please upload a CSV file to proceed.")
+        return None
 
 
 def doctor_strategy_signals(df, iv_threshold=16, capital=50000):
