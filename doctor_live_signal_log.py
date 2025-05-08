@@ -247,10 +247,8 @@ if __name__ == "__main__":
     #st.write("DATA")
     #st.dataframe(df.head(5), use_container_width=True, hide_index=True)
     #st.write(df.head(5))
-    if df.empty:
-        st.warning("No data available for today’s 5‑min bars.")
-    else:
-        st.plotly_chart(plot_candles_with_sma(df), use_container_width=True)
+    
+    st.plotly_chart(plot_candles_with_sma(df), use_container_width=True)
     #st.write(df.columns)
     # Filter reference candles
     # Safely check if the reference candle column exists
