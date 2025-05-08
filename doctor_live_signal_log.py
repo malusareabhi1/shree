@@ -182,7 +182,8 @@ def plot_candles_with_sma(df):
             name='20-SMA',
             line=dict(color='orange', width=2)
         ))
-    
+        fig.update_layout(title="Doctor Strategy Chart with Reference Candles", xaxis_rangeslider_visible=False)
+
         # Update the layout of the chart
         fig.update_layout(
             title="NIFTY 5‑Minute Candles with 20-SMA (Today)",
