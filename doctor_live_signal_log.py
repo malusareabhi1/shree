@@ -65,9 +65,7 @@ def get_nifty_data_csv():
         df = df[df['Date'].dt.time.between(pd.to_datetime('09:30:00').time(), pd.to_datetime('13:30:00').time())]
 
         # Display the final DataFrame
-        st.write(df.head())
-
-     
+        st.write(df.head())    
 
     return df
 
