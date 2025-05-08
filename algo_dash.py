@@ -134,7 +134,7 @@ if section == "Live Trading":
 
             fig = go.Figure()
             fig.add_trace(go.Scatter(x=df["time"], y=df["price"], mode="lines", name=selected_symbol))
-            st.plotly_chart(fig, use_container_width=True)
+            #st.plotly_chart(fig, use_container_width=True)
         else:
             st.warning("⚠️ No data received for selected symbol.")
     except Exception as e:
