@@ -136,7 +136,8 @@ def doctor_strategy_signals(df, iv_threshold=16, capital=50000):
 
 def plot_candles(df):
         fig = go.Figure(data=[go.Candlestick(
-            x=df.index,x=df['Date'],
+            #x=df.index,
+            x=df['Date'],
             open=df["Open"],
             high=df["High"],
             low=df["Low"],
