@@ -84,6 +84,11 @@ if section == "Live Trading":
 
     try:
         data = yf.download(tickers=ticker, period="1d", interval="1m", progress=False)
+        if isinstance(df.columns, pd.MultiIndex):  # This checks if the columns are a MultiIndex
+            df.columns = df.columns.get_level_values(0)
+                 # Ensure datetime index is timezone-aware in UTC and then convert to IST
+            df.index = df.index.tz_convert("Asia/Kolkata")
+
         
         if not data.empty:
             df = data.reset_index()
