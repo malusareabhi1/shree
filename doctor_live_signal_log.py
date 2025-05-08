@@ -214,7 +214,7 @@ if __name__ == "__main__":
     #st.write(df.columns)
     # Filter reference candles
     ref_df = df[df['Ref_Candle_Up'] == True]
-    
+    st.write("Reference Candle Log")
     # Show reference candle log
     if not ref_df.empty:
         st.subheader("Reference Candle Detected:")
