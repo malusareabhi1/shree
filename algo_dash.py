@@ -25,8 +25,12 @@ from streamlit_autorefresh import st_autorefresh
 
 # Load variables from .env
 load_dotenv()
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")  # optionally, use .env for chat_id too
+
+bot_token= os.getenv("TELEGRAM_BOT_TOKEN")
+chat_id= os.getenv("TELEGRAM_CHAT_ID")  # optionally, use .env for chat_id too
 
 def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
