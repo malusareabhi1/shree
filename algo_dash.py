@@ -39,6 +39,30 @@ st.title("💹 Algo Trading Dashboard")
 # Live Trading Section
 if section == "Live Trading":
     st.subheader("🚀 Live Trading Control")
+    def plot_candles_with_sma(df):
+        df['20-SMA'] = df['Close'].rolling(window=20).mean()
+        fig = go.Figure(data=[go.Candlestick(
+            x=df.index,
+            open=df["Open"],
+            high=df["High"],
+            low=df["Low"],
+            close=df["Close"],
+            name="Candlesticks"
+        )])
+        fig.add_trace(go.Scatter(
+            x=df.index,
+            y=df['20-SMA'],
+            mode='lines',
+            name='20-SMA',
+            line=dict(color='orange', width=2)
+        ))
+        fig.update_layout(
+            title="NIFTY 5‑Minute Candles with 20-SMA",
+            xaxis_title="Time",
+            yaxis_title="Price",
+            xaxis_rangeslider_visible=False
+        )
+        return fig
 
     strategy = st.selectbox("Select Strategy", ["Doctor Strategy", "ORB", "Momentum", "Mean Reversion"])
     selected_symbol = st.selectbox("Select Live Symbol", ["NIFTY 50", "RELIANCE", "INFY", "TCS", "HDFC BANK", "ICICI BANK"])
