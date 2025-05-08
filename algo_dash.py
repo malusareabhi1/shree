@@ -192,8 +192,8 @@ if section == "Live Trading":
 
             send_telegram_message(
                 f"🟢 *Trade Executed: BUY NIFTY*\n\n"
-                f"• Entry: {entry_price:.2f} at {entry_time.strftime('%H:%M')}\n"
-                f"• Exit: {exit_price:.2f} at {exit_time.strftime('%H:%M')}\n"
+                f"• Entry: {live_price:.2f} at {current_time.strftime('%H:%M')}\n"
+                f"• Exit: {live_price:.2f} at {current_time.strftime('%H:%M')}\n"
                 f"• Reason: {exit_reason}\n"
                 f"• PnL: ₹{pnl:.2f}"
             )
