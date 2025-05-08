@@ -117,7 +117,7 @@ if section == "Live Trading":
 
     # Live Chart Section
     st.subheader("📉 Live Price Chart")
-    df = get_nifty_data()
+    #df = get_nifty_data()
 
     try:
         data = yf.download(tickers=ticker, period="1d", interval="1m", progress=False)
