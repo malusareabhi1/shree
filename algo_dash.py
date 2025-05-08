@@ -3,6 +3,24 @@ import pandas as pd
 import numpy as np
 import time
 import plotly.graph_objects as go
+import streamlit as st
+from streamlit_option_menu import option_menu
+from datetime import datetime
+
+import yfinance as yf
+import plotly.express as px
+import plotly.graph_objects as go
+#from utils import generate_mock_data
+import random
+import requests
+from kiteconnect import KiteConnect
+import time
+import threading
+#import datetime
+from datetime import datetime, timedelta
+import os
+import pytz  # ✅ Add this for details ssfsdfsdf 
+from streamlit_autorefresh import st_autorefresh
 
 # Page config
 st.set_page_config(page_title="Algo Trading Dashboard", layout="wide")
