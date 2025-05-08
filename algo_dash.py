@@ -180,6 +180,7 @@ if section == "Live Trading":
 
     if is_live and not data.empty:
         st.success("Live trading is active")
+        send_telegram_message(f"✅ *Live Trading Activated*\n\nSymbol: {selected_symbol}\nStrategy: {strategy}")
         status_placeholder = st.empty()
         log_placeholder = st.empty()
 
@@ -187,7 +188,7 @@ if section == "Live Trading":
             live_price = round(df['price'].iloc[-1] + np.random.randn(), 2)
             current_time = pd.Timestamp.now().strftime("%H:%M:%S")
             # Send Telegram notification when Live Trading is activated
-            send_telegram_message(f"✅ *Live Trading Activated*\n\nSymbol: {selected_symbol}\nStrategy: {strategy}")
+            
 
             # Simple signal logic
             signal = "Hold"
