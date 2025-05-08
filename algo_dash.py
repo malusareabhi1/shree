@@ -22,6 +22,25 @@ import os
 import pytz  # ✅ Add this for details ssfsdfsdf 
 from streamlit_autorefresh import st_autorefresh
 
+# Load variables from .env
+load_dotenv()
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
+def send_telegram_message(message):
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": TELEGRAM_CHAT_ID,
+        "text": message,
+        "parse_mode": "Markdown"
+    }
+    try:
+        response = requests.post(url, data=payload)
+        return response.status_code == 200
+    except Exception as e:
+        print(f"Telegram error: {e}")
+        return False
+
 # Page config
 st.set_page_config(page_title="Algo Trading Dashboard", layout="wide")
 
@@ -34,6 +53,12 @@ trade_log_df = pd.DataFrame(columns=["Time", "Symbol", "Side", "Qty", "Price", "
 
 # Header
 st.title("💹 Algo Trading Dashboard")
+def send_market_status():
+    nifty = yf.download("^NSEI", period="1d", interval="1m").Close[-1]
+    banknifty = yf.download("^NSEBANK", period="1d", interval="1m").Close[-1]
+    msg = f"📈 *Market Update*\n\nNIFTY: {nifty:.2f}\nBANKNIFTY: {banknifty:.2f}"
+    send_telegram_message(msg)
+
 
 # Live Trading Section
 # Live Trading Section
@@ -163,6 +188,14 @@ if section == "Live Trading":
                 signal = "Buy"
             elif live_price < df['price'].iloc[-1] - 2:
                 signal = "Sell"
+
+            send_telegram_message(
+                f"🟢 *Trade Executed: BUY NIFTY*\n\n"
+                f"• Entry: {entry_price:.2f} at {entry_time.strftime('%H:%M')}\n"
+                f"• Exit: {exit_price:.2f} at {exit_time.strftime('%H:%M')}\n"
+                f"• Reason: {exit_reason}\n"
+                f"• PnL: ₹{pnl:.2f}"
+            )
 
             status_placeholder.markdown(f"### 📢 Signal: **{signal}** at ₹{live_price} ({current_time})")
 
