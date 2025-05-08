@@ -29,7 +29,7 @@ else:
 
 # Fetch data function
 def get_nifty_data():
-    df = yf.download(tickers=symbol, interval=interval, period="1d", progress=False)
+    df = yf.download(tickers=symbol, interval=interval, period="2d", progress=False)
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
     df.index = df.index.tz_convert("Asia/Kolkata")
