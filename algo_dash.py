@@ -134,7 +134,7 @@ if section == "Live Trading":
 
             fig = go.Figure()
             fig.add_trace(go.Scatter(x=df["time"], y=df["price"], mode="lines", name=selected_symbol))
-            #st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True)
         else:
             st.warning("⚠️ No data received for selected symbol.")
     except Exception as e:
@@ -146,7 +146,7 @@ if section == "Live Trading":
         st.warning("No data available for today’s 5‑min bars.")
     else:
         st.subheader("📊 Candlestick Chart")
-        st.plotly_chart(plot_candles_with_sma(df), use_container_width=True)
+        #st.plotly_chart(plot_candles_with_sma(df), use_container_width=True)
 
     if is_live and not data.empty:
         st.success("Live trading is active")
