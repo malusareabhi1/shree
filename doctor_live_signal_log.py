@@ -47,23 +47,27 @@ def get_nifty_data():
 
 def get_nifty_data_csv():
     # Read CSV instead of downloading
-    csv_file_path = "doctor_signal_log.csv"  # Adjust path if needed
+    uploaded_file = st.file_uploader("Upload CSV file", type="csv")
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file)
+        st.success("File uploaded successfully")
 
-    try:
-        df = pd.read_csv(csv_file_path, parse_dates=["Date"])
-    except FileNotFoundError:
-        st.error(f"CSV file not found: {csv_file_path}")
-        return pd.DataFrame()  # Return empty DataFrame
+        # Convert 'Date' to datetime if it's not already
+        df['Date'] = pd.to_datetime(df['Date'])
 
-    # Ensure datetime column is timezone-aware in IST
-    if df['Date'].dt.tz is None:
-        df['Date'] = df['Date'].dt.tz_localize("Asia/Kolkata")
+        # Check if the 'Date' column is timezone-aware
+        if df['Date'].dt.tz is None:
+            df['Date'] = df['Date'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
+        else:
+            df['Date'] = df['Date'].dt.tz_convert('Asia/Kolkata')
 
-    # Clean and type-cast OHLC columns if they exist
-    for col in ["Open", "High", "Low", "Close"]:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors="coerce")
-    df.dropna(subset=["Open", "High", "Low", "Close"], inplace=True)
+        # Filter times for 9:30 AM to 1:30 PM market hours
+        df = df[df['Date'].dt.time.between(pd.to_datetime('09:30:00').time(), pd.to_datetime('13:30:00').time())]
+
+        # Display the final DataFrame
+        st.write(df.head())
+
+     
 
     return df
 
