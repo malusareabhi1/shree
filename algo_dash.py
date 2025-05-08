@@ -140,7 +140,7 @@ if section == "Live Trading":
     except Exception as e:
         st.error(f"Error fetching data: {e}")
 
-    st.write("Columns in df:", df.columns.tolist())
+   # st.write("Columns in df:", df.columns.tolist())
 
     if df.empty:
         st.warning("No data available for today’s 5‑min bars.")
