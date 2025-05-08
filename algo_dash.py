@@ -182,6 +182,8 @@ if section == "Live Trading":
         for i in range(10):  # Simulated 10 updates
             live_price = round(df['price'].iloc[-1] + np.random.randn(), 2)
             current_time = pd.Timestamp.now().strftime("%H:%M:%S")
+            # Send Telegram notification when Live Trading is activated
+            send_telegram_message(f"✅ *Live Trading Activated*\n\nSymbol: {selected_symbol}\nStrategy: {strategy}")
 
             # Simple signal logic
             signal = "Hold"
