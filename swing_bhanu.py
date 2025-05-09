@@ -102,7 +102,7 @@ if results:
         stock_data.dropna(inplace=True)
         stock_data = stock_data[['Open', 'High', 'Low', 'Close']]  # Make sure required columns exist
         stock_data.reset_index(inplace=True)
-        st.write("Sample stock data:", stock_data.tail())
+        #st.write("Sample stock data:", stock_data.tail())
 
         #stock_data.reset_index(inplace=True)
 
@@ -128,6 +128,9 @@ if results:
             go.Scatter(x=stock_data['Date'], y=[target1]*len(stock_data), mode='lines', name='Target 1:2', line=dict(color='green', dash='dot')),
             go.Scatter(x=stock_data['Date'], y=[target2]*len(stock_data), mode='lines', name='Target 1:3', line=dict(color='darkgreen', dash='dot'))
         ])
+        stock_data['SMA44'] = stock_data['Close'].rolling(window=44).mean()
+        fig.add_trace(go.Scatter(x=stock_data['Date'], y=stock_data['SMA44'], mode='lines', name='SMA44', line=dict(color='orange')))
+
 
         fig.update_layout(title=f"{selected_stock} Chart with Entry, SL & Targets", xaxis_title="Date", yaxis_title="Price", height=600)
         st.plotly_chart(fig, use_container_width=True)
