@@ -351,6 +351,44 @@ elif selected == "Swing SMA44 Strategy":
     
     else:
         st.info("No stocks meet the strategy criteria.")
+
+    st.markdown("""📘 SMA44 Strategy (a.k.a. Bhanushali Strategy)
+Objective:
+To identify bullish setups where the price pulls back toward the rising 44-period Simple Moving Average (SMA44) and shows strength by closing above it, suggesting potential continuation of the uptrend.
+
+📊 Core Criteria
+SMA44 Rising:
+The 44-day Simple Moving Average (SMA44) must be sloping upward, indicating an uptrend.
+
+Current Candle Conditions:
+
+The Low of the current candle is below SMA44.
+
+The Close of the candle is above SMA44.
+👉 This implies the price dipped below the SMA during the day but recovered and closed above it, showing buyer strength near support.
+
+🎯 Trade Setup
+Entry Price:
+Above the High of the candle that met the criteria.
+
+Stoploss:
+Below the Low of the same candle.
+
+Targets:
+
+Target 1 (1:2 RR): Entry + 2 × (Entry − Stoploss)
+
+Target 2 (1:3 RR): Entry + 3 × (Entry − Stoploss)
+
+🧠 Why SMA44?
+The 44-period SMA is a custom mid-range moving average that balances between shorter-term (e.g., 20 SMA) and long-term (e.g., 100/200 SMA) trends. It is often used by discretionary swing traders like Vivek Bhanushali for detecting pullback zones in trending markets.
+
+📌 Best Practices
+Works well in strong uptrending stocks.
+
+Avoid in sideways or weakly trending stocks.
+
+Preferably used with volume confirmation or sector strength.""")
 #_______________________________________________________________________________________________________________________________________________________________________________________________________
 elif selected == "Paper Trade":
     # ✅ MUST BE FIRST Streamlit command
