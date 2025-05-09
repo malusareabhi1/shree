@@ -4,29 +4,40 @@ import pandas as pd
 def is_sma_rising(sma_series):
     return sma_series[-1] > sma_series[-2] > sma_series[-3]
 
-def scan_bhanushali_strategy(stock, interval='1d', period='3mo'):
-    df = yf.download(stock, interval=interval, period=period)
-    if df.empty or len(df) < 50:
-        return None
+def scan_bhanushali_strategy(stock):
+    df = yf.download(stock, period='90d', interval='1d')
+    df['SMA44'] = df['Close'].rolling(window=44).mean()
+    df.dropna(inplace=True)
 
-    df['SMA44'] = df['Close'].rolling(44).mean()
+    if len(df) < 2:
+        return None  # Not enough data
 
-    # Check if last candle crosses SMA and SMA is rising
-    if is_sma_rising(df['SMA44'][-5:]):
-        last_candle = df.iloc[-1]
-        if last_candle['Low'] < last_candle['SMA44'] < last_candle['Close']:
-            entry = last_candle['High']
-            sl = last_candle['Low']
-            rr_2 = entry + 2 * (entry - sl)
-            rr_3 = entry + 3 * (entry - sl)
-            return {
-                'Stock': stock,
-                'Entry': round(entry, 2),
-                'StopLoss': round(sl, 2),
-                'Target_1_2': round(rr_2, 2),
-                'Target_1_3': round(rr_3, 2)
-            }
+    last_candle = df.iloc[-1]
+    prev_candle = df.iloc[-2]
+
+    # Extract scalar values
+    low = last_candle['Low']
+    close = last_candle['Close']
+    sma44 = last_candle['SMA44']
+
+    # Condition: candle near rising 44 SMA
+    if low < sma44 < close:
+        # Buy above high of that candle, stoploss below low
+        entry = last_candle['High']
+        stoploss = low
+        target1 = entry + (entry - stoploss) * 2
+        target2 = entry + (entry - stoploss) * 3
+
+        return {
+            'symbol': stock,
+            'entry': round(entry, 2),
+            'stoploss': round(stoploss, 2),
+            'target_1_2': round(target1, 2),
+            'target_1_3': round(target2, 2)
+        }
+
     return None
+
 
 nifty_100 = [
     'RELIANCE.NS', 'TCS.NS', 'INFY.NS', 'HDFCBANK.NS', 'ICICIBANK.NS',
