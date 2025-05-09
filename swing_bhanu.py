@@ -65,6 +65,13 @@ for stock in nifty_100:
     except Exception as e:
         st.write(f"Error with {stock}: {e}")
 
+# Create a DataFrame to display the results in table format
+if results:
+    df_results = pd.DataFrame(results)
+    # Display the table in a clean format
+    st.write(df_results)
+else:
+    st.write("No stocks meet the criteria.")
 # Print the results
 for result in results:
     st.write(result)
