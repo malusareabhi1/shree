@@ -2,7 +2,7 @@ import yfinance as yf
 import pandas as pd
 import streamlit as st
 import plotly.graph_objects as go
-
+import numpy as np
 def scan_bhanushali_strategy(stock):
     # Download historical stock data
     df = yf.download(stock, period='90d', interval='1d')
