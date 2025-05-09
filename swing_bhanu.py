@@ -30,8 +30,11 @@ def scan_bhanushali_strategy(stock):
     # Condition: low < SMA44 < close (candle near rising 44 SMA)
     if low < sma44 < close:
         # Buy above the high of the candle, stoploss below the low of the candle
-        entry = last_candle['High']
-        stoploss = low
+        #entry = last_candle['High']
+        #stoploss = low
+        entry = float(last_candle['High'])       # entry as scalar
+        stoploss = float(last_candle['Low'])     # stoploss as scalar
+
 
         # Calculate targets based on a 1:2 and 1:3 risk-reward ratio
         target1 = entry + (entry - stoploss) * 2
