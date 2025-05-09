@@ -1,6 +1,6 @@
 import yfinance as yf
 import pandas as pd
-
+import streamlit as st
 # Define the scan_bhanushali_strategy function
 def scan_bhanushali_strategy(stock):
     # Download historical stock data
@@ -76,11 +76,11 @@ for stock in nifty_100:
         if res:
             results.append(res)
     except Exception as e:
-        print(f"Error with {stock}: {e}")
+        st.write(f"Error with {stock}: {e}")
 
 # Print the results
 for result in results:
-    print(result)
+    st.write(result)
 
 
 
