@@ -90,6 +90,7 @@ for stock in nifty_100:
 # Create a DataFrame to display the results in table format
 if results:
     df_results = pd.DataFrame(results)
+    #st.dataframe(df_results)
     # Display the table in a clean format
     st.write(df_results)
 else:
@@ -97,6 +98,48 @@ else:
 # Print the results
 #for result in results:
     #st.write(df_results)
+
+# Display results
+if results:
+    df_results = pd.DataFrame(results)
+    st.dataframe(df_results)
+
+    # Selection box
+    selected_stock = st.selectbox("Select a stock to view chart:", df_results['symbol'].tolist())
+
+    # If a stock is selected, fetch its data and plot chart
+    if selected_stock:
+        stock_data = yf.download(selected_stock, period='60d', interval='1d')
+        stock_data.reset_index(inplace=True)
+
+        # Get entry/SL/target from result
+        selected_row = df_results[df_results['symbol'] == selected_stock].iloc[0]
+        entry = selected_row['entry']
+        stoploss = selected_row['stoploss']
+        target1 = selected_row['target_1_2']
+        target2 = selected_row['target_1_3']
+
+        # Create candlestick chart
+        fig = go.Figure(data=[
+            go.Candlestick(
+                x=stock_data['Date'],
+                open=stock_data['Open'],
+                high=stock_data['High'],
+                low=stock_data['Low'],
+                close=stock_data['Close'],
+                name='Candles'
+            ),
+            go.Scatter(x=stock_data['Date'], y=[entry]*len(stock_data), mode='lines', name='Entry', line=dict(color='blue', dash='dash')),
+            go.Scatter(x=stock_data['Date'], y=[stoploss]*len(stock_data), mode='lines', name='Stoploss', line=dict(color='red', dash='dash')),
+            go.Scatter(x=stock_data['Date'], y=[target1]*len(stock_data), mode='lines', name='Target 1:2', line=dict(color='green', dash='dot')),
+            go.Scatter(x=stock_data['Date'], y=[target2]*len(stock_data), mode='lines', name='Target 1:3', line=dict(color='darkgreen', dash='dot'))
+        ])
+
+        fig.update_layout(title=f"{selected_stock} Chart with Entry, SL & Targets", xaxis_title="Date", yaxis_title="Price", height=600)
+        st.plotly_chart(fig, use_container_width=True)
+
+else:
+    st.info("No stocks meet the strategy criteria.")
 
 
 
