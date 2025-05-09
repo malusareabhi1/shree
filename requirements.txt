@@ -22,3 +22,4 @@ beautifulsoup4
 nsetools
 mysql-connector-python
 psycopg2-binary
+SQLAlchemy
