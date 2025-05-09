@@ -4,6 +4,8 @@ import streamlit as st
 def scan_bhanushali_strategy(stock):
     # Download historical stock data
     df = yf.download(stock, period='90d', interval='1d')
+    if df.empty:
+        return None  # Skip if no data returned
 
     # Calculate the 44-period SMA
     df['SMA44'] = df['Close'].rolling(window=44).mean()
