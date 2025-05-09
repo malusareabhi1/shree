@@ -1,33 +1,39 @@
 import yfinance as yf
 import pandas as pd
 
-def is_sma_rising(sma_series):
-    return sma_series[-1] > sma_series[-2] > sma_series[-3]
-
+# Define the scan_bhanushali_strategy function
 def scan_bhanushali_strategy(stock):
+    # Download historical stock data
     df = yf.download(stock, period='90d', interval='1d')
+
+    # Calculate the 44-period SMA
     df['SMA44'] = df['Close'].rolling(window=44).mean()
+
+    # Drop rows with NaN values (if any)
     df.dropna(inplace=True)
 
     if len(df) < 2:
         return None  # Not enough data
 
-    last_candle = df.iloc[-1]
-    prev_candle = df.iloc[-2]
+    last_candle = df.iloc[-1]  # Get the most recent candle (row)
+    prev_candle = df.iloc[-2]  # Get the previous candle (row)
 
-    # Extract scalar values
+    # Extract individual scalar values from the DataFrame
     low = last_candle['Low']
     close = last_candle['Close']
     sma44 = last_candle['SMA44']
 
-    # Condition: candle near rising 44 SMA
+    # Condition: low < SMA44 < close (candle near rising 44 SMA)
     if low < sma44 < close:
-        # Buy above high of that candle, stoploss below low
+        # Buy above the high of the candle, stoploss below the low of the candle
         entry = last_candle['High']
         stoploss = low
+
+        # Calculate targets based on a 1:2 and 1:3 risk-reward ratio
         target1 = entry + (entry - stoploss) * 2
         target2 = entry + (entry - stoploss) * 3
 
+        # Return a dictionary with the results
         return {
             'symbol': stock,
             'entry': round(entry, 2),
@@ -38,7 +44,7 @@ def scan_bhanushali_strategy(stock):
 
     return None
 
-
+# Example usage with a list of NIFTY 100 stocks
 nifty_100 = [
     'RELIANCE.NS', 'TCS.NS', 'INFY.NS', 'HDFCBANK.NS', 'ICICIBANK.NS',
     'KOTAKBANK.NS', 'ITC.NS', 'LT.NS', 'SBIN.NS', 'BHARTIARTL.NS',
@@ -62,11 +68,20 @@ nifty_100 = [
     'MPHASIS.NS', 'COFORGE.NS', 'TATAELXSI.NS', 'NAVINFLUOR.NS', 'ALKEM.NS'
 ]
 
+# Scan and collect results
 results = []
 for stock in nifty_100:
-    res = scan_bhanushali_strategy(stock)
-    if res:
-        results.append(res)
+    try:
+        res = scan_bhanushali_strategy(stock)
+        if res:
+            results.append(res)
+    except Exception as e:
+        print(f"Error with {stock}: {e}")
 
-df_result = pd.DataFrame(results)
-print(df_result)
+# Print the results
+for result in results:
+    print(result)
+
+
+
+
