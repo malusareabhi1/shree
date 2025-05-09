@@ -73,8 +73,8 @@ if results:
 else:
     st.write("No stocks meet the criteria.")
 # Print the results
-for result in results:
-    st.write(df_results)
+#for result in results:
+    #st.write(df_results)
 
 
 
