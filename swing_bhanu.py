@@ -88,21 +88,13 @@ for stock in nifty_100:
         st.write(f"Error with {stock}: {e}")
 
 # Create a DataFrame to display the results in table format
-if results:
-    df_results = pd.DataFrame(results)
-    #st.dataframe(df_results)
-    # Display the table in a clean format
-    st.write(df_results)
-else:
-    st.write("No stocks meet the criteria.")
-# Print the results
-#for result in results:
-    #st.write(df_results)
+
 
 # Display results
 if results:
     df_results = pd.DataFrame(results)
     st.dataframe(df_results)
+    st.write(df_results)
 
     # Selection box
     selected_stock = st.selectbox("Select a stock to view chart:", df_results['symbol'].tolist())
