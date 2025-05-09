@@ -1,6 +1,8 @@
 import yfinance as yf
 import pandas as pd
 import streamlit as st
+import plotly.graph_objects as go
+
 def scan_bhanushali_strategy(stock):
     # Download historical stock data
     df = yf.download(stock, period='90d', interval='1d')
@@ -81,7 +83,7 @@ for stock in nifty_100:
 if results:
     df_results = pd.DataFrame(results)
     st.dataframe(df_results)
-    st.write(df_results)
+    #st.write(df_results)
 
     # Selection box
     selected_stock = st.selectbox("Select a stock to view chart:", df_results['symbol'].tolist())
