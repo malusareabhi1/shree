@@ -1,7 +1,6 @@
 import yfinance as yf
 import pandas as pd
-import streamlit as st
-# Define the scan_bhanushali_strategy function
+
 def scan_bhanushali_strategy(stock):
     # Download historical stock data
     df = yf.download(stock, period='90d', interval='1d')
@@ -18,10 +17,15 @@ def scan_bhanushali_strategy(stock):
     last_candle = df.iloc[-1]  # Get the most recent candle (row)
     prev_candle = df.iloc[-2]  # Get the previous candle (row)
 
-    # Extract individual scalar values from the DataFrame
+    # Ensure you're working with scalar values
     low = last_candle['Low']
     close = last_candle['Close']
     sma44 = last_candle['SMA44']
+
+    # Ensure values are scalar (individual numbers)
+    if isinstance(low, pd.Series): low = low.values[0]
+    if isinstance(close, pd.Series): close = close.values[0]
+    if isinstance(sma44, pd.Series): sma44 = sma44.values[0]
 
     # Condition: low < SMA44 < close (candle near rising 44 SMA)
     if low < sma44 < close:
@@ -47,25 +51,8 @@ def scan_bhanushali_strategy(stock):
 # Example usage with a list of NIFTY 100 stocks
 nifty_100 = [
     'RELIANCE.NS', 'TCS.NS', 'INFY.NS', 'HDFCBANK.NS', 'ICICIBANK.NS',
-    'KOTAKBANK.NS', 'ITC.NS', 'LT.NS', 'SBIN.NS', 'BHARTIARTL.NS',
-    'ASIANPAINT.NS', 'HINDUNILVR.NS', 'BAJFINANCE.NS', 'AXISBANK.NS', 'HCLTECH.NS',
-    'MARUTI.NS', 'SUNPHARMA.NS', 'TITAN.NS', 'WIPRO.NS', 'ULTRACEMCO.NS',
-    'NTPC.NS', 'POWERGRID.NS', 'NESTLEIND.NS', 'TECHM.NS', 'BAJAJFINSV.NS',
-    'ONGC.NS', 'TATAMOTORS.NS', 'JSWSTEEL.NS', 'COALINDIA.NS', 'HDFCLIFE.NS',
-    'GRASIM.NS', 'ADANIENT.NS', 'ADANIPORTS.NS', 'CIPLA.NS', 'DIVISLAB.NS',
-    'BAJAJ-AUTO.NS', 'DRREDDY.NS', 'BPCL.NS', 'EICHERMOT.NS', 'SHREECEM.NS',
-    'SBILIFE.NS', 'IOC.NS', 'HEROMOTOCO.NS', 'BRITANNIA.NS', 'INDUSINDBK.NS',
-    'TATACONSUM.NS', 'PIDILITIND.NS', 'HINDALCO.NS', 'GAIL.NS', 'DABUR.NS',
-    'ICICIPRULI.NS', 'HAVELLS.NS', 'AMBUJACEM.NS', 'VEDL.NS', 'UPL.NS',
-    'DLF.NS', 'SIEMENS.NS', 'SRF.NS', 'M&M.NS', 'SBICARD.NS',
-    'BERGEPAINT.NS', 'BIOCON.NS', 'LUPIN.NS', 'AUROPHARMA.NS', 'TATAPOWER.NS',
-    'MUTHOOTFIN.NS', 'BOSCHLTD.NS', 'COLPAL.NS', 'INDIGO.NS', 'MARICO.NS',
-    'ICICIGI.NS', 'GODREJCP.NS', 'PEL.NS', 'TORNTPHARM.NS', 'HINDPETRO.NS',
-    'BANKBARODA.NS', 'IDFCFIRSTB.NS', 'PNB.NS', 'CANBK.NS', 'UNIONBANK.NS',
-    'RECLTD.NS', 'PFC.NS', 'NHPC.NS', 'NMDC.NS', 'SJVN.NS',
-    'IRCTC.NS', 'ABB.NS', 'ADANIGREEN.NS', 'ADANITRANS.NS', 'ZOMATO.NS',
-    'PAYTM.NS', 'POLYCAB.NS', 'LTTS.NS', 'LTI.NS', 'MINDTREE.NS',
-    'MPHASIS.NS', 'COFORGE.NS', 'TATAELXSI.NS', 'NAVINFLUOR.NS', 'ALKEM.NS'
+    'KOTAKBANK.NS', 'ITC.NS', 'LT.NS', 'SBIN.NS', 'BHARTIARTL.NS'
+    # Add more stock symbols here...
 ]
 
 # Scan and collect results
@@ -81,6 +68,9 @@ for stock in nifty_100:
 # Print the results
 for result in results:
     st.write(result)
+
+
+
 
 
 
