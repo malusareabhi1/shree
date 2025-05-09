@@ -91,7 +91,11 @@ if results:
     # If a stock is selected, fetch its data and plot chart
     if selected_stock:
         stock_data = yf.download(selected_stock, period='60d', interval='1d')
+        stock_data.dropna(inplace=True)
+        stock_data = stock_data[['Open', 'High', 'Low', 'Close']]  # Make sure required columns exist
         stock_data.reset_index(inplace=True)
+
+        #stock_data.reset_index(inplace=True)
 
         # Get entry/SL/target from result
         selected_row = df_results[df_results['symbol'] == selected_stock].iloc[0]
