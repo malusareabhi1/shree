@@ -94,6 +94,7 @@ if results:
         stock_data.dropna(inplace=True)
         stock_data = stock_data[['Open', 'High', 'Low', 'Close']]  # Make sure required columns exist
         stock_data.reset_index(inplace=True)
+        st.write("Sample stock data:", stock_data.tail())
 
         #stock_data.reset_index(inplace=True)
 
