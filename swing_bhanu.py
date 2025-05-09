@@ -93,7 +93,12 @@ if results:
         stock_data = yf.download(selected_stock, period='60d', interval='1d')
         if isinstance(stock_data.columns, pd.MultiIndex):
             stock_data.columns = stock_data.columns.get_level_values(0)
-        stock_data.index = stock_data.index.tz_convert("Asia/Kolkata")
+
+        if stock_data.index.tz is None:
+            stock_data.index = stock_data.index.tz_localize("UTC").tz_convert("Asia/Kolkata")
+        else:
+            stock_data.index = stock_data.index.tz_convert("Asia/Kolkata")
+        #stock_data.index = stock_data.index.tz_convert("Asia/Kolkata")
         stock_data.dropna(inplace=True)
         stock_data = stock_data[['Open', 'High', 'Low', 'Close']]  # Make sure required columns exist
         stock_data.reset_index(inplace=True)
