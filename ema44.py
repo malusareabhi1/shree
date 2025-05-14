@@ -108,8 +108,15 @@ if data_source == "Live (yFinance)":
     if df.empty:
         st.error("No data found. Please check symbol or date.")
         st.stop()
-
     df["MA44"] = df["Close"].rolling(window=44).mean()
+
+    # Drop initial rows with NaN due to MA calculation
+    df = df.dropna()
+    
+    # Buy Signal: When close crosses above MA44
+    df["Buy"] = (df["Close"] > df["MA44"]) & (df["Close"].shift(1) <= df["MA44"].shift(1))
+
+    #df["MA44"] = df["Close"].rolling(window=44).mean()
     df = df.reset_index()  # This will move the datetime index into a new column
     st.write(df.columns)  # Temporarily print column names to debug
     
