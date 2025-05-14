@@ -12,10 +12,18 @@ data_source = st.sidebar.radio("Select Data Source", ["Live (yFinance)", "CSV Up
 
 # Function to calculate 44 MA strategy
 def apply_strategy(df):
+    # Ensure 'Close' and 'Date' exist
+    required_cols = ['Close']
+    for col in required_cols:
+        if col not in df.columns:
+            st.error(f"Missing column: {col}. Please upload a CSV with a '{col}' column.")
+            st.stop()
+
     df["MA44"] = df["Close"].rolling(window=44).mean()
     df["Buy"] = (df["Close"] > df["MA44"]) & (df["Close"].shift(1) <= df["MA44"].shift(1))
     df["Sell"] = (df["Close"] < df["MA44"]) & (df["Close"].shift(1) >= df["MA44"].shift(1))
     return df
+
 
 # Load live data
 if data_source == "Live (yFinance)":
@@ -34,12 +42,21 @@ elif data_source == "CSV Upload":
     uploaded_file = st.sidebar.file_uploader("Upload CSV file", type=["csv"])
     if uploaded_file:
         df = pd.read_csv(uploaded_file)
+        
+        # Try to normalize column names
         df.columns = [col.strip().capitalize() for col in df.columns]
+        
+        # Try to parse and sort date column
         if 'Date' in df.columns:
-            df['Date'] = pd.to_datetime(df['Date'])
-            df = df.sort_values('Date')
-            df = df.reset_index(drop=True)
-        df = apply_strategy(df)
+            df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+            df = df.sort_values('Date').reset_index(drop=True)
+
+        # Apply strategy only if Close exists
+        if 'Close' not in df.columns:
+            st.error("CSV must contain a 'Close' column.")
+        else:
+            df = apply_strategy(df)
+
 
 # Display chart and signals
 if 'df' in locals():
