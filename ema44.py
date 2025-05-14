@@ -66,7 +66,7 @@ if data_source == "Live (yFinance)":
     #if selected_symbol in nifty_50_stocks:
     symbol = selected_symbol + ".NS"  # For NIFTY 50 stocks, append ".NS"
     #else:
-    symbol = selected_symbol  # For indices, don't append anything
+    #symbol = selected_symbol  # For indices, don't append anything
     #symbol = selected_stock + ".NS"
     start_date = st.date_input("From Date", datetime(2025, 1, 1))
     end_date = st.date_input("To Date", datetime.today())
