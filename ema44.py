@@ -108,6 +108,8 @@ if data_source == "Live (yFinance)":
     if df.empty:
         st.error("No data found. Please check symbol or date.")
         st.stop()
+
+    st.write(df.columns)  # Temporarily print column names to debug
     
     #st.write(df.head())
     # Technical Indicators
