@@ -64,7 +64,7 @@ if data_source == "Live (yFinance)":
     selected_stock = st.selectbox("Select a NIFTY 50 Stock", sorted(nifty_50_stocks))
     # Handle the symbol based on selection
     #if selected_symbol in nifty_50_stocks:
-    symbol = selected_symbol + ".NS"  # For NIFTY 50 stocks, append ".NS"
+    symbol = selected_stock  + ".NS"  # For NIFTY 50 stocks, append ".NS"
     #else:
     #symbol = selected_symbol  # For indices, don't append anything
     #symbol = selected_stock + ".NS"
