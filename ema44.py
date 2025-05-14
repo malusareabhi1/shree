@@ -30,8 +30,7 @@ def apply_strategy(df):
 if data_source == "Live (yFinance)":
     #import datetime
     #from datetime import datetime, timedelta
-    nifty_50_stocks = ["^NSEI","^NIFTYBANK","^BSEI"
-        "TCS.NS","ADANIENT", "ADANIPORTS", "APOLLOHOSP", "ASIANPAINT", "AXISBANK", "BAJAJ-AUTO", "BAJFINANCE",
+    nifty_50_stocks = ["^NSEI","^NIFTYBANK","^BSEI","TCS.NS","ADANIENT", "ADANIPORTS", "APOLLOHOSP", "ASIANPAINT", "AXISBANK", "BAJAJ-AUTO", "BAJFINANCE",
         "BAJAJFINSV", "BPCL", "BHARTIARTL", "BRITANNIA", "CIPLA", "COALINDIA", "DIVISLAB", "DRREDDY",
         "EICHERMOT", "GRASIM", "HCLTECH", "HDFCBANK", "HDFCLIFE", "HEROMOTOCO", "HINDALCO", "HINDUNILVR",
         "ICICIBANK", "ITC", "INDUSINDBK", "INFY", "JSWSTEEL", "KOTAKBANK", "LT", "M&M", "MARUTI", "NTPC",
