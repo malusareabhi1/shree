@@ -185,33 +185,3 @@ elif data_source == "CSV Upload":
             df = apply_strategy(df)
 
 
-# Display chart and signals
-if 'df' in locals():
-    st.subheader("📊 Price Chart with 44 MA")
-    fig, ax = plt.subplots(figsize=(12, 6))
-    ax.plot(df['Date'], df['Close'], label='Close Price', color='black')
-    ax.plot(df['Date'], df['MA44'], label='44 MA', color='orange')
-
-    buy_signals = df[df['Buy']]
-    sell_signals = df[df['Sell']]
-    ax.plot(buy_signals['Date'], buy_signals['Close'], '^', markersize=10, color='green', label='Buy Signal')
-    ax.plot(sell_signals['Date'], sell_signals['Close'], 'v', markersize=10, color='red', label='Sell Signal')
-
-    ax.set_title("44 MA Strategy Backtest")
-    ax.legend()
-    ax.grid(True)
-    st.pyplot(fig)
-
-    st.subheader("📋 Signal Table")
-    signals = df[df['Buy'] | df['Sell']][['Date', 'Close', 'Buy', 'Sell']]
-    st.dataframe(signals.reset_index(drop=True))
-
-    st.subheader("📈 Strategy Summary")
-    total_signals = len(signals)
-    buy_count = df['Buy'].sum()
-    sell_count = df['Sell'].sum()
-    st.markdown(f"""
-    - ✅ Total Signals: **{total_signals}**
-    - 🟢 Buy Signals: **{buy_count}**
-    - 🔴 Sell Signals: **{sell_count}**
-    """)
