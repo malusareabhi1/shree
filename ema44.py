@@ -35,6 +35,15 @@ if data_source == "Live (yFinance)":
         df = yf.download(ticker, period=period, interval=interval)
         df = df.reset_index()
         st.success(f"Fetched {ticker} data successfully!")
+        # Ensure index is datetime
+        df.index = pd.to_datetime(df.index)
+        
+        # Localize to UTC first (if it's naive), then convert to Asia/Kolkata
+        if df.index.tz is None:
+            df.index = df.index.tz_localize("UTC").tz_convert("Asia/Kolkata")
+        else:
+            df.index = df.index.tz_convert("Asia/Kolkata")
+
         if isinstance(df.columns, pd.MultiIndex):  # This checks if the columns are a MultiIndex
                 df.columns = df.columns.get_level_values(0)
                  # Ensure datetime index is timezone-aware in UTC and then convert to IST
