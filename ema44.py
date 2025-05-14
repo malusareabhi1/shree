@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
+#Demo
 
 st.set_page_config(layout="wide")
 st.title("📈 44-MA Strategy Tester (Live & CSV)")
