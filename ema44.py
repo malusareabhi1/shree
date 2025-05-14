@@ -35,6 +35,9 @@ if data_source == "Live (yFinance)":
         df = yf.download(ticker, period=period, interval=interval)
         df = df.reset_index()
         st.success(f"Fetched {ticker} data successfully!")
+        st.write("Preview of DataFrame:", df.head(50))
+        st.write("DataFrame columns:", df.columns.tolist())
+
         df = apply_strategy(df)
 
 # Load CSV data
