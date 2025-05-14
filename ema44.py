@@ -162,7 +162,7 @@ if data_source == "Live (yFinance)":
     rsi_fig.update_layout(yaxis=dict(range=[0, 100]), height=300)
     st.plotly_chart(rsi_fig, use_container_width=True)
     st.subheader("📉 RSI Indicator")
-    #df = apply_strategy(df)
+    df = apply_strategy(df)
 
 # Load CSV data
 elif data_source == "CSV Upload":
