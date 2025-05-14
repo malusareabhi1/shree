@@ -109,6 +109,9 @@ if data_source == "Live (yFinance)":
         st.error("No data found. Please check symbol or date.")
         st.stop()
 
+    df = df.reset_index()  # This will move the datetime index into a new column
+
+
     st.write(df.columns)  # Temporarily print column names to debug
     
     #st.write(df.head())
