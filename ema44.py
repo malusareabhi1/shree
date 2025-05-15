@@ -158,12 +158,13 @@ if data_source == "Live (yFinance)":
     #st.divider()
     # RSI Plot
     
+    
+    st.subheader("📉 RSI Indicator")
+    df = apply_strategy(df)
     rsi_fig = go.Figure()
     rsi_fig.add_trace(go.Scatter(x=df.index, y=df['RSI'], line=dict(color='purple'), name='RSI'))
     rsi_fig.update_layout(yaxis=dict(range=[0, 100]), height=300)
     st.plotly_chart(rsi_fig, use_container_width=True)
-    st.subheader("📉 RSI Indicator")
-    df = apply_strategy(df)
     #st.write(df.columns)  # Temporarily print column names to debug
     st.write(df)
 
