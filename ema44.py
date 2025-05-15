@@ -119,7 +119,7 @@ if data_source == "Live (yFinance)":
 
     #df["MA44"] = df["Close"].rolling(window=44).mean()
     df = df.reset_index()  # This will move the datetime index into a new column
-    st.write(df.columns)  # Temporarily print column names to debug
+    #st.write(df.columns)  # Temporarily print column names to debug
     
     #st.write(df.head())
     # Technical Indicators
