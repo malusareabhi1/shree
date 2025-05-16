@@ -9,11 +9,11 @@ st.title("📈 NSE Stock Data Fetcher with Interval")
 
 # Stock input
 with col1:
-stock = st.text_input("Enter Stock Symbol (e.g., RELIANCE.NS, INFY.NS, GTLINFRA.NS)", value="RELIANCE.NS")
+    stock = st.text_input("Enter Stock Symbol (e.g., RELIANCE.NS, INFY.NS, GTLINFRA.NS)", value="RELIANCE.NS")
 
 # Interval input
 with col2:
-interval = st.selectbox("Select Interval", ['1m','2m','5m','15m','30m','60m','90m','1d','1wk','1mo'])
+    interval = st.selectbox("Select Interval", ['1m','2m','5m','15m','30m','60m','90m','1d','1wk','1mo'])
 
 # Date range
 col1, col2 = st.columns(2)
