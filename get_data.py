@@ -6,7 +6,7 @@ import plotly.graph_objs as go
 # --- Streamlit UI ---
 st.set_page_config(page_title="NSE Stock Data Viewer", layout="wide")
 st.title("📈 NSE Stock Data Fetcher with Interval")
-
+col1, col2 = st.columns(2)
 # Stock input
 with col1:
     stock = st.text_input("Enter Stock Symbol (e.g., RELIANCE.NS, INFY.NS, GTLINFRA.NS)", value="RELIANCE.NS")
