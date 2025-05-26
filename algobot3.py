@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 import os
 import pytz  # ✅ Add this for details ssfsdfsdf 
 from streamlit_autorefresh import st_autorefresh
-
+from math import floor
 # Global kite object placeholder
 if 'kite' not in st.session_state:
     st.session_state.kite = None
