@@ -17,8 +17,6 @@ import os
 import pytz  # ✅ Add this for details ssfsdfsdf 
 from streamlit_autorefresh import st_autorefresh
 
-
-
 # Global kite object placeholder
 if 'kite' not in st.session_state:
     st.session_state.kite = None
