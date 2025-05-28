@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import yfinance as yf
-#import pandas_ta as ta
 import plotly.graph_objects as go
 
 st.title("📈 Trend Direction Change Strategy")
@@ -16,9 +15,8 @@ data = yf.download(symbol, start=start_date, end=end_date)
 data['SMA20'] = data['Close'].rolling(window=20).mean()
 data['SMA50'] = data['Close'].rolling(window=50).mean()
 
-# Detect crossovers
-data['Signal'] = 0
-data['Signal'][20:] = data['SMA20'][20:] > data['SMA50'][20:]
+# Detect crossovers safely
+data['Signal'] = (data['SMA20'] > data['SMA50']).astype(int)
 data['Position'] = data['Signal'].diff()
 
 # Plotting
