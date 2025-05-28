@@ -27,6 +27,18 @@ fig.add_trace(go.Candlestick(x=data.index,
                 low=data['Low'], close=data['Close'],
                 name="Candles"))
 
+candle_fig.add_trace(go.Candlestick(
+    x=data.index,
+    open=data['Open'],
+    high=data['High'],
+    low=data['Low'],
+    close=data['Close'],
+    name="Candles",
+    increasing=dict(line=dict(color='lime'), fillcolor='lime'),
+    decreasing=dict(line=dict(color='red'), fillcolor='red')
+))
+
+
 fig.add_trace(go.Scatter(x=data.index, y=data['SMA20'], line=dict(color='blue', width=1), name='SMA 20'))
 fig.add_trace(go.Scatter(x=data.index, y=data['SMA50'], line=dict(color='orange', width=1), name='SMA 50'))
 
