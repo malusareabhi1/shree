@@ -12,6 +12,7 @@ end_date = st.sidebar.date_input("End Date", pd.to_datetime("today"))
 
 # Fetch data
 data = yf.download(symbol, start=start_date, end=end_date)
+st.write(data.head(10))
 # Flatten multi-index columns if needed
 if isinstance(data.columns, pd.MultiIndex):
   data.columns = ['_'.join(col).strip() if col[1] else col[0] for col in df.columns]
