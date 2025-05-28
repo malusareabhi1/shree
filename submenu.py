@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-def check_swing_trade_pullback(stock_symbol='TCS.NS', days=60):
+def check_swing_trade_pullback(stock_symbol='TCS.NS', days=90):
     print(f"\n🔍 Checking swing trade (pullback) for: {stock_symbol}")
 
     df = yf.download(stock_symbol, period=f"{days}d", interval='1d')
@@ -12,7 +12,9 @@ def check_swing_trade_pullback(stock_symbol='TCS.NS', days=60):
         print("❌ Data unavailable or missing.")
         return
 
-    df['EMA20'] = df['Close'].ewm(span=20).mean()
+    # Calculate 20 EMA and drop NaNs
+    df['EMA20'] = df['Close'].ewm(span=20, adjust=False).mean()
+    df.dropna(subset=['EMA20'], inplace=True)
 
     # Bullish Engulfing condition
     df['Bullish_Engulfing'] = (
@@ -28,16 +30,17 @@ def check_swing_trade_pullback(stock_symbol='TCS.NS', days=60):
     # Final signal
     df['SwingSignal'] = df['Bullish_Engulfing'] & df['Trend']
 
+    # Get recent signals
     recent = df.tail(10)
     signals = recent[recent['SwingSignal']]
 
     if not signals.empty:
         print(f"\n📈 Swing BUY signal(s) found for {stock_symbol}:")
-        print(signals[['Close', 'EMA20', 'Bullish_Engulfing']])
+        print(signals[['Close', 'EMA20', 'Bullish_Engulfing', 'Trend']])
     else:
         print("❌ No swing signal found in last 10 days.")
 
-    # Optional plot
+    # Plot
     try:
         df.tail(60)[['Close', 'EMA20']].plot(figsize=(10, 4), title=f"{stock_symbol} - Pullback Swing Setup")
         plt.grid(True)
@@ -45,5 +48,5 @@ def check_swing_trade_pullback(stock_symbol='TCS.NS', days=60):
     except Exception as e:
         print(f"⚠️ Plot error: {e}")
 
-# Example
+# Run the check
 check_swing_trade_pullback("TCS.NS")
