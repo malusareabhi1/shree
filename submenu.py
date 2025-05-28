@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import yfinance as yf
-import pandas_ta as ta
+#import pandas_ta as ta
 import plotly.graph_objects as go
 
 st.title("📈 Trend Direction Change Strategy")
