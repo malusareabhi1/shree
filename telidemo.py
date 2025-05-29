@@ -130,7 +130,6 @@ def highlight_change(val):
 st.dataframe(
     df.style.applymap(highlight_change, subset=["Change", "Change %"])
 )
-
 # Convert to DataFrame
 df = pd.DataFrame(market_data)
 
@@ -143,8 +142,6 @@ df = df.sort_values(by="Change % (numeric)", ascending=False)
 # Drop the helper column before display
 df_display = df.drop(columns=["Change % (numeric)"])
 
-
-
 # Apply text color formatting
 def text_color(row):
     color = 'color: green' if row["Change %"].startswith('+') else 'color: red'
@@ -155,7 +152,6 @@ st.dataframe(df_display.style.apply(row_color, axis=1))
 
 # Send update to Telegram
 send_telegram_message(message)
-
 # Display in Streamlit
 #st.table(market_data)
 
