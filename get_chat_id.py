@@ -17,4 +17,4 @@ data = response.json()
 for result in data["result"]:
     message = result.get("message", {})
     chat = message.get("chat", {})
-    st.print(f"Chat ID: {chat.get('id')} | Chat Type: {chat.get('type')} | Title: {chat.get('title')}")
+    st.write(f"Chat ID: {chat.get('id')} | Chat Type: {chat.get('type')} | Title: {chat.get('title')}")
