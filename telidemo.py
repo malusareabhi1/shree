@@ -148,7 +148,9 @@ def text_color(row):
     return [color] * len(row)
 
 # Display styled table
-st.dataframe(df_display.style.apply(row_color, axis=1))
+#st.dataframe(df_display.style.apply(row_color, axis=1))
+# Display styled dataframe in Streamlit with colored text
+st.dataframe(df_display.style.apply(text_color, axis=1))
 
 # Send update to Telegram
 send_telegram_message(message)
