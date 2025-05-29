@@ -5,7 +5,7 @@ import streamlit as st
 import yfinance as yf
 import os
 from dotenv import load_dotenv
-
+import pandas as pd
 # --- Streamlit App ---
 st.set_page_config(page_title="Indian Market Dashboard", layout="centered")
 st.title("📈 Indian Market Dashboard")
