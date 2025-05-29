@@ -89,24 +89,36 @@ def get_market_data():
     for name, symbol in indices.items():
         ticker = yf.Ticker(symbol)
         info = ticker.info
+
         price = info.get("regularMarketPrice")
         change = info.get("regularMarketChange")
         percent = info.get("regularMarketChangePercent")
-        volume = info.get("volume")  # <-- get volume here
+        volume = info.get("volume")
 
-        if price is not None:
-            emoji = "🟢" if percent >= 0 else "🔴"
+        if price is not None and percent is not None:
             row = {
                 "Name": name,
                 "Price (₹)": round(price, 2),
                 "Change": f"{change:+.2f}",
                 "Change %": f"{percent:+.2f}%",
-                "Volume": volume if volume is not None else "N/A"  # Add volume here
+                "Volume": volume if volume is not None else "N/A",
+                "percent_numeric": percent
             }
             market_list.append(row)
-            message += f"{emoji} *{name}*: ₹{price:.2f} ({change:+.2f}, {percent:+.2f}%)\n"
-        else:
-            message += f"*{name}*: Data not available\n"
+
+    # Sort by Change % numeric descending
+    market_list.sort(key=lambda x: x["percent_numeric"], reverse=True)
+
+    # Build Telegram message from sorted data
+    message = "*📊 Indian Market Snapshot 📈*\n\n"
+    for row in market_list:
+        emoji = "🟢" if row["percent_numeric"] >= 0 else "🔴"
+        message += (f"{emoji} *{row['Name']}*: ₹{row['Price (₹)']:.2f} "
+                    f"({row['Change']}, {row['Change %']}), Vol: {row['Volume']}\n")
+
+    # Remove helper key before returning data for DataFrame
+    for row in market_list:
+        del row["percent_numeric"]
 
     return market_list, message
 # Fetch data
