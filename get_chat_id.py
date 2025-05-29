@@ -19,4 +19,4 @@ for result in data["result"]:
     chat = message.get("chat", {})
     st.write(f"Chat ID: {chat.get('id')} | Chat Type: {chat.get('type')} | Title: {chat.get('title')}")
     
- st.write(f"Chat ID: {chat.get('id')} )
+ st.write(chat.get('id'))
