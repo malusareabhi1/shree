@@ -106,6 +106,26 @@ def get_market_data():
 # Fetch data
 market_data, message = get_market_data()
 
+# Convert to DataFrame
+df = pd.DataFrame(market_data)
+
+# Sort by highest price
+df = df.sort_values(by="Price (₹)", ascending=False)
+
+# Apply color styling for Change % column
+def highlight_change(val):
+    if isinstance(val, str) and "%" in val:
+        try:
+            return 'color: green;' if float(val.strip('%')) > 0 else 'color: red;'
+        except:
+            return ''
+    return ''
+
+# Display styled dataframe
+st.dataframe(
+    df.style.applymap(highlight_change, subset=["Change", "Change %"])
+)
+
 # Send update to Telegram
 send_telegram_message(message)
 
