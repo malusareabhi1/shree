@@ -7,7 +7,7 @@ load_dotenv()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN_demo")
 
 bot_token = os.getenv("TELEGRAM_BOT_TOKEN_demo")
-st.write(bot_token)
+#st.write(bot_token)
 
 
 st.title("🔍 Telegram Bot Chat ID Finder")
