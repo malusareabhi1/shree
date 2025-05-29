@@ -131,6 +131,26 @@ st.dataframe(
     df.style.applymap(highlight_change, subset=["Change", "Change %"])
 )
 
+# Convert to DataFrame
+df = pd.DataFrame(market_data)
+
+# Convert 'Change %' to float for sorting (strip % sign and convert)
+df["Change % (numeric)"] = df["Change %"].str.replace('%', '', regex=False).astype(float)
+
+# Sort by % change descending
+df = df.sort_values(by="Change % (numeric)", ascending=False)
+
+# Drop the helper column before display
+df_display = df.drop(columns=["Change % (numeric)"])
+
+# Function to color rows
+def row_color(row):
+    color = 'background-color: lightgreen' if row["Change %"].startswith('+') else 'background-color: lightcoral'
+    return [color] * len(row)
+
+# Display styled table
+st.dataframe(df_display.style.apply(row_color, axis=1))
+
 # Send update to Telegram
 send_telegram_message(message)
 
