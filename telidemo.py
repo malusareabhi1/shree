@@ -103,7 +103,6 @@ def get_market_data():
             message += f"*{name}*: Data not available\n"
 
     return market_list, message
-
 # Fetch data
 market_data, message = get_market_data()
 
