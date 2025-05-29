@@ -2,9 +2,15 @@ import requests
 import datetime
 import time
 
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+
 # Replace with your Telegram bot token and chat ID
-BOT_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN'
-CHAT_ID = 'YOUR_CHAT_ID'
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")  # optionally, use .env for chat_id too
 
 # Function to send message to Telegram
 def send_telegram_message(message):
