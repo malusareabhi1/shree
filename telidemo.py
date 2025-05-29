@@ -92,6 +92,7 @@ def get_market_data():
         price = info.get("regularMarketPrice")
         change = info.get("regularMarketChange")
         percent = info.get("regularMarketChangePercent")
+        volume = info.get("volume")  # <-- get volume here
 
         if price is not None:
             emoji = "🟢" if percent >= 0 else "🔴"
@@ -99,7 +100,8 @@ def get_market_data():
                 "Name": name,
                 "Price (₹)": round(price, 2),
                 "Change": f"{change:+.2f}",
-                "Change %": f"{percent:+.2f}%"
+                "Change %": f"{percent:+.2f}%",
+                "Volume": volume if volume is not None else "N/A"  # Add volume here
             }
             market_list.append(row)
             message += f"{emoji} *{name}*: ₹{price:.2f} ({change:+.2f}, {percent:+.2f}%)\n"
