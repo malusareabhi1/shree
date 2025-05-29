@@ -27,14 +27,60 @@ def send_telegram_message(message):
 
 # Get stock/index data using yfinance
 def get_market_data():
-    indices = {
-        'NIFTY 50': '^NSEI',
-        'BANK NIFTY': '^NSEBANK',
-        'SENSEX': '^BSESN',
-        'RELIANCE': 'RELIANCE.NS',
-        'TCS': 'TCS.NS',
-        'INFY': 'INFY.NS'
-    }
+   indices = {
+    'NIFTY 50': '^NSEI',
+    'BANK NIFTY': '^NSEBANK',
+    'SENSEX': '^BSESN',
+    'ADANIENT': 'ADANIENT.NS',
+    'ADANIPORTS': 'ADANIPORTS.NS',
+    'ASIANPAINT': 'ASIANPAINT.NS',
+    'AXISBANK': 'AXISBANK.NS',
+    'BAJAJ-AUTO': 'BAJAJ-AUTO.NS',
+    'BAJFINANCE': 'BAJFINANCE.NS',
+    'BAJAJFINSV': 'BAJAJFINSV.NS',
+    'BPCL': 'BPCL.NS',
+    'BHARTIARTL': 'BHARTIARTL.NS',
+    'BRITANNIA': 'BRITANNIA.NS',
+    'CIPLA': 'CIPLA.NS',
+    'COALINDIA': 'COALINDIA.NS',
+    'DIVISLAB': 'DIVISLAB.NS',
+    'DRREDDY': 'DRREDDY.NS',
+    'EICHERMOT': 'EICHERMOT.NS',
+    'GRASIM': 'GRASIM.NS',
+    'HCLTECH': 'HCLTECH.NS',
+    'HDFCBANK': 'HDFCBANK.NS',
+    'HDFCLIFE': 'HDFCLIFE.NS',
+    'HEROMOTOCO': 'HEROMOTOCO.NS',
+    'HINDALCO': 'HINDALCO.NS',
+    'HINDUNILVR': 'HINDUNILVR.NS',
+    'ICICIBANK': 'ICICIBANK.NS',
+    'ITC': 'ITC.NS',
+    'INDUSINDBK': 'INDUSINDBK.NS',
+    'INFY': 'INFY.NS',
+    'JSWSTEEL': 'JSWSTEEL.NS',
+    'KOTAKBANK': 'KOTAKBANK.NS',
+    'LT': 'LT.NS',
+    'M&M': 'M&M.NS',
+    'MARUTI': 'MARUTI.NS',
+    'NTPC': 'NTPC.NS',
+    'NESTLEIND': 'NESTLEIND.NS',
+    'ONGC': 'ONGC.NS',
+    'POWERGRID': 'POWERGRID.NS',
+    'RELIANCE': 'RELIANCE.NS',
+    'SBILIFE': 'SBILIFE.NS',
+    'SBIN': 'SBIN.NS',
+    'SUNPHARMA': 'SUNPHARMA.NS',
+    'TCS': 'TCS.NS',
+    'TATACONSUM': 'TATACONSUM.NS',
+    'TATAMOTORS': 'TATAMOTORS.NS',
+    'TATASTEEL': 'TATASTEEL.NS',
+    'TECHM': 'TECHM.NS',
+    'TITAN': 'TITAN.NS',
+    'UPL': 'UPL.NS',
+    'ULTRACEMCO': 'ULTRACEMCO.NS',
+    'WIPRO': 'WIPRO.NS'
+}
+
 
     message = "*📊 Indian Market Snapshot 📈*\n\n"
     market_list = []
