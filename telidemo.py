@@ -109,17 +109,22 @@ market_data, message = get_market_data()
 # Convert to DataFrame
 df = pd.DataFrame(market_data)
 
-# Sort by highest price
-df = df.sort_values(by="Price (₹)", ascending=False)
+# Convert 'Change %' to float for sorting (strip % sign)
+df["Change % (numeric)"] = df["Change %"].str.replace('%', '').astype(float)
 
-# Apply color styling for Change % column
+# Sort by Change % descending (highest first)
+df = df.sort_values(by="Change % (numeric)", ascending=False)
+
+# Drop the helper column before display (optional)
+df = df.drop(columns=["Change % (numeric)"])
+
+# Color formatting: red for negative, green for positive
 def highlight_change(val):
-    if isinstance(val, str) and "%" in val:
-        try:
-            return 'color: green;' if float(val.strip('%')) > 0 else 'color: red;'
-        except:
-            return ''
-    return ''
+    try:
+        val_float = float(val.strip('%'))
+        return 'color: green;' if val_float > 0 else 'color: red;'
+    except:
+        return ''
 
 # Display styled dataframe
 st.dataframe(
