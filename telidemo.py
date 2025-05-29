@@ -143,9 +143,11 @@ df = df.sort_values(by="Change % (numeric)", ascending=False)
 # Drop the helper column before display
 df_display = df.drop(columns=["Change % (numeric)"])
 
-# Function to color rows
-def row_color(row):
-    color = 'background-color: lightgreen' if row["Change %"].startswith('+') else 'background-color: lightcoral'
+
+
+# Apply text color formatting
+def text_color(row):
+    color = 'color: green' if row["Change %"].startswith('+') else 'color: red'
     return [color] * len(row)
 
 # Display styled table
