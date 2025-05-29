@@ -127,9 +127,9 @@ def highlight_change(val):
         return ''
 
 # Display styled dataframe
-st.dataframe(
-    df.style.applymap(highlight_change, subset=["Change", "Change %"])
-)
+#st.dataframe(
+   # df.style.applymap(highlight_change, subset=["Change", "Change %"])
+#)
 # Convert to DataFrame
 df = pd.DataFrame(market_data)
 
