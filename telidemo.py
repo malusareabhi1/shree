@@ -5,14 +5,13 @@ import time
 from dotenv import load_dotenv
 import os
 
+
+
 load_dotenv()
 
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN_demo")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID_demo")
 
-# Replace with your Telegram bot token and chat ID
-BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")  # optionally, use .env for chat_id too
-
-# Function to send message to Telegram
 def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     payload = {
@@ -20,17 +19,34 @@ def send_telegram_message(message):
         'text': message,
         'parse_mode': 'Markdown'
     }
-    r = requests.post(url, data=payload)
-    return r.status_code
+    response = requests.post(url, data=payload)
+    return response
 
-# Example signal generator (replace with real logic)
-def simple_algo_strategy():
-    # Example: Call every 30 seconds as mock trade signal
-    while True:
-        now = datetime.datetime.now().strftime('%H:%M:%S')
-        signal = f"🟢 *BUY SIGNAL*\nStock: RELIANCE\nPrice: 2750\nTime: {now}"
-        send_telegram_message(signal)
-        time.sleep(30)  # Wait before next signal
+def get_market_data():
+    indices = {
+        'NIFTY 50': '^NSEI',
+        'BANK NIFTY': '^NSEBANK',
+        'SENSEX': '^BSESN',
+        'RELIANCE': 'RELIANCE.NS',
+        'TCS': 'TCS.NS',
+        'INFY': 'INFY.NS'
+    }
 
-# Run the strategy
-simple_algo_strategy()
+    message = "*📊 Indian Market Snapshot 📈*\n\n"
+
+    for name, symbol in indices.items():
+        data = yf.Ticker(symbol)
+        price = data.info.get("regularMarketPrice")
+        change = data.info.get("regularMarketChange")
+        percent = data.info.get("regularMarketChangePercent")
+
+        if price is not None:
+            message += f"*{name}*: ₹{price:.2f} ({change:+.2f}, {percent:+.2f}%)\n"
+        else:
+            message += f"*{name}*: Data not available\n"
+
+    return message
+
+# Fetch data and send
+market_message = get_market_data()
+send_telegram_message(market_message)
