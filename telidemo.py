@@ -155,7 +155,7 @@ st.dataframe(df_display.style.apply(row_color, axis=1))
 send_telegram_message(message)
 
 # Display in Streamlit
-st.table(market_data)
+#st.table(market_data)
 
 # Manual send button
 if st.button("📤 Send Market Data to Telegram"):
