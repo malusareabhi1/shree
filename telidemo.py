@@ -63,7 +63,7 @@ def get_market_data():
 
 
 market_data, message = get_market_data()
-
+send_telegram_message(message)
 # Display table
 st.table(market_data)
 
