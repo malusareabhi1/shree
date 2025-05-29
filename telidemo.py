@@ -6,6 +6,10 @@ import yfinance as yf
 import os
 from dotenv import load_dotenv
 import pandas as pd
+from streamlit_autorefresh import st_autorefresh
+
+# Refresh every 5 minutes
+st_autorefresh(interval=5 * 60 * 1000, key="datarefresh")
 # --- Streamlit App ---
 st.set_page_config(page_title="Indian Market Dashboard", layout="centered")
 st.title("📈 Indian Market Dashboard")
