@@ -6,6 +6,10 @@ import yfinance as yf
 import os
 from dotenv import load_dotenv
 
+# --- Streamlit App ---
+st.set_page_config(page_title="Indian Market Dashboard", layout="centered")
+st.title("📈 Indian Market Dashboard")
+st.caption("Live stock/index prices + Telegram update")
 # Load environment variables
 load_dotenv()
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN_demo")
@@ -56,10 +60,7 @@ def get_market_data():
 
     return market_list, message
 
-# --- Streamlit App ---
-st.set_page_config(page_title="Indian Market Dashboard", layout="centered")
-st.title("📈 Indian Market Dashboard")
-st.caption("Live stock/index prices + Telegram update")
+
 
 market_data, message = get_market_data()
 
