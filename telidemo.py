@@ -11,6 +11,9 @@ load_dotenv()
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN_demo")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID_demo")
 
+st.write(BOT_TOKEN)
+st.write(CHAT_ID)
+
 # Function to send a Telegram message
 def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
