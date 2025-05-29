@@ -1,6 +1,7 @@
 import requests
 from dotenv import load_dotenv
 import os
+import streamlit as st
 
 load_dotenv()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN_demo")
@@ -16,4 +17,4 @@ data = response.json()
 for result in data["result"]:
     message = result.get("message", {})
     chat = message.get("chat", {})
-    print(f"Chat ID: {chat.get('id')} | Chat Type: {chat.get('type')} | Title: {chat.get('title')}")
+    st.print(f"Chat ID: {chat.get('id')} | Chat Type: {chat.get('type')} | Title: {chat.get('title')}")
