@@ -8,8 +8,7 @@ from dotenv import load_dotenv
 import pandas as pd
 from streamlit_autorefresh import st_autorefresh
 
-# Refresh every 5 minutes
-st_autorefresh(interval=5 * 60 * 1000, key="datarefresh")
+
 # --- Streamlit App ---
 st.set_page_config(page_title="Indian Market Dashboard", layout="centered")
 st.title("📈 Indian Market Dashboard")
@@ -170,6 +169,8 @@ def text_color(row):
 # Display styled dataframe in Streamlit with colored text
 st.dataframe(df_display.style.apply(text_color, axis=1))
 
+# Refresh every 5 minutes
+st_autorefresh(interval=5 * 60 * 1000, key="datarefresh")
 # Send update to Telegram
 send_telegram_message(message)
 # Display in Streamlit
