@@ -7,7 +7,7 @@ load_dotenv()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN_demo")
 
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN_demo")
-
+st.write(BOT_TOKEN)
 # Get updates from Telegram API
 url = f"https://api.telegram.org/bot{BOT_TOKEN}/getUpdates"
 response = requests.get(url)
