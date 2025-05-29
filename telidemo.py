@@ -90,6 +90,7 @@ def get_market_data():
         percent = info.get("regularMarketChangePercent")
 
         if price is not None:
+            emoji = "🟢" if percent >= 0 else "🔴"
             row = {
                 "Name": name,
                 "Price (₹)": round(price, 2),
@@ -97,7 +98,7 @@ def get_market_data():
                 "Change %": f"{percent:+.2f}%"
             }
             market_list.append(row)
-            message += f"*{name}*: ₹{price:.2f} ({change:+.2f}, {percent:+.2f}%)\n"
+            message += f"{emoji} *{name}*: ₹{price:.2f} ({change:+.2f}, {percent:+.2f}%)\n"
         else:
             message += f"*{name}*: Data not available\n"
 
