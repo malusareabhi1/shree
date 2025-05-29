@@ -204,9 +204,9 @@ if selected == "Dashboard":
 
 elif selected == "Telegram Demo":
     # --- Streamlit App ---
-    st.set_page_config(page_title="Indian Market Dashboard", layout="centered")
-    st.title("📈 Indian Market Dashboard")
-    st.caption("Live stock/index prices + Telegram update")
+    #st.set_page_config(page_title="Indian Market Dashboard", layout="centered")
+    st.write("📈 Indian Market Dashboard")
+    st.write("Live stock/index prices + Telegram update")
     
     # Load environment variables
     load_dotenv()
