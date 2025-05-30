@@ -39,49 +39,60 @@ def fetch_live_data(symbol, period, interval):
 @st.cache_data
 @st.cache_data
 def calculate_indicators(df):
-    # Check required columns
+    # Step 1: Basic column validation
     required_cols = ['High', 'Low', 'Close']
     if not all(col in df.columns for col in required_cols):
         st.error("Missing required columns: High, Low, Close.")
         st.stop()
 
-    # Calculate EMA 200
+    df = df.copy()  # Safe copy
+
+    # Step 2: Calculate EMA
     df['EMA_200'] = df['Close'].ewm(span=200, adjust=False).mean()
 
-    # ATR Calculation
+    # Step 3: Calculate True Range components
     df['H-L'] = df['High'] - df['Low']
     df['H-PC'] = abs(df['High'] - df['Close'].shift(1))
     df['L-PC'] = abs(df['Low'] - df['Close'].shift(1))
+
+    # Step 4: Drop NaNs from TR components
+    df.dropna(subset=['H-L', 'H-PC', 'L-PC'], inplace=True)
+
+    # Step 5: Calculate True Range
     df['TR'] = df[['H-L', 'H-PC', 'L-PC']].max(axis=1)
-    df['ATR'] = df['TR'].rolling(10).mean()
 
-    # Drop rows where ATR or any needed column is NaN BEFORE creating hl2 and bands
-    df = df.dropna(subset=['ATR', 'High', 'Low', 'Close']).reset_index(drop=True).copy()
+    # Step 6: ATR using 10-period SMA
+    df['ATR'] = df['TR'].rolling(window=10).mean()
 
-    # Calculate hl2 only now - after dropping NaNs and resetting index
+    # Step 7: Drop initial NaNs from ATR
+    df.dropna(subset=['ATR'], inplace=True)
+
+    # Step 8: Supertrend-like Bands
     hl2 = (df['High'] + df['Low']) / 2
     multiplier = 3
     df['UpperBand'] = hl2 + (multiplier * df['ATR'])
     df['LowerBand'] = hl2 - (multiplier * df['ATR'])
+
+    # Step 9: Initialize trend
     df['in_uptrend'] = True
 
+    # Step 10: Trend logic loop
     for current in range(1, len(df)):
         previous = current - 1
 
-        if df.at[current, 'Close'] > df.at[previous, 'UpperBand']:
+        if df.iloc[current]['Close'] > df.iloc[previous]['UpperBand']:
             df.at[current, 'in_uptrend'] = True
-        elif df.at[current, 'Close'] < df.at[previous, 'LowerBand']:
+        elif df.iloc[current]['Close'] < df.iloc[previous]['LowerBand']:
             df.at[current, 'in_uptrend'] = False
         else:
             df.at[current, 'in_uptrend'] = df.at[previous, 'in_uptrend']
+            if df.at[current, 'in_uptrend']:
+                df.at[current, 'LowerBand'] = min(df.at[current, 'LowerBand'], df.at[previous, 'LowerBand'])
+            else:
+                df.at[current, 'UpperBand'] = max(df.at[current, 'UpperBand'], df.at[previous, 'UpperBand'])
 
-            if df.at[current, 'in_uptrend'] and df.at[current, 'LowerBand'] < df.at[previous, 'LowerBand']:
-                df.at[current, 'LowerBand'] = df.at[previous, 'LowerBand']
+    return df.reset_index(drop=True)
 
-            if not df.at[current, 'in_uptrend'] and df.at[current, 'UpperBand'] > df.at[previous, 'UpperBand']:
-                df.at[current, 'UpperBand'] = df.at[previous, 'UpperBand']
-
-    return df
 
 
 # Use your existing run_backtest and plot functions from your code here (unchanged)...
