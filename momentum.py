@@ -27,9 +27,18 @@ if st.sidebar.button("Run Backtest"):
         st.error("No data found. Please check the stock symbol or date range.")
         st.stop()
 
-    if ('Close' not in df.columns) or (df['Close'].isna().all()):
+    # Debug print (remove later)
+    st.write(f"Type of df['Close']: {type(df['Close'])}")
+    st.write(f"Shape of df['Close']: {df['Close'].shape}")
+    st.write(df['Close'].head())
+    
+    # Use squeeze() to get Series if it's a DataFrame with 1 column
+    close_series = df['Close'].squeeze()
+    
+    if ('Close' not in df.columns) or (close_series.isna().all()):
         st.error("❌ Error: 'Close' column missing or contains all NaNs.")
         st.stop()
+
 
     df = df[['Open', 'High', 'Low', 'Close', 'Volume']].copy()
     if isinstance(df.columns, pd.MultiIndex):
