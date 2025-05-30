@@ -27,7 +27,7 @@ if st.sidebar.button("Run Backtest"):
         st.error("No data found. Please check the stock symbol or date range.")
         st.stop()
 
-    if 'Close' not in df.columns or df['Close'].isna().all():
+  if ('Close' not in df.columns) or (df['Close'].isna().all()):
         st.error("❌ Error: 'Close' column missing or contains all NaNs.")
         st.stop()
 
