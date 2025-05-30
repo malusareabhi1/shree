@@ -30,15 +30,20 @@ if st.sidebar.button("Run Backtest"):
     df = df[['Open', 'High', 'Low', 'Close', 'Volume']].copy()
     df.columns = df.columns.str.strip()  # clean column names
 
-    # -----------------------------
+       # -----------------------------
     # Calculate Indicators Safely
     # -----------------------------
     if 'Close' in df.columns and not df['Close'].isnull().all():
-        df['20EMA'] = EMAIndicator(close=df['Close'], window=20).ema_indicator()
-        df['200EMA'] = EMAIndicator(close=df['Close'], window=200).ema_indicator()
+        ema20 = EMAIndicator(close=df['Close'], window=20).ema_indicator()
+        ema200 = EMAIndicator(close=df['Close'], window=200).ema_indicator()
+        
+        # Convert to 1D if needed
+        df['20EMA'] = pd.Series(ema20.values.ravel(), index=df.index)
+        df['200EMA'] = pd.Series(ema200.values.ravel(), index=df.index)
     else:
         st.error("❌ Error: 'Close' column missing or contains all NaNs.")
         st.stop()
+    
 
     # -----------------------------
     # Momentum Pullback Logic
