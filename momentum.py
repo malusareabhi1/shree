@@ -28,7 +28,11 @@ if st.sidebar.button("Run Backtest"):
         st.stop()
 
     df = df[['Open', 'High', 'Low', 'Close', 'Volume']].copy()
-    df.columns = df.columns.str.strip()  # clean column names
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = ['_'.join(map(str, col)).strip() for col in df.columns]
+    else:
+        df.columns = df.columns.str.strip()
+
 
        # -----------------------------
     # Calculate Indicators Safely
