@@ -36,9 +36,13 @@ if st.sidebar.button("Run Backtest"):
     close_series = df['Close'].squeeze()
     
    close_series = df['Close'].squeeze()
-   if ('Close' not in df.columns) or (close_series.isna().all()):
-        st.error("❌ Error: 'Close' column missing or contains all NaNs.")
+   if 'Close' not in df.columns:
+        st.error("❌ Error: 'Close' column missing.")
         st.stop()
+   elif df['Close'].isnull().all():
+        st.error("❌ Error: 'Close' column contains all NaN values.")
+        st.stop()
+
 
 
     df = df[['Open', 'High', 'Low', 'Close', 'Volume']].copy()
