@@ -20,9 +20,14 @@ target_profit_pct = st.sidebar.number_input("Target Profit %", min_value=0.1, ma
 def fetch_live_data(symbol, period, interval):
     # Fetch live intraday data from Yahoo Finance
     df = yf.download(tickers=symbol, period=period, interval=interval)
+    
     if df.empty:
         st.error("No data fetched for the symbol/period/interval combination.")
         st.stop()
+    # Flatten multi-index columns if needed
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = ['_'.join(col).strip() if col[1] else col[0] for col in df.columns]
+        
     df.reset_index(inplace=True)
     df.rename(columns={'Datetime':'Datetime', 'Date':'Datetime'}, inplace=True)  # yfinance sometimes uses Date or Datetime
     df['Datetime'] = pd.to_datetime(df['Datetime'])
