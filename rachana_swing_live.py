@@ -39,44 +39,49 @@ def fetch_live_data(symbol, period, interval):
 @st.cache_data
 @st.cache_data
 def calculate_indicators(df):
-    # Step 1: Basic column validation
+    st.write("Initial columns:", df.columns.tolist())  # Debugging info
+    if df.empty:
+        st.error("Received empty DataFrame.")
+        return df
+
+    # Normalize column names (safe for inconsistent APIs)
+    df.columns = [col.strip().capitalize() for col in df.columns]
+    
     required_cols = ['High', 'Low', 'Close']
-    if not all(col in df.columns for col in required_cols):
-        st.error("Missing required columns: High, Low, Close.")
-        st.stop()
+    for col in required_cols:
+        if col not in df.columns:
+            st.error(f"Missing required column: {col}")
+            return df
 
-    df = df.copy()  # Safe copy
-
-    # Step 2: Calculate EMA
+    df = df.copy()
     df['EMA_200'] = df['Close'].ewm(span=200, adjust=False).mean()
 
-    # Step 3: Calculate True Range components
+    # Create TR helper columns
     df['H-L'] = df['High'] - df['Low']
     df['H-PC'] = abs(df['High'] - df['Close'].shift(1))
     df['L-PC'] = abs(df['Low'] - df['Close'].shift(1))
 
-    # Step 4: Drop NaNs from TR components
+    # Check if they now exist
+    missing_cols = [col for col in ['H-L', 'H-PC', 'L-PC'] if col not in df.columns]
+    if missing_cols:
+        st.error(f"Missing calculated columns: {missing_cols}")
+        return df
+
+    # Drop rows with NaN
     df.dropna(subset=['H-L', 'H-PC', 'L-PC'], inplace=True)
 
-    # Step 5: Calculate True Range
     df['TR'] = df[['H-L', 'H-PC', 'L-PC']].max(axis=1)
-
-    # Step 6: ATR using 10-period SMA
     df['ATR'] = df['TR'].rolling(window=10).mean()
-
-    # Step 7: Drop initial NaNs from ATR
     df.dropna(subset=['ATR'], inplace=True)
 
-    # Step 8: Supertrend-like Bands
+    # Supertrend Band calculation
     hl2 = (df['High'] + df['Low']) / 2
     multiplier = 3
     df['UpperBand'] = hl2 + (multiplier * df['ATR'])
     df['LowerBand'] = hl2 - (multiplier * df['ATR'])
 
-    # Step 9: Initialize trend
     df['in_uptrend'] = True
 
-    # Step 10: Trend logic loop
     for current in range(1, len(df)):
         previous = current - 1
 
@@ -92,7 +97,6 @@ def calculate_indicators(df):
                 df.at[current, 'UpperBand'] = max(df.at[current, 'UpperBand'], df.at[previous, 'UpperBand'])
 
     return df.reset_index(drop=True)
-
 
 
 # Use your existing run_backtest and plot functions from your code here (unchanged)...
