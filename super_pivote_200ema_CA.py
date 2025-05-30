@@ -43,6 +43,9 @@ def calculate_indicators(df):
     df['LowerBand'] = hl2 - (multiplier * df['ATR'])
     df['in_uptrend'] = True
 
+    # Drop NaNs and reset index to ensure iat works properly
+    df = df.dropna(subset=['Close', 'LowerBand', 'UpperBand', 'ATR', 'EMA_200']).reset_index(drop=True)
+
     col_in_uptrend = df.columns.get_loc('in_uptrend')
     col_lowerband = df.columns.get_loc('LowerBand')
     col_upperband = df.columns.get_loc('UpperBand')
@@ -50,18 +53,25 @@ def calculate_indicators(df):
     for current in range(1, len(df)):
         previous = current - 1
 
-        if df['Close'].iat[current] > df['UpperBand'].iat[previous]:
-            df.iat[current, col_in_uptrend] = True
-        elif df['Close'].iat[current] < df['LowerBand'].iat[previous]:
-            df.iat[current, col_in_uptrend] = False
-        else:
-            df.iat[current, col_in_uptrend] = df.iat[previous, col_in_uptrend]
+        if current >= len(df) or previous < 0:
+            continue
 
-            if df.iat[current, col_in_uptrend] and df['LowerBand'].iat[current] < df['LowerBand'].iat[previous]:
-                df.iat[current, col_lowerband] = df['LowerBand'].iat[previous]
+        try:
+            if df['Close'].iat[current] > df['UpperBand'].iat[previous]:
+                df.iat[current, col_in_uptrend] = True
+            elif df['Close'].iat[current] < df['LowerBand'].iat[previous]:
+                df.iat[current, col_in_uptrend] = False
+            else:
+                df.iat[current, col_in_uptrend] = df.iat[previous, col_in_uptrend]
 
-            if not df.iat[current, col_in_uptrend] and df['UpperBand'].iat[current] > df['UpperBand'].iat[previous]:
-                df.iat[current, col_upperband] = df['UpperBand'].iat[previous]
+                if df.iat[current, col_in_uptrend] and df['LowerBand'].iat[current] < df['LowerBand'].iat[previous]:
+                    df.iat[current, col_lowerband] = df['LowerBand'].iat[previous]
+
+                if not df.iat[current, col_in_uptrend] and df['UpperBand'].iat[current] > df['UpperBand'].iat[previous]:
+                    df.iat[current, col_upperband] = df['UpperBand'].iat[previous]
+        except Exception as e:
+            st.error(f"Error at index {current}: {e}")
+            break
 
     return df
 
