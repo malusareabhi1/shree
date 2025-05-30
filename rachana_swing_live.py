@@ -32,12 +32,15 @@ def fetch_live_data(symbol, period, interval):
 # Reuse your existing indicator calculation and backtest functions here (with slight adjustments for df index)
 
 @st.cache_data
+@st.cache_data
 def calculate_indicators(df):
+    # Check required columns
     required_cols = ['High', 'Low', 'Close']
     if not all(col in df.columns for col in required_cols):
-        st.error("Missing required columns in the CSV file. Expected: High, Low, Close.")
+        st.error("Missing required columns: High, Low, Close.")
         st.stop()
 
+    # Calculate EMA 200
     df['EMA_200'] = df['Close'].ewm(span=200, adjust=False).mean()
 
     # ATR Calculation
@@ -47,40 +50,34 @@ def calculate_indicators(df):
     df['TR'] = df[['H-L', 'H-PC', 'L-PC']].max(axis=1)
     df['ATR'] = df['TR'].rolling(10).mean()
 
-    # Drop rows with NaN in ATR and other critical columns before calculating bands
+    # Drop rows where ATR or any needed column is NaN BEFORE creating hl2 and bands
     df = df.dropna(subset=['ATR', 'High', 'Low', 'Close']).reset_index(drop=True).copy()
 
+    # Calculate hl2 only now - after dropping NaNs and resetting index
     hl2 = (df['High'] + df['Low']) / 2
     multiplier = 3
     df['UpperBand'] = hl2 + (multiplier * df['ATR'])
     df['LowerBand'] = hl2 - (multiplier * df['ATR'])
     df['in_uptrend'] = True
 
-    col_in_uptrend = df.columns.get_loc('in_uptrend')
-    col_lowerband = df.columns.get_loc('LowerBand')
-    col_upperband = df.columns.get_loc('UpperBand')
-
     for current in range(1, len(df)):
         previous = current - 1
 
-        try:
-            if df['Close'].iat[current] > df['UpperBand'].iat[previous]:
-                df.iat[current, col_in_uptrend] = True
-            elif df['Close'].iat[current] < df['LowerBand'].iat[previous]:
-                df.iat[current, col_in_uptrend] = False
-            else:
-                df.iat[current, col_in_uptrend] = df.iat[previous, col_in_uptrend]
+        if df.at[current, 'Close'] > df.at[previous, 'UpperBand']:
+            df.at[current, 'in_uptrend'] = True
+        elif df.at[current, 'Close'] < df.at[previous, 'LowerBand']:
+            df.at[current, 'in_uptrend'] = False
+        else:
+            df.at[current, 'in_uptrend'] = df.at[previous, 'in_uptrend']
 
-                if df.iat[current, col_in_uptrend] and df['LowerBand'].iat[current] < df['LowerBand'].iat[previous]:
-                    df.iat[current, col_lowerband] = df['LowerBand'].iat[previous]
+            if df.at[current, 'in_uptrend'] and df.at[current, 'LowerBand'] < df.at[previous, 'LowerBand']:
+                df.at[current, 'LowerBand'] = df.at[previous, 'LowerBand']
 
-                if not df.iat[current, col_in_uptrend] and df['UpperBand'].iat[current] > df['UpperBand'].iat[previous]:
-                    df.iat[current, col_upperband] = df['UpperBand'].iat[previous]
-        except Exception as e:
-            st.error(f"Error at index {current}: {e}")
-            break
+            if not df.at[current, 'in_uptrend'] and df.at[current, 'UpperBand'] > df.at[previous, 'UpperBand']:
+                df.at[current, 'UpperBand'] = df.at[previous, 'UpperBand']
 
     return df
+
 
 # Use your existing run_backtest and plot functions from your code here (unchanged)...
 
