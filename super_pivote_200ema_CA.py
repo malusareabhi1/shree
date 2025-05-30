@@ -7,6 +7,15 @@ import datetime
 st.set_page_config(page_title="Supertrend + Pivot + 200 EMA Strategy", layout="wide")
 
 st.title("📈 Supertrend + Pivot + 200 EMA Strategy")
+st.markdown("""
+### Strategy Explanation
+- **Supertrend**: Uses ATR (Average True Range) to determine trend direction.
+- **200 EMA**: Confirms trend direction. Buy signals only if price is above 200 EMA.
+- **Pivot Breakout**: Entry when price breaks above recent high (3-bar high).
+- **Buy Condition**: Supertrend in uptrend, Close > 200 EMA, Close > Pivot High.
+- **Sell Condition**: Supertrend turns down OR Close < 200 EMA.
+- Trades are shown on the chart with green (Buy) and red (Sell) dots.
+""")
 
 # --- File uploader ---
 file = st.sidebar.file_uploader("Upload CSV File", type=["csv"])
