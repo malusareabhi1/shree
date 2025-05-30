@@ -35,7 +35,8 @@ if st.sidebar.button("Run Backtest"):
     # Use squeeze() to get Series if it's a DataFrame with 1 column
     close_series = df['Close'].squeeze()
     
-    if ('Close' not in df.columns) or (close_series.isna().all()):
+   close_series = df['Close'].squeeze()
+   if ('Close' not in df.columns) or (close_series.isna().all()):
         st.error("❌ Error: 'Close' column missing or contains all NaNs.")
         st.stop()
 
