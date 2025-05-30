@@ -27,6 +27,10 @@ if st.sidebar.button("Run Backtest"):
         st.error("No data found. Please check the stock symbol or date range.")
         st.stop()
 
+    if 'Close' not in df.columns or df['Close'].isna().all():
+    st.error("❌ Error: 'Close' column missing or contains all NaNs.")
+    st.stop()
+
     df = df[['Open', 'High', 'Low', 'Close', 'Volume']].copy()
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = ['_'.join(map(str, col)).strip() for col in df.columns]
