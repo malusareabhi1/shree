@@ -37,28 +37,34 @@ def calculate_indicators(df):
     df['TR'] = df[['H-L', 'H-PC', 'L-PC']].max(axis=1)
     df['ATR'] = df['TR'].rolling(10).mean()
 
-    # Supertrend Calculation
     hl2 = (df['High'] + df['Low']) / 2
     multiplier = 3
     df['UpperBand'] = hl2 + (multiplier * df['ATR'])
     df['LowerBand'] = hl2 - (multiplier * df['ATR'])
     df['in_uptrend'] = True
 
+    col_in_uptrend = df.columns.get_loc('in_uptrend')
+    col_lowerband = df.columns.get_loc('LowerBand')
+    col_upperband = df.columns.get_loc('UpperBand')
+
     for current in range(1, len(df)):
         previous = current - 1
 
-        if df['Close'].iloc[current] > df['UpperBand'].iloc[previous]:
-            df.at[current, 'in_uptrend'] = True
-        elif df['Close'].iloc[current] < df['LowerBand'].iloc[previous]:
-            df.at[current, 'in_uptrend'] = False
+        if df['Close'].iat[current] > df['UpperBand'].iat[previous]:
+            df.iat[current, col_in_uptrend] = True
+        elif df['Close'].iat[current] < df['LowerBand'].iat[previous]:
+            df.iat[current, col_in_uptrend] = False
         else:
-            df.at[current, 'in_uptrend'] = df.at[previous, 'in_uptrend']
-            if df.at[current, 'in_uptrend'] and df['LowerBand'].iloc[current] < df['LowerBand'].iloc[previous]:
-                df.at[current, 'LowerBand'] = df['LowerBand'].iloc[previous]
-            if not df.at[current, 'in_uptrend'] and df['UpperBand'].iloc[current] > df['UpperBand'].iloc[previous]:
-                df.at[current, 'UpperBand'] = df['UpperBand'].iloc[previous]
+            df.iat[current, col_in_uptrend] = df.iat[previous, col_in_uptrend]
+
+            if df.iat[current, col_in_uptrend] and df['LowerBand'].iat[current] < df['LowerBand'].iat[previous]:
+                df.iat[current, col_lowerband] = df['LowerBand'].iat[previous]
+
+            if not df.iat[current, col_in_uptrend] and df['UpperBand'].iat[current] > df['UpperBand'].iat[previous]:
+                df.iat[current, col_upperband] = df['UpperBand'].iat[previous]
 
     return df
+
 
 @st.cache_data
 def run_backtest(df, stop_loss_pct, target_profit_pct):
