@@ -28,8 +28,8 @@ if st.sidebar.button("Run Backtest"):
         st.stop()
 
     if 'Close' not in df.columns or df['Close'].isna().all():
-    st.error("❌ Error: 'Close' column missing or contains all NaNs.")
-    st.stop()
+        st.error("❌ Error: 'Close' column missing or contains all NaNs.")
+        st.stop()
 
     df = df[['Open', 'High', 'Low', 'Close', 'Volume']].copy()
     if isinstance(df.columns, pd.MultiIndex):
