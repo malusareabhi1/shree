@@ -2,47 +2,51 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-import yfinance as yf
-from datetime import datetime, timedelta
+import datetime
 
 st.set_page_config(page_title="Supertrend + Pivot + 200 EMA Strategy", layout="wide")
 st.title("📈 Supertrend + Pivot + 200 EMA Strategy")
-st.markdown("""Strategy Explanation
-Supertrend: Uses ATR (Average True Range) to determine trend direction.
-200 EMA: Confirms trend direction. Buy signals only if price is above 200 EMA.
-Pivot Breakout: Entry when price breaks above recent high (3-bar high).
-Buy Condition: Supertrend in uptrend, Close > 200 EMA, Close > Pivot High.
-Sell Condition: Supertrend turns down OR Close < 200 EMA.
-Trades are shown on the chart with green (Buy) and red (Sell) dots.""")
-# Sidebar: Select Stock and Interval
-nifty100_stocks = ["RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS", "ICICIBANK.NS", "SBIN.NS", "LT.NS", "ITC.NS", "KOTAKBANK.NS"]
-symbol = st.sidebar.selectbox("Select NIFTY 100 Stock", nifty100_stocks)
-interval = st.sidebar.selectbox("Select Interval", ["5m", "15m", "1h"])
-days = st.sidebar.slider("Number of past days", 1, 10, 5)
+
+# --- Sidebar Inputs ---
+file = st.sidebar.file_uploader("Upload CSV File", type=["csv"])
+
+stop_loss_pct = st.sidebar.number_input("Stop Loss %", min_value=0.1, max_value=20.0, value=1.0, step=0.1)
+target_profit_pct = st.sidebar.number_input("Target Profit %", min_value=0.1, max_value=50.0, value=2.0, step=0.1)
 
 @st.cache_data
-def fetch_data(symbol, interval, days):
-    df = yf.download(tickers=symbol, interval=interval, period=f"{days}d")
-    df.reset_index(inplace=True)
+def load_data(file):
+    df = pd.read_csv(file)
+    df.columns = [col.strip() for col in df.columns]
     df['Datetime'] = pd.to_datetime(df['Datetime'])
+    df.set_index('Datetime', inplace=True)
     return df
 
 @st.cache_data
 def calculate_indicators(df):
+    required_cols = ['High', 'Low', 'Close']
+    if not all(col in df.columns for col in required_cols):
+        st.error("Missing required columns in the CSV file. Expected: High, Low, Close.")
+        st.stop()
+
     df['EMA_200'] = df['Close'].ewm(span=200, adjust=False).mean()
 
+    # ATR Calculation
     df['H-L'] = df['High'] - df['Low']
     df['H-PC'] = abs(df['High'] - df['Close'].shift(1))
     df['L-PC'] = abs(df['Low'] - df['Close'].shift(1))
     df['TR'] = df[['H-L', 'H-PC', 'L-PC']].max(axis=1)
     df['ATR'] = df['TR'].rolling(10).mean()
 
-    df['UpperBand'] = ((df['High'] + df['Low']) / 2) + (3 * df['ATR'])
-    df['LowerBand'] = ((df['High'] + df['Low']) / 2) - (3 * df['ATR'])
+    # Supertrend Calculation
+    hl2 = (df['High'] + df['Low']) / 2
+    multiplier = 3
+    df['UpperBand'] = hl2 + (multiplier * df['ATR'])
+    df['LowerBand'] = hl2 - (multiplier * df['ATR'])
     df['in_uptrend'] = True
 
     for current in range(1, len(df)):
         previous = current - 1
+
         if df['Close'].iloc[current] > df['UpperBand'].iloc[previous]:
             df.at[current, 'in_uptrend'] = True
         elif df['Close'].iloc[current] < df['LowerBand'].iloc[previous]:
@@ -53,54 +57,120 @@ def calculate_indicators(df):
                 df.at[current, 'LowerBand'] = df['LowerBand'].iloc[previous]
             if not df.at[current, 'in_uptrend'] and df['UpperBand'].iloc[current] > df['UpperBand'].iloc[previous]:
                 df.at[current, 'UpperBand'] = df['UpperBand'].iloc[previous]
+
     return df
 
 @st.cache_data
-def run_backtest(df):
+def run_backtest(df, stop_loss_pct, target_profit_pct):
     position = False
     entry_price = 0.0
     trades = []
 
+    stop_loss_price = None
+    target_price = None
+
     for i in range(1, len(df)):
         if not position:
-            if df['in_uptrend'].iloc[i] and df['Close'].iloc[i] > df['EMA_200'].iloc[i] and df['Close'].iloc[i] > df['High'].rolling(3).max().iloc[i - 1]:
+            # Entry Condition
+            pivot_high = df['High'].rolling(3).max().iloc[i-1]
+            if (df['in_uptrend'].iloc[i] and
+                df['Close'].iloc[i] > df['EMA_200'].iloc[i] and
+                df['Close'].iloc[i] > pivot_high):
                 position = True
                 entry_price = df['Close'].iloc[i]
-                trades.append({'Type': 'Buy', 'Price': entry_price, 'Time': df['Datetime'].iloc[i]})
+                stop_loss_price = entry_price * (1 - stop_loss_pct / 100)
+                target_price = entry_price * (1 + target_profit_pct / 100)
+                trades.append({'Type': 'Buy', 'Price': entry_price, 'Time': df.index[i]})
 
         elif position:
-            if not df['in_uptrend'].iloc[i] or df['Close'].iloc[i] < df['EMA_200'].iloc[i]:
-                exit_price = df['Close'].iloc[i]
-                trades.append({'Type': 'Sell', 'Price': exit_price, 'Time': df['Datetime'].iloc[i], 'PnL': exit_price - entry_price})
+            current_price = df['Close'].iloc[i]
+            exit_trade = False
+            exit_reason = ''
+
+            # Exit conditions
+            if current_price <= stop_loss_price:
+                exit_trade = True
+                exit_reason = 'Stop Loss Hit'
+            elif current_price >= target_price:
+                exit_trade = True
+                exit_reason = 'Target Hit'
+            elif (not df['in_uptrend'].iloc[i]) or (current_price < df['EMA_200'].iloc[i]):
+                exit_trade = True
+                exit_reason = 'Trend Reversal'
+
+            if exit_trade:
+                trades.append({'Type': 'Sell', 'Price': current_price, 'Time': df.index[i], 'PnL': current_price - entry_price, 'Exit Reason': exit_reason})
                 position = False
+                stop_loss_price = None
+                target_price = None
+
+    # Close position at the end if still open
+    if position:
+        last_price = df['Close'].iloc[-1]
+        trades.append({'Type': 'Sell', 'Price': last_price, 'Time': df.index[-1], 'PnL': last_price - entry_price, 'Exit Reason': 'End of Data'})
+        position = False
+
     return trades
 
 def plot_chart(df, trades):
     fig = go.Figure()
-    fig.add_trace(go.Candlestick(x=df['Datetime'],
+
+    fig.add_trace(go.Candlestick(x=df.index,
                                  open=df['Open'],
                                  high=df['High'],
                                  low=df['Low'],
                                  close=df['Close'], name='Candlestick'))
-    fig.add_trace(go.Scatter(x=df['Datetime'], y=df['EMA_200'], line=dict(color='orange', width=1), name='EMA 200'))
+
+    fig.add_trace(go.Scatter(x=df.index, y=df['EMA_200'], line=dict(color='orange', width=1), name='EMA 200'))
+
     for trade in trades:
-        color = 'green' if trade['Type'] == 'Buy' else 'red'
-        fig.add_trace(go.Scatter(x=[trade['Time']], y=[trade['Price']],
-                                 mode='markers', marker=dict(color=color, size=10), name=trade['Type']))
-    fig.update_layout(title=f'{symbol} Strategy Backtest', xaxis_rangeslider_visible=False)
+        if trade['Type'] == 'Buy':
+            fig.add_trace(go.Scatter(x=[trade['Time']], y=[trade['Price']], mode='markers', marker=dict(color='green', size=10), name='Buy'))
+        elif trade['Type'] == 'Sell':
+            fig.add_trace(go.Scatter(x=[trade['Time']], y=[trade['Price']], mode='markers', marker=dict(color='red', size=10), name='Sell'))
+
+    fig.update_layout(title='Supertrend + Pivot + 200 EMA Strategy', xaxis_rangeslider_visible=False)
     return fig
 
-# Run everything
-df = fetch_data(symbol, interval, days)
-df = calculate_indicators(df)
-trades = run_backtest(df)
+def plot_equity_curve(trades):
+    pnl = 0
+    equity = []
+    times = []
 
-st.plotly_chart(plot_chart(df, trades), use_container_width=True)
+    for trade in trades:
+        if trade['Type'] == 'Sell':
+            pnl += trade['PnL']
+            equity.append(pnl)
+            times.append(trade['Time'])
 
-if trades:
-    st.subheader("📋 Trade Log")
-    st.dataframe(pd.DataFrame(trades))
-    total_pnl = sum([t['PnL'] for t in trades if t['Type'] == 'Sell'])
-    st.metric(label="Total Profit/Loss", value=f"{total_pnl:.2f}")
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=times, y=equity, mode='lines+markers', name='Equity Curve'))
+    fig.update_layout(title='Equity Curve (Cumulative PnL)', xaxis_title='Time', yaxis_title='Profit/Loss')
+    return fig
+
+if file:
+    df = load_data(file)
+    df = calculate_indicators(df)
+    trades = run_backtest(df, stop_loss_pct, target_profit_pct)
+
+    st.plotly_chart(plot_chart(df, trades), use_container_width=True)
+
+    if trades:
+        st.subheader("📋 Trade Log")
+        trades_df = pd.DataFrame(trades)
+        st.dataframe(trades_df)
+
+        total_pnl = trades_df.loc[trades_df['Type'] == 'Sell', 'PnL'].sum()
+        win_trades = trades_df[(trades_df['Type'] == 'Sell') & (trades_df['PnL'] > 0)]
+        win_rate = len(win_trades) / len(trades_df[trades_df['Type'] == 'Sell']) * 100 if len(trades_df[trades_df['Type'] == 'Sell']) > 0 else 0
+        avg_pnl = trades_df.loc[trades_df['Type'] == 'Sell', 'PnL'].mean()
+
+        st.metric(label="Total Profit/Loss", value=f"{total_pnl:.2f}")
+        st.metric(label="Win Rate (%)", value=f"{win_rate:.2f}")
+        st.metric(label="Average PnL per Trade", value=f"{avg_pnl:.2f}")
+
+        st.plotly_chart(plot_equity_curve(trades), use_container_width=True)
+    else:
+        st.info("No trades generated for the selected data.")
 else:
-    st.info("No trades generated for this stock in selected time.")
+    st.info("Please upload a CSV file to begin.")
