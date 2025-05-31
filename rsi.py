@@ -1,45 +1,52 @@
+import streamlit as st
 import yfinance as yf
 import pandas as pd
 import ta
-import time
+import plotly.graph_objects as go
 
-def get_rsi_signal(symbol="RELIANCE.NS", interval="5m", lookback="1d", rsi_period=14):
-    try:
-        df = yf.download(tickers=symbol, interval=interval, period=lookback, progress=False)
+st.set_page_config(page_title="Live RSI Strategy", layout="wide")
 
-        if df.empty or 'Close' not in df.columns:
-            print(f"No data fetched for {symbol}.")
-            return
+st.title("📊 Live RSI Strategy Dashboard (NSE)")
 
-        df.dropna(inplace=True)  # Remove any rows with NaN
+# Sidebar options
+symbol = st.sidebar.selectbox("Select Stock", ["RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS", "ICICIBANK.NS"])
+interval = st.sidebar.selectbox("Select Interval", ["1m", "5m", "15m", "1h", "1d"])
+period = st.sidebar.selectbox("Select Lookback Period", ["1d", "5d", "1mo"])
+rsi_period = st.sidebar.slider("RSI Period", 5, 30, 14)
 
-        # Calculate RSI
-        rsi_calc = ta.momentum.RSIIndicator(close=df['Close'], window=rsi_period)
-        df['RSI'] = rsi_calc.rsi()
+# Fetch data
+@st.cache_data(ttl=300)
+def fetch_data(symbol, interval, period):
+    df = yf.download(tickers=symbol, interval=interval, period=period, progress=False)
+    df.dropna(inplace=True)
+    return df
 
-        latest_rsi = df['RSI'].iloc[-1]
-        last_price = df['Close'].iloc[-1]
+df = fetch_data(symbol, interval, period)
 
-        # Signal logic
-        if latest_rsi < 30:
-            signal = "BUY"
-        elif latest_rsi > 70:
-            signal = "SELL"
-        else:
-            signal = "HOLD"
+# RSI calculation
+df['RSI'] = ta.momentum.RSIIndicator(close=df['Close'], window=rsi_period).rsi()
 
-        print(f"\nSymbol: {symbol}")
-        print(f"Last Price: ₹{round(last_price, 2)}")
-        print(f"RSI({rsi_period}): {round(latest_rsi, 2)} -> Signal: {signal}")
+# Last RSI and Signal
+latest_rsi = df['RSI'].iloc[-1]
+last_price = df['Close'].iloc[-1]
 
-        return signal, last_price, latest_rsi
+# Strategy Signal
+if latest_rsi < 30:
+    signal = "🟢 BUY"
+elif latest_rsi > 70:
+    signal = "🔴 SELL"
+else:
+    signal = "⚪ HOLD"
 
-    except Exception as e:
-        print(f"Error fetching or processing data: {e}")
+# Display Results
+st.metric("📈 Last Price", f"₹{round(last_price, 2)}")
+st.metric(f"📉 RSI ({rsi_period})", f"{round(latest_rsi, 2)}")
+st.subheader(f"Strategy Signal: {signal}")
 
-# Run once or in a loop
-if __name__ == "__main__":
-    symbol = "RELIANCE.NS"
-    while True:
-        get_rsi_signal(symbol)
-        time.sleep(300)  # 5-minute interval
+# Plot RSI + Price
+fig = go.Figure()
+fig.add_trace(go.Candlestick(x=df.index, open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'], name="Candles"))
+fig.update_layout(title=f"{symbol} Price Chart", xaxis_rangeslider_visible=False)
+st.plotly_chart(fig, use_container_width=True)
+
+st.line_chart(df[['RSI']])
