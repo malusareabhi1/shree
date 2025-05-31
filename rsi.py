@@ -26,14 +26,19 @@ df = fetch_data(symbol, interval, period)
 # RSI calculation
 #df['RSI'] = ta.momentum.RSIIndicator(close=df['Close'], window=rsi_period).rsi()
 # Ensure 'Close' is valid Series
-if 'Close' in df.columns and df['Close'].notnull().any():
-    close_prices = df['Close'].astype(float)
-    rsi_calc = ta.momentum.RSIIndicator(close=close_prices, window=rsi_period)
-    df['RSI'] = rsi_calc.rsi()
+if 'Close' in df.columns:
+    if df['Close'].notnull().any():
+        close_prices = df['Close'].astype(float)
+        rsi_calc = ta.momentum.RSIIndicator(close=close_prices, window=rsi_period)
+        df['RSI'] = rsi_calc.rsi()
+    else:
+        st.error("Close price column contains only null values.")
+        st.stop()
 else:
-    st.error("Error: 'Close' price data is invalid or missing.")
+    st.error("'Close' column not found in data.")
     st.stop()
 
+    
 
 # Last RSI and Signal
 latest_rsi = df['RSI'].iloc[-1]
