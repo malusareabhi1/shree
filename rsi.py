@@ -26,7 +26,7 @@ df = fetch_data(symbol, interval, period)
 # RSI calculation
 #df['RSI'] = ta.momentum.RSIIndicator(close=df['Close'], window=rsi_period).rsi()
 # Ensure 'Close' is valid Series
-if 'Close' in df.columns and not df['Close'].isnull().all():
+if 'Close' in df.columns and df['Close'].notnull().any():
     close_prices = df['Close'].astype(float)
     rsi_calc = ta.momentum.RSIIndicator(close=close_prices, window=rsi_period)
     df['RSI'] = rsi_calc.rsi()
