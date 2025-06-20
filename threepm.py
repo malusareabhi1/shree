@@ -1,32 +1,54 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
+import plotly.graph_objects as go
 
-st.title("📥 Download NIFTY 15-Minute Data (Last 60 Days)")
+st.set_page_config(page_title="NIFTY 15-Min Candlestick", layout="wide")
+
+st.title("📈 NIFTY 15-Minute Candlestick Chart (Last 60 Days)")
 
 # Step 1: Download data
 data = yf.download("^NSEI", period="60d", interval="15m", progress=False)
 
-# Step 2: Flatten MultiIndex if exists
+# Step 2: Flatten MultiIndex columns (if any)
 if isinstance(data.columns, pd.MultiIndex):
-    data.columns = ['_'.join(col).strip() if isinstance(col, tuple) else col for col in data.columns]
+    data.columns = data.columns.get_level_values(0)
 
-# Step 3: Drop missing
+# Step 3: Drop NA, reset index
 data.dropna(inplace=True)
-
-# Step 4: Reset index and rename
 data.reset_index(inplace=True)
-data.columns = ['Datetime', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume'] if 'Adj Close' in data.columns else ['Datetime', 'Open', 'High', 'Low', 'Close', 'Volume']
 
-# Step 5: Display preview
-st.subheader("📊 Preview of NIFTY 15-Minute Data")
-st.dataframe(data.tail(10))
+# Step 4: Rename columns safely
+data = data[['Datetime', 'Open', 'High', 'Low', 'Close', 'Volume']]
 
-# Step 6: Download as CSV
-csv = data.to_csv(index=False).encode('utf-8')
-st.download_button(
-    label="📥 Download CSV File",
-    data=csv,
-    file_name="nifty_15min_last_60days.csv",
-    mime="text/csv"
+# Step 5: Let user pick a specific date to plot (to avoid overloading chart)
+data['Date'] = data['Datetime'].dt.date
+unique_dates = sorted(data['Date'].unique(), reverse=True)
+selected_date = st.selectbox("📅 Select a Date to Plot:", unique_dates)
+
+# Filter data for selected date
+plot_data = data[data['Date'] == selected_date]
+
+# Step 6: Plot candlestick
+st.subheader(f"📊 Candlestick Chart for {selected_date}")
+fig = go.Figure(data=[go.Candlestick(
+    x=plot_data['Datetime'],
+    open=plot_data['Open'],
+    high=plot_data['High'],
+    low=plot_data['Low'],
+    close=plot_data['Close'],
+    name="NIFTY"
+)])
+
+fig.update_layout(
+    xaxis_title='Time',
+    yaxis_title='Price',
+    xaxis_rangeslider_visible=False,
+    height=600
 )
+
+st.plotly_chart(fig, use_container_width=True)
+
+# Optional: show raw data
+with st.expander("🔍 Show raw data"):
+    st.dataframe(plot_data)
