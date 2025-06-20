@@ -14,14 +14,19 @@ data = yf.download("^NSEI", period="60d", interval="15m", progress=False)
 if isinstance(data.columns, pd.MultiIndex):
     data.columns = data.columns.get_level_values(0)
 
-# Step 3: Drop NA, reset index
+# Step 3: Drop NA
 data.dropna(inplace=True)
+
+# Convert Datetime index from UTC to IST
+data.index = data.index.tz_localize('UTC').tz_convert('Asia/Kolkata')
+
+# Step 4: Reset index to get Datetime as column
 data.reset_index(inplace=True)
 
-# Step 4: Rename columns safely
+# Step 5: Rename columns safely
 data = data[['Datetime', 'Open', 'High', 'Low', 'Close', 'Volume']]
 
-# Step 5: Let user pick a specific date to plot (to avoid overloading chart)
+# Step 6: Let user pick a specific date to plot (in IST now)
 data['Date'] = data['Datetime'].dt.date
 unique_dates = sorted(data['Date'].unique(), reverse=True)
 selected_date = st.selectbox("📅 Select a Date to Plot:", unique_dates)
@@ -29,8 +34,8 @@ selected_date = st.selectbox("📅 Select a Date to Plot:", unique_dates)
 # Filter data for selected date
 plot_data = data[data['Date'] == selected_date]
 
-# Step 6: Plot candlestick
-st.subheader(f"📊 Candlestick Chart for {selected_date}")
+# Step 7: Plot candlestick
+st.subheader(f"📊 Candlestick Chart for {selected_date} (IST)")
 fig = go.Figure(data=[go.Candlestick(
     x=plot_data['Datetime'],
     open=plot_data['Open'],
@@ -41,7 +46,7 @@ fig = go.Figure(data=[go.Candlestick(
 )])
 
 fig.update_layout(
-    xaxis_title='Time',
+    xaxis_title='Time (IST)',
     yaxis_title='Price',
     xaxis_rangeslider_visible=False,
     height=600
