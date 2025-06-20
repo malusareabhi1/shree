@@ -9,7 +9,7 @@ symbol = "^NSEI"  # Nifty 50 index
 st.info("Fetching NIFTY 50 daily data...")
 
 # Get data (100 trading days ≈ 140 calendar days)
-data = yf.download(symbol, period="140d", interval="15m")
+data = yf.download(symbol, period="100d", interval="15m")
 
 # Drop any incomplete rows
 data.dropna(inplace=True)
