@@ -15,7 +15,7 @@ data = yf.download(symbol, period="30d", interval="15m")
 data.dropna(inplace=True)
 
 # Keep only last 100 trading days
-data = data.tail(100)
+data = data.tail(30)
 
 # Reset index to have Date as a column
 data.reset_index(inplace=True)
