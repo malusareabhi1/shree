@@ -14,6 +14,12 @@ st.write("Fetching last 30 days of 15-minute NIFTY data...")
 data = yf.download(symbol, period="30d", interval=interval)
 data.dropna(inplace=True)
 
+# FIX: Flatten multi-index if present
+if isinstance(data.columns, pd.MultiIndex):
+    data.columns = data.columns.get_level_values(0)
+
+data.dropna(inplace=True)
+
 # Prepare data
 data['Date'] = data.index.date
 data['Time'] = data.index.time
