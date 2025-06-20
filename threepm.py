@@ -38,8 +38,7 @@ three_pm_candles_display = three_pm_candles[['Open', 'High', 'Low', 'Close']]
 three_pm_candles_display['Date'] = three_pm_candles.index.date
 three_pm_candles_display.reset_index(drop=True, inplace=True)
 
-st.subheader("📋 3:00 PM Candle Data (Past Days)")
-st.dataframe(three_pm_candles_display)
+
 
 
 # Reset index to remove datetime index
