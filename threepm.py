@@ -4,7 +4,7 @@ import pandas as pd
 from datetime import datetime
 import plotly.graph_objects as go
 
-st.title("📈 NIFTY 3PM Breakout with 100-Point Move")
+st.title("📈 NIFTY 3PM Breakout with 10-Point Move")
 
 symbol = "^NSEI"  # Nifty 50 Index
 interval = "15m"
