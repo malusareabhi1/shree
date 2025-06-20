@@ -25,6 +25,15 @@ three_pm_close = three_pm_close.rename(columns={'Close': '3PM_Close'})
 three_pm_close['Date'] = three_pm_close.index.date
 three_pm_close['NextDate'] = three_pm_close['Date'].shift(-1)
 
+
+# Extract full 3:00 PM candle data
+three_pm_candles = data[data['Time'] == three_pm_time].copy()
+three_pm_candles_display = three_pm_candles[['Open', 'High', 'Low', 'Close']]
+three_pm_candles_display['Date'] = three_pm_candles.index.date
+three_pm_candles_display.reset_index(drop=True, inplace=True)
+
+st.subheader("📋 3:00 PM Candle Data (Past Days)")
+st.dataframe(three_pm_candles_display)
 # Result list
 results = []
 
