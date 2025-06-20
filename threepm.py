@@ -17,8 +17,11 @@ if isinstance(data.columns, pd.MultiIndex):
 # Step 3: Drop NA
 data.dropna(inplace=True)
 
-# Convert Datetime index from UTC to IST
-data.index = data.index.tz_localize('UTC').tz_convert('Asia/Kolkata')
+# Check if index is timezone-aware or not, then do the right thing:
+if data.index.tz is None:
+    data.index = data.index.tz_localize('UTC').tz_convert('Asia/Kolkata')
+else:
+    data.index = data.index.tz_convert('Asia/Kolkata')
 
 # Step 4: Reset index to get Datetime as column
 data.reset_index(inplace=True)
