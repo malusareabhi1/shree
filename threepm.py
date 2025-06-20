@@ -34,6 +34,22 @@ three_pm_candles_display.reset_index(drop=True, inplace=True)
 
 st.subheader("📋 3:00 PM Candle Data (Past Days)")
 st.dataframe(three_pm_candles_display)
+
+
+# Reset index to remove datetime index
+three_pm_candles.reset_index(inplace=True)
+
+# Extract date only (optional: keep datetime for precision)
+three_pm_candles['Date'] = three_pm_candles['Datetime'].dt.date
+
+# Select desired columns
+three_pm_display = three_pm_candles[['Date', 'Open', 'High', 'Low', 'Close']]
+
+# Show in Streamlit
+st.subheader("📋 3:00 PM Candle Data (Past Days)")
+st.dataframe(three_pm_display)
+
+
 # Result list
 results = []
 
