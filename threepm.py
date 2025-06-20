@@ -22,6 +22,16 @@ if data.index.tz is None:
 else:
     data.index = data.index.tz_convert('Asia/Kolkata')
 
+# After converting index to IST and resetting index:
+
+data.reset_index(inplace=True)
+
+# Filter to market hours (09:15 to 15:30 IST)
+market_open = pd.to_datetime("09:15:00").time()
+market_close = pd.to_datetime("15:30:00").time()
+
+data = data[(data['Datetime'].dt.time >= market_open) & (data['Datetime'].dt.time <= market_close)]
+
 # Reset index to get Datetime as a column
 data.reset_index(inplace=True)
 
