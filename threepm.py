@@ -1,77 +1,111 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
+import plotly.graph_objects as go
 
-st.title("📊 NIFTY 3PM Candle Breakout Tracker")
+st.title("📈 NIFTY 3PM Breakout with 100-Point Move")
 
-# User parameters
-points_required = 100
-symbol = "^NSEI"  # NIFTY 50 index
+symbol = "^NSEI"  # Nifty 50 Index
 interval = "15m"
-days_to_check = 100
+points_required = 100
 
-st.write(f"Fetching NIFTY {interval} data for the last {days_to_check} trading days...")
-
-# Load past 30 days of data with 15m interval (~390 candles/day, so 30 days gives approx 100 trading days)
+st.write("Fetching last 30 days of 15-minute NIFTY data...")
 data = yf.download(symbol, period="30d", interval=interval)
 data.dropna(inplace=True)
 
-# Prepare day-wise split
+# Prepare data
 data['Date'] = data.index.date
 data['Time'] = data.index.time
 
-# Identify 15-min 3:00 PM candles
+# Find 3:00 PM candles
 three_pm_time = datetime.strptime("15:00:00", "%H:%M:%S").time()
 three_pm_close = data[data['Time'] == three_pm_time][['Close']]
 three_pm_close = three_pm_close.rename(columns={'Close': '3PM_Close'})
 three_pm_close['Date'] = three_pm_close.index.date
-
-# Shift date to match next day
 three_pm_close['NextDate'] = three_pm_close['Date'].shift(-1)
 
-# Final scan
-result = []
-unique_dates = three_pm_close['NextDate'].dropna().unique()
+# Result list
+results = []
 
-for next_date in unique_dates:
-    try:
-        # 3PM close from previous day
-        prev_close = three_pm_close[three_pm_close['NextDate'] == next_date]['3PM_Close'].values[0]
-        # Next day full data
-        next_day_data = data[data['Date'] == next_date]
+# Loop through each next trading day
+for i in range(len(three_pm_close) - 1):
+    prev_close = three_pm_close.iloc[i]['3PM_Close']
+    next_date = three_pm_close.iloc[i]['NextDate']
+    next_day_data = data[data['Date'] == next_date]
 
-        crossed = False
-        crossed_time = None
-        high_after_cross = None
+    crossed = False
+    breakout_index = None
+    high_after = None
 
-        for i in range(1, len(next_day_data)):
-            prev = next_day_data.iloc[i - 1]
-            curr = next_day_data.iloc[i]
-            # Check cross from below
-            if prev['Close'] < prev_close and curr['Close'] > prev_close:
-                crossed = True
-                crossed_time = curr.name
-                high_after_cross = next_day_data.iloc[i:]['High'].max()
-                break
+    for j in range(1, len(next_day_data)):
+        prev_c = next_day_data.iloc[j - 1]
+        curr_c = next_day_data.iloc[j]
 
-        if crossed and high_after_cross and high_after_cross >= (prev_close + points_required):
-            result.append({
-                "Date": next_date,
-                "Prev 3PM Close": prev_close,
-                "Crossed Time": crossed_time,
-                "High After Cross": high_after_cross
-            })
+        if prev_c['Close'] < prev_close and curr_c['Close'] > prev_close:
+            crossed = True
+            breakout_index = curr_c.name
+            high_after = next_day_data.iloc[j:]['High'].max()
+            break
 
-    except Exception as e:
-        st.warning(f"Error on date {next_date}: {e}")
-        continue
+    if crossed and high_after >= (prev_close + points_required):
+        results.append({
+            'Date': next_date,
+            'Prev_3PM_Close': prev_close,
+            'Breakout_Time': breakout_index,
+            'High_After': high_after
+        })
 
-# Output result
-st.subheader(f"✅ Total Matches: {len(result)}")
-if result:
-    df_result = pd.DataFrame(result)
+# Show results
+st.subheader(f"✅ Found {len(results)} Breakout Days")
+if results:
+    df_result = pd.DataFrame(results)
     st.dataframe(df_result)
-else:
-    st.info("No matching scenario found in last 100 trading days.")
 
+    # Select a breakout date to visualize
+    selected_date = st.selectbox("📅 Select a breakout date to view chart:", df_result['Date'])
+
+    # Extract that day's data
+    chart_data = data[data['Date'] == selected_date]
+    prev_close_level = df_result[df_result['Date'] == selected_date]['Prev_3PM_Close'].values[0]
+    breakout_time = df_result[df_result['Date'] == selected_date]['Breakout_Time'].values[0]
+
+    # Plot
+    fig = go.Figure()
+
+    # Candlestick
+    fig.add_trace(go.Candlestick(
+        x=chart_data.index,
+        open=chart_data['Open'],
+        high=chart_data['High'],
+        low=chart_data['Low'],
+        close=chart_data['Close'],
+        name="Candles"
+    ))
+
+    # 3PM Close Line
+    fig.add_hline(y=prev_close_level, line=dict(color="blue", dash="dash"), 
+                  annotation_text="Previous 3PM Close", annotation_position="top left")
+
+    # Breakout Marker
+    fig.add_trace(go.Scatter(
+        x=[breakout_time],
+        y=[prev_close_level],
+        mode='markers+text',
+        marker=dict(color='red', size=12, symbol='triangle-up'),
+        name="Breakout",
+        text=["Breakout"],
+        textposition="top center"
+    ))
+
+    fig.update_layout(
+        title=f"NIFTY Breakout on {selected_date}",
+        xaxis_title="Time",
+        yaxis_title="Price",
+        xaxis_rangeslider_visible=False,
+        height=600
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+else:
+    st.info("No matching breakouts found in recent data.")
