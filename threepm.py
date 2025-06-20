@@ -8,7 +8,7 @@ st.title("📈 NIFTY 3PM Breakout with 100-Point Move")
 
 symbol = "^NSEI"  # Nifty 50 Index
 interval = "15m"
-points_required = 50
+points_required = 10
 
 st.write("Fetching last 30 days of 15-minute NIFTY data...")
 data = yf.download(symbol, period="30d", interval=interval)
