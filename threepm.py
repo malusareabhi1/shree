@@ -2,37 +2,31 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 
-st.title("📊 NIFTY Last 100 Trading Days - Daily OLHCV Data")
+st.title("📥 Download NIFTY 15-Minute Data (Last 60 Calendar Days)")
 
-# Fetch last 100 trading days of NIFTY (daily interval)
-symbol = "^NSEI"  # Nifty 50 index
-st.info("Fetching NIFTY 50 daily data...")
+# Fetch NIFTY data
+st.info("Fetching 15-minute NIFTY data... Yahoo Finance allows up to 60 calendar days for intraday data.")
+data = yf.download("^NSEI", period="60d", interval="15m")
 
-# Get data (100 trading days ≈ 140 calendar days)
-data = yf.download(symbol, period="30d", interval="15m")
+# Flatten columns if multi-indexed
+if isinstance(data.columns, pd.MultiIndex):
+    data.columns = data.columns.get_level_values(0)
 
-# Drop any incomplete rows
+# Drop missing
 data.dropna(inplace=True)
 
-# Keep only last 100 trading days
-data = data.tail(30)
-
-# Reset index to have Date as a column
+# Reset index for CSV download
 data.reset_index(inplace=True)
 
-# Rename and reorder columns for clarity
-data = data[['Date', 'Open', 'High', 'Low', 'Close', 'Volume']]
-data.columns = ['Date', 'Open', 'High', 'Low', 'Close', 'Volume']
+# Show preview
+st.subheader("📊 NIFTY 15-Minute Data Preview")
+st.dataframe(data.tail(10))
 
-# Display table
-st.subheader("📋 NIFTY 100-Day OLHCV Table")
-st.dataframe(data)
-
-# Optional: CSV Download
+# Download as CSV
 csv = data.to_csv(index=False).encode('utf-8')
 st.download_button(
-    label="📥 Download CSV",
+    label="📥 Download CSV File",
     data=csv,
-    file_name='nifty_100_days_ohlcv.csv',
-    mime='text/csv'
+    file_name="nifty_15min_last_60days.csv",
+    mime="text/csv"
 )
