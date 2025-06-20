@@ -7,44 +7,36 @@ st.set_page_config(page_title="NIFTY 15-Min Candlestick", layout="wide")
 
 st.title("📈 NIFTY 15-Minute Candlestick Chart (Last 60 Days)")
 
-# Step 1: Download data
+# Download data
 data = yf.download("^NSEI", period="60d", interval="15m", progress=False)
 
-# Step 2: Flatten MultiIndex columns (if any)
+# Flatten MultiIndex columns if any
 if isinstance(data.columns, pd.MultiIndex):
     data.columns = data.columns.get_level_values(0)
 
-# Step 3: Drop NA
 data.dropna(inplace=True)
 
-# Check if index is timezone-aware or not, then do the right thing:
+# Convert timezone from UTC to IST
 if data.index.tz is None:
     data.index = data.index.tz_localize('UTC').tz_convert('Asia/Kolkata')
 else:
     data.index = data.index.tz_convert('Asia/Kolkata')
 
-# Step 4: Reset index to get Datetime as column
+# Reset index to get Datetime as a column
 data.reset_index(inplace=True)
 
-# Step 5: Rename columns safely
+# Select relevant columns
 data = data[['Datetime', 'Open', 'High', 'Low', 'Close', 'Volume']]
 
-# Step 6: Let user pick a specific date to plot (in IST now)
-data['Date'] = data['Datetime'].dt.date
-unique_dates = sorted(data['Date'].unique(), reverse=True)
-selected_date = st.selectbox("📅 Select a Date to Plot:", unique_dates)
+# Plot entire data in one chart
+st.subheader("📊 Candlestick Chart for Last 60 Days (15-min Interval)")
 
-# Filter data for selected date
-plot_data = data[data['Date'] == selected_date]
-
-# Step 7: Plot candlestick
-st.subheader(f"📊 Candlestick Chart for {selected_date} (IST)")
 fig = go.Figure(data=[go.Candlestick(
-    x=plot_data['Datetime'],
-    open=plot_data['Open'],
-    high=plot_data['High'],
-    low=plot_data['Low'],
-    close=plot_data['Close'],
+    x=data['Datetime'],
+    open=data['Open'],
+    high=data['High'],
+    low=data['Low'],
+    close=data['Close'],
     name="NIFTY"
 )])
 
@@ -52,11 +44,11 @@ fig.update_layout(
     xaxis_title='Time (IST)',
     yaxis_title='Price',
     xaxis_rangeslider_visible=False,
-    height=600
+    height=700
 )
 
 st.plotly_chart(fig, use_container_width=True)
 
-# Optional: show raw data
+# Optional: Show raw data
 with st.expander("🔍 Show raw data"):
-    st.dataframe(plot_data)
+    st.dataframe(data)
