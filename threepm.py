@@ -12,7 +12,7 @@ points_required = 10
 
 st.write("Fetching last 30 days of 15-minute NIFTY data...")
 data = yf.download(symbol, period="30d", interval=interval)
-data.dropna(inplace=True)
+#data.dropna(inplace=True)
 
 # FIX: Flatten multi-index if present
 if isinstance(data.columns, pd.MultiIndex):
