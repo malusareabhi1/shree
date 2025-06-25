@@ -74,7 +74,7 @@ fig = go.Figure(data=[go.Candlestick(
     close=df['close'],
     name='NIFTY'
 )])
-st.plotly_chart(fig)
+#st.plotly_chart(fig)
 
 
 # Preview data
