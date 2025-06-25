@@ -30,16 +30,6 @@ with st.spinner("Fetching NIFTY 15-min data..."):
             (df['datetime'].dt.time <= pd.to_datetime("15:30").time())]
     # Convert columns to lowercase now
 df.columns = df.columns.str.lower()
-df['step_high'] = df['close']
-df['step_low'] = df['close']
-
-for i in range(1, len(df)):
-    if df.loc[i, 'close'] > df.loc[i - 1, 'close']:
-        df.loc[i, 'step_high'] = max(df.loc[i, 'close'], df.loc[i - 1, 'step_high'])
-        df.loc[i, 'step_low'] = df.loc[i - 1, 'step_low']
-    else:
-        df.loc[i, 'step_low'] = min(df.loc[i, 'close'], df.loc[i - 1, 'step_low'])
-        df.loc[i, 'step_high'] = df.loc[i - 1, 'step_high']
 
     
 
