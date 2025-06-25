@@ -84,6 +84,62 @@ for i in range(len(df_3pm) - 1):  # Avoid last day, no "next day" after it
 trade_log_df = pd.DataFrame(trade_log)
 
 ####################################################################################################################################
+
+
+# Additional trade log for close-breakdown and 100-point fall
+close_breakdown_log = []
+
+for i in range(len(df_3pm) - 1):
+    current_row = df_3pm.iloc[i]
+    next_day_date = df_3pm.iloc[i + 1]['datetime'].date()
+
+    threepm_close = current_row['close']
+    target_down = threepm_close - 100
+
+    # Get next day's data
+    next_day_data = df[df['datetime'].dt.date == next_day_date].copy()
+    if next_day_data.empty:
+        continue
+
+    # Sort by time to simulate price movement
+    next_day_data.sort_values(by='datetime', inplace=True)
+
+    # Detect first time price crosses below the previous close from above
+    crossed_down = False
+    target_hit = False
+    hit_time = None
+
+    for j in range(1, len(next_day_data)):
+        prev_candle = next_day_data.iloc[j - 1]
+        this_candle = next_day_data.iloc[j]
+
+        # Check if we crossed the close from above to below
+        if not crossed_down and prev_candle['high'] > threepm_close and this_candle['low'] < threepm_close:
+            crossed_down = True
+            cross_time = this_candle['datetime']
+
+        # After crossing, check if it dropped 100 points
+        if crossed_down and this_candle['low'] <= target_down:
+            target_hit = True
+            hit_time = this_candle['datetime']
+            break
+
+    close_breakdown_log.append({
+        '3PM Date': current_row['datetime'].date(),
+        'Next Day': next_day_date,
+        '3PM Close': round(threepm_close, 2),
+        'Target (Close - 100)': round(target_down, 2),
+        'Crossed & Dropped 100?': '✅ Yes' if target_hit else '❌ No',
+        'Drop Hit Time': hit_time.time() if hit_time else '-'
+    })
+
+# Convert to DataFrame
+breakdown_df = pd.DataFrame(close_breakdown_log)
+
+
+
+
+#####################################################################################################################################################################
 # Keep only the last 10 **trading days**
 df['date'] = df['datetime'].dt.date
 last_10_trading_days = sorted(df['date'].unique())[-20:]
@@ -173,8 +229,9 @@ fig.update_layout(
     height=600
 )
 
+############################################################################################################################################
 st.plotly_chart(fig, use_container_width=True)
-
+############################################################################################################################################
 st.subheader("📘 Trade Log – Did Next Day Break 3PM High + 100 Points?")
 st.dataframe(trade_log_df)
 
@@ -184,6 +241,12 @@ st.download_button(
     file_name="nifty_3pm_breakout_tradelog.csv",
     mime="text/csv"
 )
+############################################################################################################################################
+st.subheader("📉 Breakdown Log – Did Price Cross Below 3PM Close and Drop 100 Points?")
+st.dataframe(breakdown_df)
 
+# Show total count
+count = breakdown_df[breakdown_df['Crossed & Dropped 100?'] == '✅ Yes'].shape[0]
+st.success(f"✅ This scenario happened **{count} times** in the last {len(df_3pm)-1} trading days.")
 
 
