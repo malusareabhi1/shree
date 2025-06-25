@@ -40,7 +40,7 @@ df.columns = df.columns.str.lower()
 
 # Filter to last 10 trading days
 df['date'] = df['datetime'].dt.date
-last_10_trading_days = sorted(df['date'].unique())[-50:]
+last_10_trading_days = sorted(df['date'].unique())[-20:]
 df = df[df['date'].isin(last_10_trading_days)]
 df = df.drop(columns='date')
 
