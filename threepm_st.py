@@ -93,20 +93,7 @@ fig = go.Figure(data=[go.Candlestick(
     name="NIFTY"
 )])
 
-# Add horizontal lines for each 3PM high/low level
-for _, row in df_3pm.iterrows():
-    fig.add_shape(
-        type="line",
-        x0=df['datetime'].min(), x1=df['datetime'].max(),
-        y0=row['high'], y1=row['high'],
-        line=dict(color="orange", width=1, dash="dash")
-    )
-    fig.add_shape(
-        type="line",
-        x0=df['datetime'].min(), x1=df['datetime'].max(),
-        y0=row['low'], y1=row['low'],
-        line=dict(color="cyan", width=1, dash="dash")
-    )
+
 
 fig.update_traces(increasing_line_color='green', decreasing_line_color='red')
 fig.add_trace(go.Scatter(
