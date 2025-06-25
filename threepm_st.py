@@ -24,8 +24,8 @@ with st.spinner("Fetching NIFTY 15-min data..."):
     df = df.rename(columns={datetime_col: 'datetime'})
 
 # Just in case yfinance gives multi-index columns, flatten them
-if isinstance(df.columns, pd.MultiIndex):
-    df.columns = ['_'.join(col).strip() if isinstance(col, tuple) else col for col in df.columns]
+#if isinstance(df.columns, pd.MultiIndex):
+    #df.columns = ['_'.join(col).strip() if isinstance(col, tuple) else col for col in df.columns]
 
 # Preview data
 st.subheader("📋 Data Preview")
