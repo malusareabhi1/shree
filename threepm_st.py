@@ -174,3 +174,6 @@ fig.update_layout(
 )
 
 st.plotly_chart(fig, use_container_width=True)
+
+st.subheader("📘 Trade Log – Did Next Day Break 3PM High + 50 Points?")
+st.dataframe(trade_log_df)
