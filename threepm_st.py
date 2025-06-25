@@ -249,4 +249,10 @@ st.dataframe(breakdown_df)
 count = breakdown_df[breakdown_df['Crossed & Dropped 100?'] == '✅ Yes'].shape[0]
 st.success(f"✅ This scenario happened **{count} times** in the last {len(df_3pm)-1} trading days.")
 
-
+st.download_button(
+    label="📥 Download Trade Log as CSV",
+    data=breakdown_df.to_csv(index=False),
+    file_name="nifty_3pm_breakout_tradelog.csv",
+    mime="text/csv"
+)
+############################################################################################################################################
