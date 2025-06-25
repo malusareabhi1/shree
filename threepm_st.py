@@ -27,6 +27,9 @@ with st.spinner("Fetching NIFTY 15-min data..."):
 # After loading and processing dataframe df
 # Assuming you already have the DataFrame `df`
 df.columns = df.columns.str.lower()
+# Filter data to only include the last 10 days
+last_10_days = df['datetime'].max() - pd.Timedelta(days=10)
+df = df[df['datetime'] >= last_10_days]
 # Debug columns
 #st.write("Columns available:", df.columns.tolist())
 
