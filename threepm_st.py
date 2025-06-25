@@ -54,8 +54,8 @@ st.plotly_chart(fig)
 
 
 # Preview data
-st.subheader("📋 Data Preview")
-st.dataframe(df.tail(50))
+#st.subheader("📋 Data Preview")
+#st.dataframe(df.tail(50))
 
 # Candlestick chart
 st.subheader("🕯️ NIFTY Candlestick Chart (15m)")
