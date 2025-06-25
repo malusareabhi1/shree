@@ -128,7 +128,23 @@ fig.add_trace(go.Scatter(
     text=["Low"] * len(df_3pm),
     textposition="bottom center"
 ))
+fig.add_trace(go.Scatter(
+    x=df['datetime'],
+    y=df['step_high'],
+    mode='lines',
+    name='Step High',
+    line=dict(color='green', width=1),
+    connectgaps=True
+))
 
+fig.add_trace(go.Scatter(
+    x=df['datetime'],
+    y=df['step_low'],
+    mode='lines',
+    name='Step Low',
+    line=dict(color='red', width=1),
+    connectgaps=True
+))
 
 fig.update_layout(
     title="NIFTY 15-Min Chart (Last 10 Trading Days)",
