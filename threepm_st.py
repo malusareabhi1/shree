@@ -28,6 +28,9 @@ with st.spinner("Fetching NIFTY 15-min data..."):
     # Remove off-market hours (before 9:15 AM or after 3:30 PM IST)
     df = df[(df['datetime'].dt.time >= pd.to_datetime("09:15").time()) &
             (df['datetime'].dt.time <= pd.to_datetime("15:30").time())]
+    # Filter 3:00 PM candles
+    df_3pm = df[df['datetime'].dt.time == pd.to_datetime("15:00").time()]
+
 
 # After loading and processing dataframe df
 # Assuming you already have the DataFrame `df`
