@@ -15,7 +15,7 @@ with st.spinner("Fetching NIFTY 15-min data..."):
     df.reset_index(inplace=True)
 
     # Get actual datetime column name after reset
-   # datetime_col = df.columns[0]
+    datetime_col = df.columns[0]
 
     # Convert to datetime and then IST
     df[datetime_col] = pd.to_datetime(df[datetime_col])
