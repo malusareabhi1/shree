@@ -177,3 +177,11 @@ st.plotly_chart(fig, use_container_width=True)
 
 st.subheader("📘 Trade Log – Did Next Day Break 3PM High + 100 Points?")
 st.dataframe(trade_log_df)
+
+st.download_button(
+    label="📥 Download Trade Log as CSV",
+    data=trade_log_df.to_csv(index=False),
+    file_name="nifty_3pm_breakout_tradelog.csv",
+    mime="text/csv"
+)
+
