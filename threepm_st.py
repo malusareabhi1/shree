@@ -75,7 +75,7 @@ for i in range(len(df_3pm) - 1):  # Avoid last day, no "next day" after it
         '3PM Date': threepm_date,
         'Next Day': next_day_date,
         '3PM High': round(threepm_high, 2),
-        'Target (High + 50)': round(target, 2),
+        'Target (High + 100)': round(target, 2),
         'Hit?': '✅ Yes' if hit else '❌ No',
         'Hit Time': hit_time.time() if hit else '-'
     })
