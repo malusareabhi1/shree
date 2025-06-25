@@ -11,6 +11,11 @@ with st.spinner("Fetching NIFTY 15-min data..."):
     df = yf.download(ticker, interval="15m", period="60d", progress=False)
     df.reset_index(inplace=True)
 
+# Ensure no multi-level columns
+if isinstance(df.columns, pd.MultiIndex):
+    df.columns = ['_'.join(col).strip() if isinstance(col, tuple) else col for col in df.columns]
+
+
 # Convert UTC to IST
 #df['Datetime'] = df['Datetime'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
 df['Datetime'] = df['Datetime'].dt.tz_convert('Asia/Kolkata')
