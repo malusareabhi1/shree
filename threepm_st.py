@@ -86,7 +86,7 @@ trade_log_df = pd.DataFrame(trade_log)
 ####################################################################################################################################
 # Keep only the last 10 **trading days**
 df['date'] = df['datetime'].dt.date
-last_10_trading_days = sorted(df['date'].unique())[-50:]
+last_10_trading_days = sorted(df['date'].unique())[-20:]
 df = df[df['date'].isin(last_10_trading_days)]
 df = df.drop(columns='date')  # Optional cleanup
 # Debug columns
