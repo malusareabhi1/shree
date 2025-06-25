@@ -12,8 +12,8 @@ with st.spinner("Fetching NIFTY 15-min data..."):
     df.reset_index(inplace=True)
 
 # Convert UTC to IST
-df['Datetime'] = df['Datetime'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
-
+#df['Datetime'] = df['Datetime'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
+df['Datetime'] = df['Datetime'].dt.tz_convert('Asia/Kolkata')
 # Show table
 st.subheader("📋 Data Preview")
 st.dataframe(df.tail(50))
