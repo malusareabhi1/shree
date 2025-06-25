@@ -74,11 +74,24 @@ fig = go.Figure(data=[go.Candlestick(
     name="NIFTY"
 )])
 
+fig.update_traces(increasing_line_color='green', decreasing_line_color='red')
+
 fig.update_layout(
-    title="NIFTY 15-Min Chart (Last 60 Days)",
+    title="NIFTY 15-Min Chart (Last 10 Trading Days)",
     xaxis_title="DateTime (IST)",
     yaxis_title="Price",
     xaxis_rangeslider_visible=False,
+    xaxis=dict(
+        rangebreaks=[
+            dict(bounds=["sat", "mon"]),
+            dict(bounds=[16, 9.15], pattern="hour")
+        ],
+        showgrid=False
+    ),
+    yaxis=dict(showgrid=True),
+    plot_bgcolor='black',
+    paper_bgcolor='black',
+    font=dict(color='white'),
     height=600
 )
 
