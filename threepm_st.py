@@ -9,7 +9,7 @@ st.title("📈 NIFTY 15-Min Chart – Last 60 Days")
 with st.spinner("Fetching NIFTY 15-min data..."):
     ticker = "^NSEI"
     df = yf.download(ticker, interval="15m", period="60d", progress=False)
-    df.columns = df.columns.get_level_values(-1)
+    df.columns = df.columns.get_level_values(-0)
 
     # Reset index to move Datetime from index to column
     df.reset_index(inplace=True)
