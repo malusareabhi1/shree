@@ -48,7 +48,7 @@ df = df.drop(columns='date')
 df_3pm = df[(df['datetime'].dt.hour == 15) & (df['datetime'].dt.minute == 0)]
 # Keep only the last 10 **trading days**
 df['date'] = df['datetime'].dt.date
-last_10_trading_days = sorted(df['date'].unique())[-10:]
+last_10_trading_days = sorted(df['date'].unique())[-5:]
 df = df[df['date'].isin(last_10_trading_days)]
 df = df.drop(columns='date')  # Optional cleanup
 # Debug columns
