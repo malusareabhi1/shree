@@ -61,7 +61,12 @@ for i in range(len(df_3pm) - 1):  # Avoid last day, no "next day" after it
     target = threepm_high + 100
 
     # Filter next day's data
-    next_day_data = df[df['datetime'].dt.date == next_day_date]
+    #next_day_data = df[df['datetime'].dt.date == next_day_date]
+    next_day_data = df[
+        (df['datetime'].dt.date == next_day_date) &
+        (df['datetime'].dt.time >= pd.to_datetime("09:30").time())
+    ]
+
 
     if next_day_data.empty:
         hit = False
@@ -97,7 +102,11 @@ for i in range(len(df_3pm) - 1):
     target_down = threepm_close - 100
 
     # Get next day's data
-    next_day_data = df[df['datetime'].dt.date == next_day_date].copy()
+    #next_day_data = df[df['datetime'].dt.date == next_day_date].copy()
+    next_day_data = df[
+        (df['datetime'].dt.date == next_day_date) &
+        (df['datetime'].dt.time >= pd.to_datetime("09:30").time())
+    ].copy()
     if next_day_data.empty:
         continue
 
