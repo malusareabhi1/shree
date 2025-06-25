@@ -22,7 +22,12 @@ with st.spinner("Fetching NIFTY 15-min data..."):
     df[datetime_col] = df[datetime_col].dt.tz_convert('Asia/Kolkata')
 
     # Rename to 'datetime' for consistency
+   # Rename column
     df = df.rename(columns={datetime_col: 'datetime'})
+    
+    # Remove off-market hours (before 9:15 AM or after 3:30 PM IST)
+    df = df[(df['datetime'].dt.time >= pd.to_datetime("09:15").time()) &
+            (df['datetime'].dt.time <= pd.to_datetime("15:30").time())]
 
 # After loading and processing dataframe df
 # Assuming you already have the DataFrame `df`
