@@ -86,7 +86,7 @@ trade_log_df = pd.DataFrame(trade_log)
 ####################################################################################################################################
 # Keep only the last 10 **trading days**
 df['date'] = df['datetime'].dt.date
-last_10_trading_days = sorted(df['date'].unique())[-10:]
+last_10_trading_days = sorted(df['date'].unique())[-50:]
 df = df[df['date'].isin(last_10_trading_days)]
 df = df.drop(columns='date')  # Optional cleanup
 # Debug columns
@@ -175,5 +175,5 @@ fig.update_layout(
 
 st.plotly_chart(fig, use_container_width=True)
 
-st.subheader("📘 Trade Log – Did Next Day Break 3PM High + 50 Points?")
+st.subheader("📘 Trade Log – Did Next Day Break 3PM High + 100 Points?")
 st.dataframe(trade_log_df)
