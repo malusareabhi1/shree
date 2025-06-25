@@ -62,10 +62,10 @@ st.subheader("🕯️ NIFTY Candlestick Chart (15m)")
 
 fig = go.Figure(data=[go.Candlestick(
     x=df['datetime'],
-    open=df['Open'],
-    high=df['High'],
-    low=df['Low'],
-    close=df['Close'],
+    open=df['open'],
+    high=df['high'],
+    low=df['low'],
+    close=df['close'],
     name="NIFTY"
 )])
 
