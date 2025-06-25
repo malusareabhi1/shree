@@ -28,7 +28,7 @@ with st.spinner("Fetching NIFTY 15-min data..."):
 # Assuming you already have the DataFrame `df`
 df.columns = df.columns.str.lower()
 # Debug columns
-st.write("Columns available:", df.columns.tolist())
+#st.write("Columns available:", df.columns.tolist())
 
 # Check columns exist
 required_cols = ['datetime', 'open', 'high', 'low', 'close']
