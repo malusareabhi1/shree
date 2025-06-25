@@ -234,6 +234,13 @@ st.plotly_chart(fig, use_container_width=True)
 ############################################################################################################################################
 st.subheader("📘 Trade Log – Did Next Day Break 3PM High + 100 Points?")
 st.dataframe(trade_log_df)
+# Filter successful breakouts
+success_count = trade_log_df[trade_log_df['Hit?'] == '✅ Yes'].shape[0]
+total_checked = trade_log_df.shape[0]
+
+st.markdown(f"### 📊 Summary: 3PM High + 100 Point Breakout")
+st.success(f"✅ This scenario happened **{success_count} times** out of **{total_checked}** trading days.")
+
 
 st.download_button(
     label="📥 Download Trade Log as CSV",
