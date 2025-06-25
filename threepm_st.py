@@ -23,9 +23,32 @@ with st.spinner("Fetching NIFTY 15-min data..."):
     # Rename to 'datetime' for consistency
     df = df.rename(columns={datetime_col: 'datetime'})
 
-# Just in case yfinance gives multi-index columns, flatten them
-#if isinstance(df.columns, pd.MultiIndex):
-    #df.columns = ['_'.join(col).strip() if isinstance(col, tuple) else col for col in df.columns]
+# After loading and processing dataframe df
+
+# Debug columns
+st.write("Columns available:", df.columns.tolist())
+
+# Check columns exist
+required_cols = ['datetime', 'open', 'high', 'low', 'close']
+if not all(col in df.columns for col in required_cols):
+    missing = [col for col in required_cols if col not in df.columns]
+    st.error(f"Missing columns: {missing}")
+    st.stop()
+
+# Show dataframe sample
+st.dataframe(df.head())
+
+# Then proceed to plot
+fig = go.Figure(data=[go.Candlestick(
+    x=df['datetime'],
+    open=df['open'],
+    high=df['high'],
+    low=df['low'],
+    close=df['close'],
+    name='NIFTY'
+)])
+st.plotly_chart(fig)
+
 
 # Preview data
 st.subheader("📋 Data Preview")
