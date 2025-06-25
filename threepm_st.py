@@ -32,10 +32,17 @@ with st.spinner("Fetching NIFTY 15-min data..."):
 
 
 # After loading and processing dataframe df
-# Assuming you already have the DataFrame `df`
+# Convert all column names to lowercase
 df.columns = df.columns.str.lower()
-# Filter 3:00 PM candles
-df_3pm = df[df['datetime'].dt.time == pd.to_datetime("15:00").time()]
+
+# Filter to last 10 trading days
+df['date'] = df['datetime'].dt.date
+last_10_trading_days = sorted(df['date'].unique())[-10:]
+df = df[df['date'].isin(last_10_trading_days)]
+df = df.drop(columns='date')
+
+# ✅ Now safe to filter 3PM candles (after lowercase and filtering)
+df_3pm = df[(df['datetime'].dt.hour == 15) & (df['datetime'].dt.minute == 0)]
 # Keep only the last 10 **trading days**
 df['date'] = df['datetime'].dt.date
 last_10_trading_days = sorted(df['date'].unique())[-10:]
