@@ -30,7 +30,7 @@ with st.spinner("Fetching NIFTY 15-min data..."):
 st.write("Columns available:", df.columns.tolist())
 
 # Check columns exist
-required_cols = ['Datetime', 'Open', 'High', 'Low', 'Close']
+required_cols = ['datetime', 'Open', 'High', 'Low', 'Close']
 if not all(col in df.columns for col in required_cols):
     missing = [col for col in required_cols if col not in df.columns]
     st.error(f"Missing columns: {missing}")
