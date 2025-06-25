@@ -46,6 +46,44 @@ df = df.drop(columns='date')
 
 # ✅ Now safe to filter 3PM candles (after lowercase and filtering)
 df_3pm = df[(df['datetime'].dt.hour == 15) & (df['datetime'].dt.minute == 0)]
+###############################################################################################################################
+# Trade log: check if next day breaks 3PM high + 50 points
+trade_log = []
+
+for i in range(len(df_3pm) - 1):  # Avoid last day, no "next day" after it
+    current_row = df_3pm.iloc[i]
+    next_row = df_3pm.iloc[i + 1]
+
+    threepm_date = current_row['datetime'].date()
+    next_day_date = next_row['datetime'].date()
+
+    threepm_high = current_row['high']
+    target = threepm_high + 50
+
+    # Filter next day's data
+    next_day_data = df[df['datetime'].dt.date == next_day_date]
+
+    if next_day_data.empty:
+        hit = False
+        hit_time = None
+    else:
+        breakout = next_day_data[next_day_data['high'] >= target]
+        hit = not breakout.empty
+        hit_time = breakout['datetime'].iloc[0] if hit else None
+
+    trade_log.append({
+        '3PM Date': threepm_date,
+        'Next Day': next_day_date,
+        '3PM High': round(threepm_high, 2),
+        'Target (High + 50)': round(target, 2),
+        'Hit?': '✅ Yes' if hit else '❌ No',
+        'Hit Time': hit_time.time() if hit else '-'
+    })
+
+# Convert to DataFrame
+trade_log_df = pd.DataFrame(trade_log)
+
+####################################################################################################################################
 # Keep only the last 10 **trading days**
 df['date'] = df['datetime'].dt.date
 last_10_trading_days = sorted(df['date'].unique())[-10:]
