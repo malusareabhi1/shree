@@ -58,7 +58,7 @@ for i in range(len(df_3pm) - 1):  # Avoid last day, no "next day" after it
     next_day_date = next_row['datetime'].date()
 
     threepm_high = current_row['high']
-    target = threepm_high + 50
+    target = threepm_high + 100
 
     # Filter next day's data
     next_day_data = df[df['datetime'].dt.date == next_day_date]
