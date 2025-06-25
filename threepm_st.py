@@ -25,7 +25,8 @@ with st.spinner("Fetching NIFTY 15-min data..."):
     df = df.rename(columns={datetime_col: 'datetime'})
 
 # After loading and processing dataframe df
-
+# Assuming you already have the DataFrame `df`
+df.columns = df.columns.str.lower()
 # Debug columns
 st.write("Columns available:", df.columns.tolist())
 
@@ -36,8 +37,7 @@ if not all(col in df.columns for col in required_cols):
     st.error(f"Missing columns: {missing}")
     st.stop()
 
-# Assuming you already have the DataFrame `df`
-df.columns = df.columns.str.lower()
+
 # Show dataframe sample
 st.dataframe(df.head())
 
