@@ -31,7 +31,7 @@ if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
     df['datetime'] = pd.to_datetime(df['datetime'])
     # Convert and localize to IST
-    df[datetime] = pd.to_datetime(df[datetime])
+    df['datetime'] = pd.to_datetime(df['datetime'])
     df['datetime'] = df[datetime_col].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
 
     df = mark_3pm_breakouts(df)
