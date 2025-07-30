@@ -62,12 +62,12 @@ if selected_strategy == 'Opening Range Breakout (ORB)':
     df['Time'] = df['Datetime'].dt.time
     opening_range = df[(df['Time'] >= datetime.strptime("09:15", "%H:%M").time()) &
                        (df['Time'] <= datetime.strptime("09:30", "%H:%M").time())]
-    high = opening_range['High'].max()
-    low = opening_range['Low'].min()
+    high = float(opening_range['High'].max())
+    low = float(opening_range['Low'].min())
 
     for i in range(len(df)):
-        candle_high = df.loc[i, 'High']
-        candle_low = df.loc[i, 'Low']
+        candle_high = float(df.loc[i, 'High'])
+        candle_low = float(df.loc[i, 'Low'])
         candle_time = df.loc[i, 'Datetime']
 
         if candle_high > high:
