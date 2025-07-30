@@ -65,12 +65,16 @@ if selected_strategy == 'Opening Range Breakout (ORB)':
     high = opening_range['High'].max()
     low = opening_range['Low'].min()
 
-    for i, row in df.iterrows():
-        if row['High'] > high:
-            strategy_signals.append({'time': row['Datetime'], 'price': row['High'], 'type': 'BUY'})
+    for i in range(len(df)):
+        candle_high = df.loc[i, 'High']
+        candle_low = df.loc[i, 'Low']
+        candle_time = df.loc[i, 'Datetime']
+
+        if candle_high > high:
+            strategy_signals.append({'time': candle_time, 'price': candle_high, 'type': 'BUY'})
             break
-        elif row['Low'] < low:
-            strategy_signals.append({'time': row['Datetime'], 'price': row['Low'], 'type': 'SELL'})
+        elif candle_low < low:
+            strategy_signals.append({'time': candle_time, 'price': candle_low, 'type': 'SELL'})
             break
 
 elif selected_strategy == 'VWAP Pullback':
