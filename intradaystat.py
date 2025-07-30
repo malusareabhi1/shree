@@ -31,6 +31,7 @@ selected_strategy = st.sidebar.selectbox("Choose Strategy", [
 @st.cache_data(ttl=600)
 def load_data(symbol, start, end, interval):
     df = yf.download(symbol, start=start, end=end + timedelta(days=1), interval=interval)
+    df.columns = [col.capitalize() for col in df.columns]
     df.dropna(inplace=True)
     df.reset_index(inplace=True)
     return df
@@ -78,10 +79,13 @@ if selected_strategy == 'Opening Range Breakout (ORB)':
             break
 
 elif selected_strategy == 'VWAP Pullback':
-    df['vwap'] = (df['Volume'] * (df['High'] + df['Low'] + df['Close']) / 3).cumsum() / df['Volume'].cumsum()
-    for i in range(1, len(df)):
-        if df['Close'][i] > df['vwap'][i] and df['Low'][i] < df['vwap'][i]:
-            strategy_signals.append({'time': df['Datetime'][i], 'price': df['Close'][i], 'type': 'BUY'})
+    if 'Volume' not in df.columns:
+        st.error("Volume data not available in downloaded dataset.")
+    else:
+        df['vwap'] = (df['Volume'] * (df['High'] + df['Low'] + df['Close']) / 3).cumsum() / df['Volume'].cumsum()
+        for i in range(1, len(df)):
+            if df.loc[i, 'Close'] > df.loc[i, 'vwap'] and df.loc[i, 'Low'] < df.loc[i, 'vwap']:
+                strategy_signals.append({'time': df.loc[i, 'Datetime'], 'price': df.loc[i, 'Close'], 'type': 'BUY'})
 
 elif selected_strategy == 'EMA Crossover':
     df['EMA9'] = EMAIndicator(close=df['Close'], window=9).ema_indicator()
