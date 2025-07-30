@@ -31,7 +31,9 @@ selected_strategy = st.sidebar.selectbox("Choose Strategy", [
 @st.cache_data(ttl=600)
 def load_data(symbol, start, end, interval):
     df = yf.download(symbol, start=start, end=end + timedelta(days=1), interval=interval)
-    df.columns = [col.capitalize() for col in df.columns]
+    if df.empty:
+        return df
+    df.columns = [str(col) for col in df.columns]  # Ensure all column names are strings
     df.dropna(inplace=True)
     df.reset_index(inplace=True)
     return df
