@@ -33,7 +33,9 @@ def load_data(symbol, start, end, interval):
     df = yf.download(symbol, start=start, end=end + timedelta(days=1), interval=interval)
     if df.empty:
         return df
-    df.columns = [str(col).capitalize() for col in df.columns]  # Ensure all column names are strings before capitalizing
+   # df.columns = [str(col).capitalize() for col in df.columns]  # Ensure all column names are strings before capitalizing
+    df.columns = [str(col).capitalize() for col in df.columns]
+
     df.dropna(inplace=True)
     df.reset_index(inplace=True)
     return df
