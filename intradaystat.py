@@ -33,7 +33,7 @@ def load_data(symbol, start, end, interval):
     df = yf.download(symbol, start=start, end=end + timedelta(days=1), interval=interval)
     if df.empty:
         return df
-    df.columns = [str(col) for col in df.columns]  # Ensure all column names are strings
+    df.columns = [col.capitalize() for col in df.columns]  # Standardize column names (e.g., "Open", "Close")
     df.dropna(inplace=True)
     df.reset_index(inplace=True)
     return df
@@ -63,22 +63,24 @@ strategy_signals = []
 
 if selected_strategy == 'Opening Range Breakout (ORB)':
     df['Time'] = df['Datetime'].dt.time
-    opening_range = df[(df['Time'] >= datetime.strptime("09:15", "%H:%M").time()) &
-                       (df['Time'] <= datetime.strptime("09:30", "%H:%M").time())]
-    high = float(opening_range['High'].max())
-    low = float(opening_range['Low'].min())
+    if 'High' in df.columns and 'Low' in df.columns:
+        opening_range = df[(df['Time'] >= datetime.strptime("09:15", "%H:%M").time()) &
+                           (df['Time'] <= datetime.strptime("09:30", "%H:%M").time())]
+        if not opening_range.empty:
+            high = float(opening_range['High'].max())
+            low = float(opening_range['Low'].min())
 
-    for i in range(len(df)):
-        candle_high = float(df.loc[i, 'High'])
-        candle_low = float(df.loc[i, 'Low'])
-        candle_time = df.loc[i, 'Datetime']
+            for i in range(len(df)):
+                candle_high = float(df.loc[i, 'High'])
+                candle_low = float(df.loc[i, 'Low'])
+                candle_time = df.loc[i, 'Datetime']
 
-        if candle_high > high:
-            strategy_signals.append({'time': candle_time, 'price': candle_high, 'type': 'BUY'})
-            break
-        elif candle_low < low:
-            strategy_signals.append({'time': candle_time, 'price': candle_low, 'type': 'SELL'})
-            break
+                if candle_high > high:
+                    strategy_signals.append({'time': candle_time, 'price': candle_high, 'type': 'BUY'})
+                    break
+                elif candle_low < low:
+                    strategy_signals.append({'time': candle_time, 'price': candle_low, 'type': 'SELL'})
+                    break
 
 elif selected_strategy == 'VWAP Pullback':
     if 'Volume' not in df.columns:
